@@ -1,0 +1,24 @@
+{
+  "name": "marvin",
+  "version": "3.0.0",
+  "description": "Destiny 2 - Marvin",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/t3rr11/Marvin.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/t3rr11/Marvin/issues"
+  },
+  "homepage": "https://github.com/t3rr11/Marvin#readme",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "fs": "0.0.1-security",
+    "request": "^2.88.0"
+  }
+}
