@@ -11,7 +11,7 @@ async function Register(Players, message, discord_id, username) {
   if(!isNaN(username)) {
     await GetMbmDataFromId(username).then(async function(membershipData) {
       if(membershipData.membershipId) { FinishRegistration(Players, message, discord_id, username, membershipData); }
-      else { message.reply('Failed to find membershipId for: ' + username); console.log(membershipData); }
+      else { message.reply('Failed to find membershipId for: ' + membershipData); console.log(membershipData); }
     });
   }
   else {
@@ -34,9 +34,9 @@ function FinishRegistration(Players, message, discord_id, username, membershipDa
     }
   }
   else {
-    Players.push({ 'discord_id': discord_id, 'username': username, 'membershipId': membershipData.membershipId, 'platform': membershipData.membershipType });
+    Players.push({ 'discord_id': discord_id, 'username': membershipData.displayName, 'membershipId': membershipData.membershipId, 'platform': membershipData.membershipType });
     fs.writeFile("./data/players.json", JSON.stringify(Players), (err) => { if (err) console.error(err) });
-    message.reply('Your username has been set to: ' + username);
+    message.reply('Your username has been set to: ' + membershipData.displayName);
   }
 }
 
@@ -71,8 +71,8 @@ async function GetMbmDataFromId(mbmId) {
   }
   else if(request.ok) {
     //Everything is ok, request was returned to sender.
-    for(var i in reponse.Response.destinyMemberships) {
-      if(reponse.Response.destinyMemberships[i].membershipId === mbmId) { return reponse.Response.destinyMemberships[i]; }
+    for(var i in response.Response.destinyMemberships) {
+      if(response.Response.destinyMemberships[i].membershipId === mbmId) { return response.Response.destinyMemberships[i]; }
     }
   }
   else {
