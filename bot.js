@@ -5,16 +5,23 @@ const fs = require('fs');
 const client = new Discord.Client();
 
 //Modules
+var Players = JSON.parse(fs.readFileSync(__dirname + "/data/players.json", "utf8"));
+var Clans = JSON.parse(fs.readFileSync(__dirname + "/data/clans.json", "utf8"));
 let Config = require(__dirname + "/data/config.json");
-let Players = require(__dirname + "/data/players.json");
 let Misc = require(__dirname + '/js/misc.js');
 let Log = require(__dirname + '/js/log.js');
 let DiscordCommands = require(__dirname + '/modules/DiscordCommands.js');
+let ClanData = require(__dirname + '/modules/ClanData.js');
+let Register = require(__dirname + '/modules/Register.js');
+let ManageClans = require(__dirname + '/modules/ManageClans.js');
 
 //Data
 var ClanID = '2603670';
 var CommandsInput = 0;
 var ClanScans = 0;
+
+//Exports
+module.exports = { Players, Clans, client, ClanID, CommandsInput, ClanScans };
 
 //Functions
 function UpdateActivityList() {
@@ -34,7 +41,8 @@ client.on("ready", () => {
   console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + Players.length + ' players!');
 
 	//SetTimeouts
-	setInterval(function(one) { UpdateActivityList() }, 10000);
+	setInterval(function() { UpdateActivityList() }, 10000);
+  //setInterval(function() { ClanData.GetClanData(Config.apiKey); ClanScans++; }, 180000);
 });
 
 client.on("message", async message => {
@@ -44,10 +52,15 @@ client.on("message", async message => {
 
   //Commands
   if(message.author.bot) return;
-  else if(command == "~TEST") {
-    DiscordCommands.Test(message);
+  if(command.startsWith('~') && !command.startsWith('~~')) {
+    if(command.startsWith("~REGISTER ")) { Register(Players, message, message.author.id, command.substr("~REGISTER ".length)); }
+    else if(command === "~REGISTERCLAN" || command === "~REGISTER CLAN") { ManageClans.RegisterClan(Players, Clans, message, message.author.id); }
+    else if(command === "~REMOVECLAN" || command === "~REMOVE CLAN") { ManageClans.RemoveClan(Clans, message, message.author.id); }
+    else if(command === "~TEST") {
+      DiscordCommands.ServerID(message);
+    }
+    else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
   }
-  else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
 });
 
 client.on('error', console.error);
