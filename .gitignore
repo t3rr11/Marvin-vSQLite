@@ -2,8 +2,6 @@
 
 # dependencies
 /node_modules
-/data
-/logs
 /.pnp
 .pnp.js
 
