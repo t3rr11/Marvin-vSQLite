@@ -43,6 +43,8 @@ client.on("ready", () => {
 	//SetTimeouts
 	setInterval(function() { UpdateActivityList() }, 10000);
   //setInterval(function() { ClanData.GetClanData(Config.apiKey); ClanScans++; }, 180000);
+
+  for(var i in Clans) { ClanData.CheckClanMembers(Clans[i].clan_id); }
 });
 
 client.on("message", async message => {
