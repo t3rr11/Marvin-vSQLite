@@ -25,7 +25,7 @@ async function RegisterClan(Players, Clans, message, discord_id) {
     }
   }
   else {
-    message.reply("Please register first before trying to register your clan. Use: `~Register example`");
+    message.reply("Please register yourself first before trying to register your clan. Use: `~Register example`");
   }
 }
 

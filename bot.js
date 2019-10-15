@@ -16,18 +16,18 @@ let Register = require(__dirname + '/modules/Register.js');
 let ManageClans = require(__dirname + '/modules/ManageClans.js');
 
 //Data
-var ClanID = '2603670';
 var CommandsInput = 0;
 var ClanScans = 0;
 
 //Exports
-module.exports = { Players, Clans, client, ClanID, CommandsInput, ClanScans };
+module.exports = { Players, Clans, client, CommandsInput, ClanScans };
 
 //Functions
 function UpdateActivityList() {
   var ActivityList = [];
   ActivityList.push(`Serving ${client.users.size} users`);
   ActivityList.push('Tracking ' + Players.length + ' players!');
+  ActivityList.push('Tracking ' + Clans.length + ' clans!');
   ActivityList.push('Use ~HELP for Support');
   ActivityList.push('Want to support? ~Donate');
   var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
@@ -39,12 +39,14 @@ client.on("ready", () => {
   //Start Up Console Log
   console.log(Misc.GetReadableDateTime() + ' - ' + `Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
   console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + Players.length + ' players!');
+  console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + Clans.length + ' clans!');
 
 	//SetTimeouts
 	setInterval(function() { UpdateActivityList() }, 10000);
   setInterval(function() { for(var i in Clans) { ClanData.CheckClanMembers(Clans[i].clan_id); ClanScans++; } }, 180000);
 
-
+  //Init
+  for(var i in Clans) { ClanData.CheckClanMembers(Clans[i].clan_id); ClanScans++; }
 });
 
 client.on("message", async message => {
@@ -56,11 +58,13 @@ client.on("message", async message => {
   if(message.author.bot) return;
   if(command.startsWith('~') && !command.startsWith('~~')) {
     if(command.startsWith("~REGISTER ")) { Register(Players, message, message.author.id, command.substr("~REGISTER ".length)); }
+    else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
+    else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message); }
     else if(command === "~REGISTERCLAN" || command === "~REGISTER CLAN") { ManageClans.RegisterClan(Players, Clans, message, message.author.id); }
     else if(command === "~REMOVECLAN" || command === "~REMOVE CLAN") { ManageClans.RemoveClan(Clans, message, message.author.id); }
-    else if(command === "~TEST") {
-      DiscordCommands.ServerID(message);
-    }
+    else if(command === "~VALOR") { DiscordCommands.ValorRankings(message); }
+    else if(command === "~GLORY") { DiscordCommands.GloryRankings(message); }
+    else if(command === "~SEASON RANKS" || command === "~SEASON RANK" || command === "~SEASONRANKS" || command === "~SEASONRANK") { DiscordCommands.SeasonRankings(message); }
     else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
   }
 });

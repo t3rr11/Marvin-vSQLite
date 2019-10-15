@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const Bot = require("../bot.js");
-module.exports = { GetDateString, GetReadableDateTime, IsJson, AddCommas, DeleteMessages, WriteAnnoucement, WriteCustomAnnoucement, formatTime };
+const Clans = require("../data/clans.json");
+const Players = require("../data/players.json");
+module.exports = { GetDateString, GetReadableDateTime, formatTime, IsJson, AddCommas, DeleteMessages, WriteAnnoucement, WriteCustomAnnoucement, GetClanID, GetMembershipID };
 
 function AddCommas(x) { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
 function IsJson(str) { try { JSON.parse(str); } catch (e) { return false; } return true; }
@@ -21,7 +23,6 @@ function GetDateString() {
   var dateString = year + "-" + month + "-" + day + "_" + hour + "-" + minute + "-" + seconds;
   return dateString;
 }
-
 function GetReadableDateTime() {
   var d = new Date();
   var day = d.getDate();
@@ -38,7 +39,6 @@ function GetReadableDateTime() {
   var dateString = day + "-" + month + "-" + year + " " + hour + ":" + minute + ":" + seconds;
   return dateString;
 }
-
 function formatTime(TimeinSeconds) {
   var seconds  = Math.floor(Number(TimeinSeconds));
   var years    = Math.floor(seconds / (24*60*60*7*4.34*12));
@@ -80,19 +80,6 @@ function DeleteMessages(message, amount) {
   }
   else { message.channel.send('You don\'t have access to this command'); }
 }
-// Fix this!!
-// function DeleteMessages(message, amount) {
-//   if(message.author == "<@194972321168097280>" || message.author == "<@226123337410019328>"){
-//     message.channel.fetchMessages({limit: amount}).then(collected => { collected.forEach(msg => {
-//       lockedMsgs = ['527052089575342080', '574073272141086721', '500157460577779713', '582368247949819915', '585231117280346112'];
-//       for(i in lockedMsgs){
-//         if(msg.id == lockedMsgs[i]){ console.log('Cannot Delete This Message! ' + msg.id); }
-//         else { msg.delete(); }
-//       }
-//     }); });
-//   }
-//   else { message.channel.send('You don\'t have access to this command'); }
-// }
 function WriteAnnoucement(type, data) {
   if(type == 'Item'){
     const embed = new Discord.RichEmbed()
@@ -123,7 +110,7 @@ function GetMembershipId() {
   if(Bot.Players.some(player => player.discord_id === message.member.user.id)) {
     for(j in Bot.Players){
       if(Bot.Players[j].discord_id === message.member.user.id){
-        
+
       }
     }
   }
@@ -131,3 +118,6 @@ function GetMembershipId() {
     message.reply('Please register first using the `~Register` command. Example: `~Register Terrii#1506`');
   }
 }
+
+function GetClanID(guild_id) { for(var i in Clans) { if(Clans[i].guild_id === guild_id) { return Clans[i].clan_id; } } return false; }
+function GetMembershipID(discord_id) { for(var i in Players) { if(Players[i].discord_id === discord_id) { return Players[i].membershipId; } } return false; }

@@ -6,6 +6,7 @@ const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
 const Config = require("../data/config.json");
 const fetch = require("node-fetch");
+let UpdateClanData = require("./UpdateClanData.js");
 
 //Exports
 module.exports = { GetClanMembers, CheckClanMembers };
@@ -31,29 +32,32 @@ async function GetClanMembers(clan_id) {
   }
 }
 async function CheckClanMembers(clan_id) {
-  var PreviousClanMembers = []; if(!fs.existsSync(`./data/clans/${ clan_id }/ClanMembers.json`)) { PreviousClanMembers = fs.readFileSync(`./data/clans/${ clan_id }/ClanMembers.json`, "utf8"); }
+  var PreviousClanMembers = []; if(fs.existsSync(`./data/clans/${ clan_id }/ClanMembers.json`)) { PreviousClanMembers = fs.readFileSync(`./data/clans/${ clan_id }/ClanMembers.json`, "utf8"); }
   var CurrentClanMembers = await GetClanMembers(clan_id);
   var ClanMembers = [];
 
   if(PreviousClanMembers.length == 0) {
     for(i in CurrentClanMembers) {
-      PreviousClanMembers.push({ "displayName": CurrentClanMembers[i].destinyUserInfo.displayName, "membershipId": CurrentClanMembers[i].destinyUserInfo.membershipId });
-      ClanMembers.push({ "displayName": CurrentClanMembers[i].destinyUserInfo.displayName, "membershipId": CurrentClanMembers[i].destinyUserInfo.membershipId });
+      PreviousClanMembers.push({ "displayName": CurrentClanMembers[i].destinyUserInfo.displayName, "membership_Id": CurrentClanMembers[i].destinyUserInfo.membershipId, "membershipType": CurrentClanMembers[i].destinyUserInfo.membershipType });
+      ClanMembers.push({ "displayName": CurrentClanMembers[i].destinyUserInfo.displayName, "membership_Id": CurrentClanMembers[i].destinyUserInfo.membershipId, "membershipType": CurrentClanMembers[i].destinyUserInfo.membershipType });
     }
   }
   else {
     for(i in CurrentClanMembers){
-      ClanMembers.push({ "displayName": CurrentClanMembers[i].destinyUserInfo.displayName, "membershipId": CurrentClanMembers[i].destinyUserInfo.membershipId });
+      ClanMembers.push({ "displayName": CurrentClanMembers[i].destinyUserInfo.displayName, "membership_Id": CurrentClanMembers[i].destinyUserInfo.membershipId, "membershipType": CurrentClanMembers[i].destinyUserInfo.membershipType });
     }
   }
 
-  var MembersJoined = ClanMembers.filter(function(player) { return !PreviousClanMembers.find(member => member.membershipId === player.membershipId); });
-  var MembersLeft = PreviousClanMembers.filter(function(player) { return !ClanMembers.find(member => member.membershipId === player.membershipId); });
+  var MembersJoined = []; try { MembersJoined = ClanMembers.filter(function(player) { return !PreviousClanMembers.find(member => member.membershipId === player.membershipId); }); } catch (err) { }
+  var MembersLeft = []; try { MembersLeft = PreviousClanMembers.filter(function(player) { return !ClanMembers.find(member => member.membershipId === player.membershipId); }); } catch (err) { }
 
   if(MembersLeft.length > 0){ for(i in MembersLeft){ SendJoinLeaveMessage(MembersLeft[i], 'Left'); } } else { }
   if(MembersJoined.length > 0){ for(i in MembersJoined){ SendJoinLeaveMessage(MembersJoined[i], 'Joined'); } } else { }
 
   fs.writeFile(`./data/clans/${ clan_id }/ClanMembers.json`, JSON.stringify(ClanMembers), (err) => { if (err) console.error(err) });
+
+  //Finished Member Checks, Now get member data
+  UpdateClanData(clan_id, ClanMembers);
 }
 
 function SendJoinLeaveMessage(player, input) {
