@@ -4,7 +4,7 @@ const Clans = require("../data/clans.json");
 const Players = require("../data/players.json");
 module.exports = { GetDateString, GetReadableDateTime, formatTime, IsJson, AddCommas, DeleteMessages, WriteAnnoucement, WriteCustomAnnoucement, GetClanID, GetMembershipID };
 
-function AddCommas(x) { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function AddCommas(x) { try { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") } catch (err) { return x } }
 function IsJson(str) { try { JSON.parse(str); } catch (e) { return false; } return true; }
 
 function GetDateString() {
