@@ -2,9 +2,7 @@
 
 # dependencies
 /node_modules
-/data/clans
-/data/clans.json
-/data/players.json
+/data
 /.pnp
 .pnp.js
 
