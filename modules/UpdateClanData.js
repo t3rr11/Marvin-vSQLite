@@ -43,7 +43,6 @@ function UpdateClanData(clan_id, ClanMembers) {
       titlesObtained: []
     },
     Others: {
-      privatePlayers: [],
       triumphRankings: [],
       wellsRankings: [],
       epRankings: [],
@@ -97,22 +96,25 @@ function UpdateClanData(clan_id, ClanMembers) {
   }, 200);
 }
 async function GrabClanMemberCharacterData(playerInfo, playerId, retried) {
-  const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
-  const request = await fetch(`https://bungie.net/Platform/Destiny2/${ playerInfo.membershipType }/Profile/${ playerInfo.membership_Id }/?components=100,200,202,204,800,900`, headers);
-  const response = await request.json();
-  if(request.ok && response.ErrorCode && response.ErrorCode !== 1) {
-    //Error with bungie, might have sent bad headers.
-    if(retried == "false") { GrabClanMemberCharacterData(playerInfo, playerId, "true"); }
-    else if(retried == "true") { return "Failed"; }
+  try {
+    const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
+    const request = await fetch(`https://bungie.net/Platform/Destiny2/${ playerInfo.membershipType }/Profile/${ playerInfo.membership_Id }/?components=100,200,202,204,800,900`, headers);
+    const response = await request.json();
+    if(request.ok && response.ErrorCode && response.ErrorCode !== 1) {
+      //Error with bungie, might have sent bad headers.
+      if(retried == "false") { GrabClanMemberCharacterData(playerInfo, playerId, "true"); }
+      else if(retried == "true") { return "Failed"; }
+    }
+    else if(request.ok) {
+      //Data was obtained.
+      return response.Response;
+    }
+    else {
+      //Error in request ahhhhh!
+      return "Failed";
+    }
   }
-  else if(request.ok) {
-    //Data was obtained.
-    return response.Response;
-  }
-  else {
-    //Error in request ahhhhh!
-    return "Failed";
-  }
+  catch (err) { return "Failed"; }
 }
 
 function processPlayerData(playerInfo, playerData) {
@@ -151,7 +153,6 @@ function processPlayerData(playerInfo, playerData) {
         titlesObtained: {}
       },
       Others: {
-        privatePlayers: {},
         triumphRankings: {},
         wellsRankings: {},
         epRankings: {},
@@ -160,6 +161,7 @@ function processPlayerData(playerInfo, playerData) {
       }
     }
 
+    //Check If Private (If private, Ignore)
     if(Object.keys(playerData.profileRecords).length > 1) {
       ProcessedData.Rankings = GetRankings(playerInfo, playerData, characterIds);
       ProcessedData.Raids = GetRaids(playerInfo, playerData, characterIds);
@@ -167,7 +169,6 @@ function processPlayerData(playerInfo, playerData) {
       ProcessedData.Titles = GetObtainedTitles(playerInfo, playerData);
       ProcessedData.Others = GetOthers(playerInfo, playerData, characterIds);
     }
-    else { ProcessedData.Others.privatePlayers.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id }); }
 
     return ProcessedData;
   }
