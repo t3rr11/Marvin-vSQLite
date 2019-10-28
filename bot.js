@@ -41,12 +41,31 @@ client.on("ready", () => {
   console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + Players.length + ' players!');
   console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + Clans.length + ' clans!');
 
+  //Init
+  var startUpScan = [];
+  for(var i in Clans) {
+    if(!startUpScan.includes(Clans[i].clan_id)) {
+      console.log("Scanning Clan:" + Clans[i].clan_id);
+      ClanData.CheckClanMembers(Clans[i].clan_id);
+      ClanScans++;
+      startUpScan.push(Clans[i].clan_id);
+    } else { console.log("Clan already scanned: " + Clans[i].clan_id); }
+  }
+
 	//SetTimeouts
 	setInterval(function() { UpdateActivityList() }, 10000);
-  setInterval(function() { for(var i in Clans) { ClanData.CheckClanMembers(Clans[i].clan_id); ClanScans++; } }, 180000);
-
-  //Init
-  for(var i in Clans) { ClanData.CheckClanMembers(Clans[i].clan_id); ClanScans++; }
+  setInterval(function() {
+    var clansScanned = [];
+    for(var i in Clans) {
+      if(!clansScanned.includes(Clans[i].clan_id)) {
+        console.log("Scanning Clan:" + Clans[i].clan_id);
+        ClanData.CheckClanMembers(Clans[i].clan_id);
+        ClanScans++;
+        clansScanned.push(Clans[i].clan_id);
+      } else { console.log("Clan already scanned: " + Clans[i].clan_id); }
+    }
+    clansScanned = [];
+  }, 180000);
 });
 
 client.on("message", async message => {
@@ -62,10 +81,15 @@ client.on("message", async message => {
     else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message); }
     else if(command === "~REGISTERCLAN" || command === "~REGISTER CLAN") { ManageClans.RegisterClan(Players, Clans, message, message.author.id); }
     else if(command === "~REMOVECLAN" || command === "~REMOVE CLAN") { ManageClans.RemoveClan(Clans, message, message.author.id); }
-    else if(command === "~VALOR") { DiscordCommands.ValorRankings(message); }
-    else if(command === "~GLORY") { DiscordCommands.GloryRankings(message); }
-    else if(command === "~SEASON RANKS" || command === "~SEASON RANK" || command === "~SEASONRANKS" || command === "~SEASONRANK") { DiscordCommands.SeasonRankings(message); }
+    else if(command === "~VALOR") { DiscordCommands.ValorRankings(Clans, Players, message); }
+    else if(command === "~GLORY") { DiscordCommands.GloryRankings(Clans, Players, message); }
+    else if(command === "~INFAMY") { DiscordCommands.InfamyRankings(Clans, Players, message); }
+    else if(command === "~COS") { DiscordCommands.SorrowsRankings(Clans, Players, message); }
+    else if(command === "~GOS") { DiscordCommands.GardenRankings(Clans, Players, message); }
+    else if(command === "~SEASON RANKS" || command === "~SEASON RANK" || command === "~SEASONRANKS" || command === "~SEASONRANK") { DiscordCommands.SeasonRankings(Clans, Players, message); }
     else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
+
+    console.log(Misc.GetReadableDateTime() + ' - ' + 'User: ' + message.member.user.tag + ', Command: ' + command);
   }
 });
 

@@ -9,7 +9,7 @@ const Players = require('../data/players.json');
 
 //Exports
 module.exports = {
-  Help, Test, ValorRankings, GloryRankings, SeasonRankings
+  Help, Test, ValorRankings, GloryRankings, SeasonRankings, InfamyRankings, SorrowsRankings, GardenRankings
 };
 
 function GetArray(type, clan_id) {
@@ -47,10 +47,10 @@ function Test(message) {
 }
 
 //Rankings
-function ValorRankings(message) {
-  if(Misc.GetClanID(message.guild.id)) {
-    var clan_id = Misc.GetClanID(message.guild.id);
-    var membership_Id = Misc.GetMembershipID(message.author.id);
+function ValorRankings(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
     var valorRankings = GetArray("Rankings", clan_id).valorRankings;
     valorRankings.sort(function(a, b) { return b.valor - a.valor; });
     var valorRanks = valorRankings.slice(0, 10); var names = []; var valor = []; var resets = [];
@@ -82,10 +82,10 @@ function ValorRankings(message) {
   }
   else { message.reply("No clan added, to add one use: ~RegisterClan"); }
 }
-function GloryRankings(message) {
-  if(Misc.GetClanID(message.guild.id)) {
-    var clan_id = Misc.GetClanID(message.guild.id);
-    var membership_Id = Misc.GetMembershipID(message.author.id);
+function GloryRankings(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
     var gloryRankings = GetArray("Rankings", clan_id).gloryRankings;
     gloryRankings.sort(function(a, b) { return b.glory - a.glory; });
     var gloryRanks = gloryRankings.slice(0, 10); var names = []; var glory = [];
@@ -116,10 +116,45 @@ function GloryRankings(message) {
   }
   else { message.reply("No clan added, to add one use: ~RegisterClan"); }
 }
-function SeasonRankings(message) {
-  if(Misc.GetClanID(message.guild.id)) {
-    var clan_id = Misc.GetClanID(message.guild.id);
-    var membership_Id = Misc.GetMembershipID(message.author.id);
+function InfamyRankings(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
+    var infamyRankings = GetArray("Rankings", clan_id).infamyRankings;
+    infamyRankings.sort(function(a, b) { return b.infamy - a.infamy; });
+    var infamyRanks = infamyRankings.slice(0, 10); var names = []; var infamy = []; var motes = [];
+    for(i in infamyRanks) { names.push(infamyRanks[i].displayName); infamy.push(Misc.AddCommas(infamyRanks[i].infamy)); motes.push(Misc.AddCommas(infamyRanks[i].motesCollected)); }
+
+    try {
+      if(membership_Id) {
+        var rank = infamyRankings.indexOf(infamyRankings.find(e => e.membership_Id === membership_Id));
+        var player = infamyRankings.find(e => e.membership_Id === membership_Id);
+        names.push(""); infamy.push(""); motes.push("");
+        names.push(`${ rank+1 }: ${ player.displayName }`); infamy.push(Misc.AddCommas(player.infamy)); motes.push(Misc.AddCommas(player.motesCollected));
+      }
+      else {
+        names.push(""); infamy.push(""); motes.push("");
+        names.push("~Register to see rank!");
+      }
+    }
+    catch (err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Infamy Ranks")
+    .addField("Name", names, true)
+    .addField("Infamy", infamy, true)
+    .addField("Motes Collected", motes, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else { message.reply("No clan added, to add one use: ~RegisterClan"); }
+}
+function SeasonRankings(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
     var seasonRankings = GetArray("Others", clan_id).seasonRankings;
     seasonRankings.sort(function(a, b) { return b.seasonRank - a.seasonRank; });
     var seasonRanks = seasonRankings.slice(0, 10); var names = []; var seasonRank = [];
@@ -144,6 +179,74 @@ function SeasonRankings(message) {
     .setAuthor("Top 10 Season Ranks")
     .addField("Name", names, true)
     .addField("Season Rank", seasonRank, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else { message.reply("No clan added, to add one use: ~RegisterClan"); }
+}
+function SorrowsRankings(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
+    var sorrowsRankings = GetArray("Raids", clan_id).sorrows;
+    sorrowsRankings.sort(function(a, b) { return b.completions - a.completions; });
+    var sorrowsRanks = sorrowsRankings.slice(0, 10); var names = []; var completions = [];
+    for(i in sorrowsRanks) { names.push(sorrowsRanks[i].displayName); completions.push(sorrowsRanks[i].completions); }
+
+    try {
+      if(membership_Id) {
+        var rank = sorrowsRankings.indexOf(sorrowsRankings.find(e => e.membership_Id === membership_Id));
+        var player = sorrowsRankings.find(e => e.membership_Id === membership_Id);
+        names.push(""); completions.push("");
+        names.push(`${ rank+1 }: ${ player.displayName }`); completions.push(player.completions);
+      }
+      else {
+        names.push(""); completions.push("");
+        names.push("~Register to see rank!");
+      }
+    }
+    catch (err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Crown of Sorrows Completions")
+    .addField("Name", names, true)
+    .addField("Completions", completions, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else { message.reply("No clan added, to add one use: ~RegisterClan"); }
+}
+function GardenRankings(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
+    var gardenRankings = GetArray("Raids", clan_id).garden;
+    gardenRankings.sort(function(a, b) { return b.completions - a.completions; });
+    var gardenRanks = gardenRankings.slice(0, 10); var names = []; var completions = [];
+    for(i in gardenRanks) { names.push(gardenRanks[i].displayName); completions.push(gardenRanks[i].completions); }
+
+    try {
+      if(membership_Id) {
+        var rank = gardenRankings.indexOf(gardenRankings.find(e => e.membership_Id === membership_Id));
+        var player = gardenRankings.find(e => e.membership_Id === membership_Id);
+        names.push(""); completions.push("");
+        names.push(`${ rank+1 }: ${ player.displayName }`); completions.push(player.completions);
+      }
+      else {
+        names.push(""); completions.push("");
+        names.push("~Register to see rank!");
+      }
+    }
+    catch (err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Garden of Salvation Completions")
+    .addField("Name", names, true)
+    .addField("Completions", completions, true)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});

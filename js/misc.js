@@ -1,7 +1,5 @@
 const Discord = require('discord.js');
 const Bot = require("../bot.js");
-const Clans = require("../data/clans.json");
-const Players = require("../data/players.json");
 module.exports = { GetDateString, GetReadableDateTime, formatTime, IsJson, AddCommas, DeleteMessages, WriteAnnoucement, WriteCustomAnnoucement, GetClanID, GetMembershipID };
 
 function AddCommas(x) { try { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") } catch (err) { return x } }
@@ -119,5 +117,5 @@ function GetMembershipId() {
   }
 }
 
-function GetClanID(guild_id) { for(var i in Clans) { if(Clans[i].guild_id === guild_id) { return Clans[i].clan_id; } } return false; }
-function GetMembershipID(discord_id) { for(var i in Players) { if(Players[i].discord_id === discord_id) { return Players[i].membershipId; } } return false; }
+function GetClanID(Clans, guild_id) { for(var i in Clans) { if(Clans[i].guild_id === guild_id) { return Clans[i].clan_id; } } return false; }
+function GetMembershipID(Players, discord_id) { for(var i in Players) { if(Players[i].discord_id === discord_id) { return Players[i].membershipId; } } return false; }

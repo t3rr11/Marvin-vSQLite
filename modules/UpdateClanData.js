@@ -47,7 +47,8 @@ function UpdateClanData(clan_id, ClanMembers) {
       wellsRankings: [],
       epRankings: [],
       seasonRankings: [],
-      menageire: []
+      menageire: [],
+      privatePlayers: []
     }
   }
 
@@ -59,7 +60,9 @@ function UpdateClanData(clan_id, ClanMembers) {
       processedAccounts++;
 
       //Store Data in Clan Data
-      if(processedData !== "Failed") {
+      if(processedData === "Private") { ClanData.Others.privatePlayers.push(ClanMembers[playerId]); }
+      else if(processedData === "Failed") {  }
+      else {
         //Rankings
         ClanData.Rankings.infamyRankings.push(processedData.Rankings.infamyRankings);
         ClanData.Rankings.valorRankings.push(processedData.Rankings.valorRankings);
@@ -110,7 +113,7 @@ async function GrabClanMemberCharacterData(playerInfo, playerId, retried) {
       return response.Response;
     }
     else {
-      //Error in request ahhhhh!
+      console.log(`${ ClanMembers[playerId].displayName }: ${ response.ErrorStatus }`);
       return "Failed";
     }
   }
@@ -119,58 +122,58 @@ async function GrabClanMemberCharacterData(playerInfo, playerId, retried) {
 
 function processPlayerData(playerInfo, playerData) {
   if(playerData !== "Failed") {
-    var thisDate = new Date().toLocaleString();
-    var characterIds = playerData.profile.data.characterIds;
-    var characterLight0 = 0; try { characterLight0 = playerData.characters.data[characterIds[0]].light } catch (err) {  }
-    var characterLight1 = 0; try { characterLight1 = playerData.characters.data[characterIds[1]].light } catch (err) {  }
-    var characterLight2 = 0; try { characterLight2 = playerData.characters.data[characterIds[2]].light } catch (err) {  }
-    var highestPower = Math.max(characterLight0, characterLight1, characterLight2);
-    var lastPlayed = new Date(playerData.profile.data.dateLastPlayed).getTime();
-    var dlc_Owned = playerData.profile.data.versionsOwned;
-    var totalTime0 = 0; try { totalTime0 = playerData.characters.data[characterIds[0]].minutesPlayedTotal; } catch (err) {  }
-    var totalTime1 = 0; try { totalTime1 = playerData.characters.data[characterIds[1]].minutesPlayedTotal; } catch (err) {  }
-    var totalTime2 = 0; try { totalTime2 = playerData.characters.data[characterIds[2]].minutesPlayedTotal; } catch (err) {  }
-    var totalTimeOverall = parseInt(totalTime0) + parseInt(totalTime1) + parseInt(totalTime2);
-
-    var ProcessedData = {
-      Rankings: {
-        infamyRankings: {},
-        valorRankings: {},
-        gloryRankings: {},
-        ibRankings: {}
-      },
-      Raids: {
-        lastWish: {},
-        scourge: {},
-        sorrows: {},
-        garden: {}
-      },
-      Events: { },
-      Items: {
-        itemsObtained: {}
-      },
-      Titles: {
-        titlesObtained: {}
-      },
-      Others: {
-        triumphRankings: {},
-        wellsRankings: {},
-        epRankings: {},
-        seasonRankings: {},
-        menageire: {}
-      }
-    }
-
-    //Check If Private (If private, Ignore)
     if(Object.keys(playerData.profileRecords).length > 1) {
+      var thisDate = new Date().toLocaleString();
+      var characterIds = playerData.profile.data.characterIds;
+      var characterLight0 = 0; try { characterLight0 = playerData.characters.data[characterIds[0]].light } catch (err) {  }
+      var characterLight1 = 0; try { characterLight1 = playerData.characters.data[characterIds[1]].light } catch (err) {  }
+      var characterLight2 = 0; try { characterLight2 = playerData.characters.data[characterIds[2]].light } catch (err) {  }
+      var highestPower = Math.max(characterLight0, characterLight1, characterLight2);
+      var lastPlayed = new Date(playerData.profile.data.dateLastPlayed).getTime();
+      var dlc_Owned = playerData.profile.data.versionsOwned;
+      var totalTime0 = 0; try { totalTime0 = playerData.characters.data[characterIds[0]].minutesPlayedTotal; } catch (err) {  }
+      var totalTime1 = 0; try { totalTime1 = playerData.characters.data[characterIds[1]].minutesPlayedTotal; } catch (err) {  }
+      var totalTime2 = 0; try { totalTime2 = playerData.characters.data[characterIds[2]].minutesPlayedTotal; } catch (err) {  }
+      var totalTimeOverall = parseInt(totalTime0) + parseInt(totalTime1) + parseInt(totalTime2);
+
+      var ProcessedData = {
+        Rankings: {
+          infamyRankings: {},
+          valorRankings: {},
+          gloryRankings: {},
+          ibRankings: {}
+        },
+        Raids: {
+          lastWish: {},
+          scourge: {},
+          sorrows: {},
+          garden: {}
+        },
+        Events: { },
+        Items: {
+          itemsObtained: {}
+        },
+        Titles: {
+          titlesObtained: {}
+        },
+        Others: {
+          triumphRankings: {},
+          wellsRankings: {},
+          epRankings: {},
+          seasonRankings: {},
+          menageire: {}
+        }
+      }
+
       ProcessedData.Rankings = GetRankings(playerInfo, playerData, characterIds);
       ProcessedData.Raids = GetRaids(playerInfo, playerData, characterIds);
       ProcessedData.Items = GetObtainedItems(playerInfo, playerData);
       ProcessedData.Titles = GetObtainedTitles(playerInfo, playerData);
       ProcessedData.Others = GetOthers(playerInfo, playerData, characterIds);
-    }
 
-    return ProcessedData;
+      return ProcessedData;
+    }
+    else { return "Private" }
   }
   else { return "Failed" }
 }
