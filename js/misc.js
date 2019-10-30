@@ -104,18 +104,5 @@ function WriteCustomAnnoucement(data) {
   .setTimestamp()
   Bot.client.channels.get('498828495619883018').send({embed});
 }
-function GetMembershipId() {
-  if(Bot.Players.some(player => player.discord_id === message.member.user.id)) {
-    for(j in Bot.Players){
-      if(Bot.Players[j].discord_id === message.member.user.id){
-
-      }
-    }
-  }
-  else {
-    message.reply('Please register first using the `~Register` command. Example: `~Register Terrii#1506`');
-  }
-}
-
 function GetClanID(Clans, guild_id) { for(var i in Clans) { if(Clans[i].guild_id === guild_id) { return Clans[i].clan_id; } } return false; }
 function GetMembershipID(Players, discord_id) { for(var i in Players) { if(Players[i].discord_id === discord_id) { return Players[i].membershipId; } } return false; }

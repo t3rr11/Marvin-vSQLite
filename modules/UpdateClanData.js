@@ -184,7 +184,7 @@ function GetRankings(playerInfo, playerData, characterIds) {
   var valor = playerData.characterProgressions.data[characterIds[0]].progressions["3882308435"].currentProgress;
   var glory = playerData.characterProgressions.data[characterIds[0]].progressions["2679551909"].currentProgress;
   var infamyResets = playerData.profileRecords.data.records["3901785488"].objectives[0].progress;
-  var valorResets = playerData.characterRecords.data[characterIds[0]].records["510151900"].objectives[1].progress;
+  var valorResets = playerData.profileRecords.data.records["510151900"].objectives[1].progress;
   var totalInfamy = parseInt(infamy) + (parseInt('15000') * parseInt(infamyResets));
   var totalValor = parseInt(valor) + (parseInt('2000') * parseInt(valorResets));
   var ibKills = playerData.profileRecords.data.records["2023796284"].intervalObjectives[2].progress;
@@ -202,7 +202,7 @@ function GetRaids(playerInfo, playerData, characterIds) {
   var lastWishCompletions = playerData.profileRecords.data.records["2195455623"].objectives[0].progress;
   var scourgeCompletions = playerData.profileRecords.data.records["4060320345"].objectives[0].progress;
   var sorrowsCompletions = playerData.profileRecords.data.records["1558682421"].objectives[0].progress;
-  var gardenCompletions = playerData.characterRecords.data[characterIds[0]].records["1120290476"].objectives[0].progress;
+  var gardenCompletions = playerData.profileRecords.data.records["1120290476"].objectives[0].progress;
 
   return {
     lastWish: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "completions": lastWishCompletions, "lastScan": new Date() },

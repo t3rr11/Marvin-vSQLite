@@ -14,6 +14,7 @@ async function RegisterClan(Players, Clans, message, discord_id) {
       const Player = Players.find(player => player.discord_id === discord_id);
       const Clan = await GetClanIDFromMbmID(Player.platform, Player.membershipId);
       if(Clan !== "Error") {
+        console.log("Clan Added: " + Clan.name + " (" + Clan.id + ")");
         Clans.push({ 'guild_id': message.guild.id, 'creator_id': Player.discord_id, 'creator_name': Player.name, 'clan_id': Clan.id, 'clan_name': Clan.name });
         fs.writeFile("./data/clans.json", JSON.stringify(Clans), (err) => { if (err) console.error(err) });
         if(!fs.existsSync(`./data/clans/${ Clan.id }`)){ fs.mkdirSync(`./data/clans/${ Clan.id }`); }
@@ -53,6 +54,7 @@ function RemoveClan(Clans, message, discord_id) {
   if(Clans.find(clan => clan.creator_id === discord_id)) {
     for(var i in Clans) {
       if(Clans[i].guild_id === message.guild.id) {
+        console.log("Clan Deleted: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
         Clans.splice(i, 1);
         fs.writeFile("./data/clans.json", JSON.stringify(Clans), (err) => { if (err) console.error(err) });
         message.reply("Clan deleted, you are free!");

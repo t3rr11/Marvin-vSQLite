@@ -45,11 +45,11 @@ client.on("ready", () => {
   var startUpScan = [];
   for(var i in Clans) {
     if(!startUpScan.includes(Clans[i].clan_id)) {
-      console.log("Scanning Clan:" + Clans[i].clan_id);
+      console.log("Scanning Clan: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
       ClanData.CheckClanMembers(Clans[i].clan_id);
       ClanScans++;
       startUpScan.push(Clans[i].clan_id);
-    } else { console.log("Clan already scanned: " + Clans[i].clan_id); }
+    }
   }
 
 	//SetTimeouts
@@ -58,11 +58,11 @@ client.on("ready", () => {
     var clansScanned = [];
     for(var i in Clans) {
       if(!clansScanned.includes(Clans[i].clan_id)) {
-        console.log("Scanning Clan:" + Clans[i].clan_id);
+        console.log("Scanning Clan: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
         ClanData.CheckClanMembers(Clans[i].clan_id);
         ClanScans++;
         clansScanned.push(Clans[i].clan_id);
-      } else { console.log("Clan already scanned: " + Clans[i].clan_id); }
+      }
     }
     clansScanned = [];
   }, 180000);
