@@ -16,11 +16,13 @@ let Register = require(__dirname + '/modules/Register.js');
 let ManageClans = require(__dirname + '/modules/ManageClans.js');
 
 //Data
+var StartupTime = new Date().getTime();
 var CommandsInput = 0;
 var ClanScans = 0;
+var TimedOutUsers = [];
 
 //Exports
-module.exports = { Players, Clans, client, CommandsInput, ClanScans };
+module.exports = { Players, Clans, client, CommandsInput, ClanScans, StartupTime };
 
 //Functions
 function UpdateActivityList() {
@@ -32,6 +34,16 @@ function UpdateActivityList() {
   ActivityList.push('Want to support? ~Donate');
   var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
   client.user.setActivity(activity);
+}
+
+function CheckTimeout(message) {
+  if(TimedOutUsers.includes(message.author.id)) { message.reply("You've been timed out. This lasts 5 minutes from your last ~request command. This is to protect from spam, sorry!"); return false; }
+  else { SetTimeout(message); return true; }
+}
+
+function SetTimeout(message) {
+  TimedOutUsers.push(message.author.id);
+  setTimeout(function() { TimedOutUsers.splice(TimedOutUsers.findIndex(id => id === message.author.id), 1); }, 300000);
 }
 
 //Discord Client Code
@@ -77,8 +89,14 @@ client.on("message", async message => {
   if(message.author.bot) return;
   if(command.startsWith('~') && !command.startsWith('~~')) {
     if(command.startsWith("~REGISTER ")) { Register(Players, message, message.author.id, command.substr("~REGISTER ".length)); }
+    else if(command.startsWith("~ITEM ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~ITEM ".length)); }
+    else if(command.startsWith("~WEAPON ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~WEAPON ".length)); }
+    else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }
+    else if(command === "~ITEMS") { DiscordCommands.TrackedItems(Clans, Players, message); }
+    else if(command === "~WEAPONS") { DiscordCommands.TrackedItems(Clans, Players, message); }
     else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
     else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message); }
+    else if(command === "~DONATE" || command === "~SPONSOR") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
     else if(command === "~REGISTERCLAN" || command === "~REGISTER CLAN") { ManageClans.RegisterClan(Players, Clans, message, message.author.id); }
     else if(command === "~REMOVECLAN" || command === "~REMOVE CLAN") { ManageClans.RemoveClan(Clans, message, message.author.id); }
     else if(command === "~VALOR") { DiscordCommands.ValorRankings(Clans, Players, message); }
@@ -86,6 +104,9 @@ client.on("message", async message => {
     else if(command === "~INFAMY") { DiscordCommands.InfamyRankings(Clans, Players, message); }
     else if(command === "~COS") { DiscordCommands.SorrowsRankings(Clans, Players, message); }
     else if(command === "~GOS") { DiscordCommands.GardenRankings(Clans, Players, message); }
+    else if(command === "~IRON BANNER") { DiscordCommands.IronBannerRankings(Clans, Players, message); }
+    else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME") { DiscordCommands.TotalTime(Clans, Players, message); }
+    else if(command === "~STATUS") { DiscordCommands.Status(Clans, Players, ClanScans, StartupTime, client, message); }
     else if(command === "~SEASON RANKS" || command === "~SEASON RANK" || command === "~SEASONRANKS" || command === "~SEASONRANK") { DiscordCommands.SeasonRankings(Clans, Players, message); }
     else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
 
