@@ -35,7 +35,7 @@ function Help(message) {
   .setTimestamp()
   message.channel.send({embed});
 }
-function Status(Clans, Players, ClanScans, StartupTime, client, message) {
+function Status(Clans, Players, ClanScans, ClanTracked, StartupTime, client, message) {
   var thisTime = new Date().getTime(); var totalTime = thisTime - StartupTime; totalTime = Misc.formatTime(totalTime / 1000);
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
@@ -45,7 +45,7 @@ function Status(Clans, Players, ClanScans, StartupTime, client, message) {
   .addField("Servers", `${ client.guilds.size }`, true)
   .addField("Uptime", `${ totalTime }`, true)
   .addField("Players Tracked", `${ Players.length }`, true)
-  .addField("Clans Tracked: ", `${ Clans.length }`, true)
+  .addField("Clans Tracked: ", `${ ClanTracked }`, true)
   .addField("Clan Scans", `${ ClanScans }`, true)
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
