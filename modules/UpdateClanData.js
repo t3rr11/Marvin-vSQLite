@@ -131,6 +131,7 @@ function processPlayerData(playerInfo, playerData) {
       var totalTime1 = 0; try { totalTime1 = playerData.characters.data[characterIds[1]].minutesPlayedTotal; } catch (err) {  }
       var totalTime2 = 0; try { totalTime2 = playerData.characters.data[characterIds[2]].minutesPlayedTotal; } catch (err) {  }
       var totalTimeOverall = parseInt(totalTime0) + parseInt(totalTime1) + parseInt(totalTime2);
+      playerInfo.displayName = playerInfo.displayName.substring(0, 24);
 
       var ProcessedData = {
         Rankings: {
@@ -214,12 +215,17 @@ function GetOthers(playerInfo, playerData, characterIds) {
   var triumphScore = "0"; try { var triumphScore = playerData.profileRecords.data.score; } catch (err) {  }
   var wellsCompleted = "0"; try { var wellsCompleted = playerData.profileRecords.data.records["819775261"].objectives[0].progress; } catch (err) {  }
   var epsCompleted = "0"; try { var epsCompleted = playerData.profileRecords.data.records["3350489579"].objectives[0].progress; } catch (err) {  }
-  var seasonRank = "0"; try { var seasonRank = playerData.profileRecords.data.records["684525211"].intervalObjectives[3].progress; } catch (err) {  }
   var finishers = "0"; try { var finishers = playerData.characterRecords.data[characterIds[0]].records["630510424"].objectives[0].progress; } catch (err) {  }
   try { var totalTime0 = playerData.characters.data[characterIds[0]].minutesPlayedTotal; } catch (err) { var totalTime0 = 0; }
   try { var totalTime1 = playerData.characters.data[characterIds[1]].minutesPlayedTotal; } catch (err) { var totalTime1 = 0; }
   try { var totalTime2 = playerData.characters.data[characterIds[2]].minutesPlayedTotal; } catch (err) { var totalTime2 = 0; }
   var totalTime = "0"; totalTime = parseInt(totalTime0) + parseInt(totalTime1) + parseInt(totalTime2);
+  var seasonRank = "0";
+  try {
+    var seasonRankBefore = playerData.characterProgressions.data[characterIds[0]].progressions["1628407317"].level;
+    var seasonRankAfter = playerData.characterProgressions.data[characterIds[0]].progressions["3184735011"].level;
+    seasonRank = seasonRankBefore + seasonRankAfter;
+  } catch (err) { }
 
   return {
     menageire: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "encounters": encounters, "runes": runes, "lastScan": new Date() },

@@ -64,7 +64,7 @@ client.on("ready", () => {
       startUpScan.push(Clans[i].clan_id);
     }
   }
-  ClanTracked = startUpScan.length();
+  ClanTracked = startUpScan.length;
 
 	//SetTimeouts
 	setInterval(function() { UpdateActivityList() }, 10000);
@@ -78,7 +78,7 @@ client.on("ready", () => {
         clansScanned.push(Clans[i].clan_id);
       }
     }
-    ClanTracked = clansScanned.length();
+    ClanTracked = clansScanned.length;
     clansScanned = [];
   }, 180000);
 });
