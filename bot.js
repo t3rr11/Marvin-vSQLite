@@ -19,7 +19,7 @@ let ManageClans = require(__dirname + '/modules/ManageClans.js');
 var StartupTime = new Date().getTime();
 var CommandsInput = 0;
 var ClanScans = 0;
-var ClanTracked = 0;
+var ClansTracked = 0;
 var TimedOutUsers = [];
 
 //Exports
@@ -30,7 +30,7 @@ function UpdateActivityList() {
   var ActivityList = [];
   ActivityList.push(`Serving ${client.users.size} users`);
   ActivityList.push('Tracking ' + Players.length + ' players!');
-  ActivityList.push('Tracking ' + Clans.length + ' clans!');
+  ActivityList.push('Tracking ' + ClansTracked + ' clans!');
   ActivityList.push('Use ~HELP for Support');
   ActivityList.push('Want to support? ~Donate');
   var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
@@ -49,11 +49,6 @@ function SetTimeout(message) {
 
 //Discord Client Code
 client.on("ready", () => {
-  //Start Up Console Log
-  console.log(Misc.GetReadableDateTime() + ' - ' + `Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
-  console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + Players.length + ' players!');
-  console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + ClanTracked + ' clans!');
-
   //Init
   var startUpScan = [];
   for(var i in Clans) {
@@ -64,7 +59,7 @@ client.on("ready", () => {
       startUpScan.push(Clans[i].clan_id);
     }
   }
-  ClanTracked = startUpScan.length;
+  ClansTracked = startUpScan.length;
 
 	//SetTimeouts
 	setInterval(function() { UpdateActivityList() }, 10000);
@@ -78,9 +73,14 @@ client.on("ready", () => {
         clansScanned.push(Clans[i].clan_id);
       }
     }
-    ClanTracked = clansScanned.length;
+    ClansTracked = clansScanned.length;
     clansScanned = [];
   }, 180000);
+
+  //Start Up Console Log
+  console.log(Misc.GetReadableDateTime() + ' - ' + `Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
+  console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + Players.length + ' players!');
+  console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + ClansTracked + ' clans!');
 });
 
 client.on("message", async message => {
@@ -109,7 +109,7 @@ client.on("message", async message => {
     else if(command === "~GOS") { DiscordCommands.GardenRankings(Clans, Players, message); }
     else if(command === "~IRON BANNER") { DiscordCommands.IronBannerRankings(Clans, Players, message); }
     else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME") { DiscordCommands.TotalTime(Clans, Players, message); }
-    else if(command === "~STATUS") { DiscordCommands.Status(Clans, Players, ClanScans, ClanTracked, StartupTime, client, message); }
+    else if(command === "~STATUS") { DiscordCommands.Status(Clans, Players, ClanScans, ClansTracked, StartupTime, client, message); }
     else if(command === "~SEASON RANKS" || command === "~SEASON RANK" || command === "~SEASONRANKS" || command === "~SEASONRANK") { DiscordCommands.SeasonRankings(Clans, Players, message); }
     else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
 
