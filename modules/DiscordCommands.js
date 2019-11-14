@@ -9,7 +9,9 @@ const Players = require('../data/players.json');
 
 //Exports
 module.exports = {
-  Help, Status, Request, ValorRankings, GloryRankings, IronBannerRankings, SeasonRankings, InfamyRankings, SorrowsRankings, GardenRankings, TriumphRankings, ItemsObtained, TrackedItems, TotalTime
+  Help, Status, Request, ValorRankings, GloryRankings, IronBannerRankings, SeasonRankings, InfamyRankings,
+  LastWishRankings, ScourgeRankings, SorrowsRankings, GardenRankings,
+  TriumphRankings, ItemsObtained, TrackedItems, TitlesObtained, TrackedTitles, TotalTime
 };
 
 function GetArray(type, clan_id) {
@@ -46,7 +48,7 @@ function Status(Clans, Players, ClanScans, ClanTracked, StartupTime, client, mes
   .addField("Uptime", `${ totalTime }`, true)
   .addField("Players Tracked", `${ Players.length }`, true)
   .addField("Clans Tracked: ", `${ ClanTracked }`, true)
-  .addField("Clan Scans", `${ ClanScans }`, true)
+  .addField("Clan Scans", `${ Misc.AddCommas(ClanScans) }`, true)
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});
@@ -238,6 +240,74 @@ function SeasonRankings(Clans, Players, message) {
 }
 
 //Raids
+function LastWishRankings(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
+    var lastWishRankings = GetArray("Raids", clan_id).lastWish;
+    lastWishRankings.sort(function(a, b) { return b.completions - a.completions; });
+    var lastWishRanks = lastWishRankings.slice(0, 10); var names = []; var completions = [];
+    for(i in lastWishRanks) { names.push(lastWishRanks[i].displayName); completions.push(lastWishRanks[i].completions); }
+
+    try {
+      if(membership_Id) {
+        var rank = lastWishRankings.indexOf(lastWishRankings.find(e => e.membership_Id === membership_Id));
+        var player = lastWishRankings.find(e => e.membership_Id === membership_Id);
+        names.push(""); completions.push("");
+        names.push(`${ rank+1 }: ${ player.displayName }`); completions.push(player.completions);
+      }
+      else {
+        names.push(""); completions.push("");
+        names.push("~Register to see rank!");
+      }
+    }
+    catch (err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Last Wish Completions")
+    .addField("Name", names, true)
+    .addField("Completions", completions, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else { message.reply("No clan added, to add one use: ~RegisterClan"); }
+}
+function ScourgeRankings(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
+    var scourgeRankings = GetArray("Raids", clan_id).scourge;
+    scourgeRankings.sort(function(a, b) { return b.completions - a.completions; });
+    var scourgeRanks = scourgeRankings.slice(0, 10); var names = []; var completions = [];
+    for(i in scourgeRanks) { names.push(scourgeRanks[i].displayName); completions.push(scourgeRanks[i].completions); }
+
+    try {
+      if(membership_Id) {
+        var rank = scourgeRankings.indexOf(scourgeRankings.find(e => e.membership_Id === membership_Id));
+        var player = scourgeRankings.find(e => e.membership_Id === membership_Id);
+        names.push(""); completions.push("");
+        names.push(`${ rank+1 }: ${ player.displayName }`); completions.push(player.completions);
+      }
+      else {
+        names.push(""); completions.push("");
+        names.push("~Register to see rank!");
+      }
+    }
+    catch (err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Scourge of the Past Completions")
+    .addField("Name", names, true)
+    .addField("Completions", completions, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else { message.reply("No clan added, to add one use: ~RegisterClan"); }
+}
 function SorrowsRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
@@ -362,22 +432,77 @@ function TrackedItems(Clans, Players, message) {
   else { message.reply("No clan added, to add one use: ~RegisterClan"); }
 }
 
+//Titles
+function TitlesObtained(Clans, Players, message, title) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var Titles = GetArray("Titles", clan_id).titlesObtained;
+    var TitlesTracked = []; for(i in Titles){ if(!TitlesTracked.includes(Titles[i].title)) { TitlesTracked.push(Titles[i].title); } }
+    var TitlesLeft = TitlesTracked.slice(0, Math.floor(TitlesTracked.length / 2));
+    var TitlesRight = TitlesTracked.slice(Math.floor(TitlesTracked.length / 2), TitlesTracked.length);
+    var FilteredTitles = Titles.filter(e => e.title.toUpperCase() === title);
+    if(FilteredTitles.length == 1) {
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("The only person to own " + FilteredTitles[0].title + " is: ")
+      .setDescription(FilteredTitles[0].displayName)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(FilteredTitles.length > 1){
+      var lNames = []; var rNames = [];
+      var firstHalf = FilteredTitles.slice(0, Math.floor(FilteredTitles.length / 2)); var secondHalf = FilteredTitles.slice(Math.floor(FilteredTitles.length / 2), FilteredTitles.length);
+      for(i in firstHalf) { lNames.push(firstHalf[i].displayName); }
+      for(i in secondHalf){ rNames.push(secondHalf[i].displayName); }
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("People who own " + firstHalf[0].title)
+      .addField('Names', rNames, true)
+      .addField('Names', lNames, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else { TrackedTitles(Clans, Players, message); }
+  }
+  else { message.reply("No clan added, to add one use: ~RegisterClan"); }
+}
+function TrackedTitles(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var Titles = GetArray("Titles", clan_id).titlesObtained;
+    var TitlesTracked = []; for(i in Titles){ if(!TitlesTracked.includes(Titles[i].title)) { TitlesTracked.push(Titles[i].title); } }
+    var TitlesLeft = TitlesTracked.slice(0, Math.floor(TitlesTracked.length / 2));
+    var TitlesRight = TitlesTracked.slice(Math.floor(TitlesTracked.length / 2), TitlesTracked.length);
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("We either don't track that title or nobody has obtained it yet. Here is a list of titles we do track! Use: `~Title ExampleName` to see who has them!")
+    .addField("Titles", TitlesRight, true)
+    .addField("Titles", TitlesLeft, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else { message.reply("No clan added, to add one use: ~RegisterClan"); }
+}
+
 //Others
 function TriumphRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var triumphRankings = GetArray("Others", clan_id).triumphScore;
+    var triumphRankings = GetArray("Others", clan_id).triumphRankings;
     triumphRankings.sort(function(a, b) { return b.triumphScore - a.triumphScore; });
     var triumphRanks = triumphRankings.slice(0, 10); var names = []; var score = [];
-    for(i in triumphRanks) { names.push(triumphRanks[i].displayName); score.push(triumphRanks[i].triumphScore); }
+    for(i in triumphRanks) { names.push(triumphRanks[i].displayName); score.push(Misc.AddCommas(triumphRanks[i].triumphScore)); }
 
     try {
       if(membership_Id) {
         var rank = triumphRankings.indexOf(triumphRankings.find(e => e.membership_Id === membership_Id));
         var player = triumphRankings.find(e => e.membership_Id === membership_Id);
         names.push(""); score.push("");
-        names.push(`${ rank+1 }: ${ player.displayName }`); score.push(player.triumphScore);
+        names.push(`${ rank+1 }: ${ player.displayName }`); score.push(Misc.AddCommas(player.triumphScore));
       }
       else {
         names.push(""); score.push("");

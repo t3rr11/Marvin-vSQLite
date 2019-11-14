@@ -94,8 +94,10 @@ client.on("message", async message => {
     if(command.startsWith("~REGISTER ")) { Register(Players, message, message.author.id, command.substr("~REGISTER ".length)); }
     else if(command.startsWith("~ITEM ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~ITEM ".length)); }
     else if(command.startsWith("~WEAPON ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~WEAPON ".length)); }
+    else if(command.startsWith("~TITLE ")) { DiscordCommands.TitlesObtained(Clans, Players, message, command.substr("~TITLE ".length)); }
     else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }
     else if(command === "~ITEMS") { DiscordCommands.TrackedItems(Clans, Players, message); }
+    else if(command === "~TITLES") { DiscordCommands.TrackedTitles(Clans, Players, message); }
     else if(command === "~WEAPONS") { DiscordCommands.TrackedItems(Clans, Players, message); }
     else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
     else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message); }
@@ -105,9 +107,12 @@ client.on("message", async message => {
     else if(command === "~VALOR") { DiscordCommands.ValorRankings(Clans, Players, message); }
     else if(command === "~GLORY") { DiscordCommands.GloryRankings(Clans, Players, message); }
     else if(command === "~INFAMY") { DiscordCommands.InfamyRankings(Clans, Players, message); }
-    else if(command === "~COS") { DiscordCommands.SorrowsRankings(Clans, Players, message); }
-    else if(command === "~GOS") { DiscordCommands.GardenRankings(Clans, Players, message); }
+    else if(command === "~LW" || command === "~LAST WISH") { DiscordCommands.LastWishRankings(Clans, Players, message); }
+    else if(command === "~SOTP" || command === "~SCOURGE") { DiscordCommands.ScourgeRankings(Clans, Players, message); }
+    else if(command === "~COS" || command === "~CROWN") { DiscordCommands.SorrowsRankings(Clans, Players, message); }
+    else if(command === "~GOS" || command === "~GARDEN") { DiscordCommands.GardenRankings(Clans, Players, message); }
     else if(command === "~IRON BANNER") { DiscordCommands.IronBannerRankings(Clans, Players, message); }
+    else if(command === "~TRIUMPH SCORE") { DiscordCommands.TriumphRankings(Clans, Players, message); }
     else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME") { DiscordCommands.TotalTime(Clans, Players, message); }
     else if(command === "~STATUS") { DiscordCommands.Status(Clans, Players, ClanScans, ClansTracked, StartupTime, client, message); }
     else if(command === "~SEASON RANKS" || command === "~SEASON RANK" || command === "~SEASONRANKS" || command === "~SEASONRANK") { DiscordCommands.SeasonRankings(Clans, Players, message); }

@@ -300,6 +300,11 @@ function GetObtainedTitles(playerInfo, playerData) {
   var rivensbane = playerData.profileRecords.data.records["2182090828"].objectives[0].complete;
   var blacksmith = playerData.profileRecords.data.records["2053985130"].objectives[0].complete;
   var reckoner = playerData.profileRecords.data.records["1313291220"].objectives[0].complete;
+  var mmxix = playerData.profileRecords.data.records["2254764897"].objectives[0].complete;
+  var shadow = playerData.profileRecords.data.records["1883929036"].objectives[0].complete;
+  var undying = playerData.profileRecords.data.records["2707428411"].objectives[0].complete;
+  var enlightened = playerData.profileRecords.data.records["3387213440"].objectives[0].complete;
+  var harbinger = playerData.profileRecords.data.records["3793754396"].objectives[0].complete;
 
   if(wayfarer){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Wayfarer" }); }
   if(dredgen){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Dredgen" }); }
@@ -309,6 +314,11 @@ function GetObtainedTitles(playerInfo, playerData) {
   if(rivensbane){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Rivensbane" }); }
   if(blacksmith){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Blacksmith" }); }
   if(reckoner){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Reckoner" }); }
+  if(mmxix){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "MMXIX" }); }
+  if(shadow){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Shadow" }); }
+  if(undying){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Undying" }); }
+  if(enlightened){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Enlightened" }); }
+  if(harbinger){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Harbinger" }); }
 
   return { titlesObtained };
 }
