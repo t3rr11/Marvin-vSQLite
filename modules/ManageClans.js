@@ -65,5 +65,14 @@ function RemoveClan(Clans, message, discord_id) {
     message.reply("Only the one who linked this server to the clan can remove the clan from the server. Message Terrii#5799 if things have changed and this is not possible.");
   }
 }
+function DeleteClan(Clans, guild_id) {
+  for(var i in Clans) {
+    if(Clans[i].guild_id === guild_id) {
+      console.log("Clan Deleted: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
+      Clans.splice(i, 1);
+      fs.writeFile("./data/clans.json", JSON.stringify(Clans), (err) => { if (err) console.error(err) });
+    }
+  }
+}
 
-module.exports = { RegisterClan, RemoveClan };
+module.exports = { RegisterClan, RemoveClan, DeleteClan };

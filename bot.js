@@ -1,6 +1,7 @@
 //Required Libraraies
 const Discord = require('discord.js');
 const Request = require('request');
+const Long = require("long");
 const fs = require('fs');
 const client = new Discord.Client();
 
@@ -47,6 +48,20 @@ function SetTimeout(message) {
   setTimeout(function() { TimedOutUsers.splice(TimedOutUsers.findIndex(id => id === message.author.id), 1); }, 300000);
 }
 
+const getDefaultChannel = (guild) => {
+  if(guild.channels.has(guild.id))
+    return guild.channels.get(guild.id)
+  const generalChannel = guild.channels.find(channel => channel.name === "general");
+  if (generalChannel)
+    return generalChannel;
+  return guild.channels
+   .filter(c => c.type === "text" &&
+     c.permissionsFor(guild.client.user).has("SEND_MESSAGES"))
+   .sort((a, b) => a.position - b.position ||
+     Long.fromString(a.id).sub(Long.fromString(b.id)).toNumber())
+   .first();
+}
+
 //Discord Client Code
 client.on("ready", () => {
   //Init
@@ -75,7 +90,7 @@ client.on("ready", () => {
     }
     ClansTracked = clansScanned.length;
     clansScanned = [];
-  }, 180000);
+  }, 250000);
 
   //Start Up Console Log
   console.log(Misc.GetReadableDateTime() + ' - ' + `Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
@@ -83,6 +98,25 @@ client.on("ready", () => {
   console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + ClansTracked + ' clans!');
 });
 
+//Joined a server
+client.on("guildCreate", guild => {
+    console.log(Misc.GetReadableDateTime() + " - " + "Joined a new guild: " + guild.name);
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Hey there!")
+    .setDescription("I am Marvin. To set me up first register with me by using the `~register example` command. Replace example with your in-game username. \n\nOnce registration is complete use the `~Registerclan` command and then wait 5 minutes whilst I scan your clan. That's it you'll be ready to go! \n\nSee `~help` to see what I can do!")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp();
+    getDefaultChannel(guild).send({ embed });
+});
+
+//Removed from a server
+client.on("guildDelete", guild => {
+    console.log(Misc.GetReadableDateTime() + " - " + "Left a guild: " + guild.name);
+    ManageClans.DeleteClan(Clans, guild.id);
+});
+
+//Detected message
 client.on("message", async message => {
   //Translate command
   var default_command = message.content;

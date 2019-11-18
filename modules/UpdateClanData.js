@@ -92,7 +92,7 @@ function UpdateClanData(clan_id, ClanMembers) {
         SaveToFile(clan_id, ClanData);
       }
     }
-  }, 200);
+  }, 500);
 }
 async function GrabClanMemberCharacterData(playerInfo, playerId, retried) {
   try {
