@@ -9,7 +9,7 @@ const Players = require('../data/players.json');
 
 //Exports
 module.exports = {
-  Help, Status, Request, ValorRankings, GloryRankings, IronBannerRankings, SeasonRankings, InfamyRankings,
+  Help, Status, Request, GetClansTracked, ValorRankings, GloryRankings, IronBannerRankings, SeasonRankings, InfamyRankings,
   LastWishRankings, ScourgeRankings, SorrowsRankings, GardenRankings,
   TriumphRankings, ItemsObtained, TrackedItems, TitlesObtained, TrackedTitles, TotalTime
 };
@@ -26,13 +26,13 @@ function GetArray(type, clan_id) {
 function Help(message) {
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
-  .setAuthor("Help")
-  .setDescription("Hey there!, I am Marvin. Here is a list of my commands!")
+  .setAuthor("Hey there! I am Marvin. Here is a list of my commands!")
   .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~SeasonRanks`")
   .addField("Raids", "`~LW`, `~SoTP`, `~CoS`, `~GoS`")
   .addField("Items", "`~Items`, `~Item Example`")
-  .addField("Titles", "`~Title Example`")
+  .addField("Titles", "`~Titles`, `~Title Example`")
   .addField("Others", "`~Donate`, `~Triumph Score`")
+  .addField("Request", "If you see something that isn't there that you'd like me to track request it like this: `~request I would like to see Marvin track season ranks!`")
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});
@@ -62,6 +62,17 @@ function Request(client, message) {
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   client.guilds.get('630967941076221954').channels.get('639582004710735883').send({embed})
+}
+function GetClansTracked(Clans, message) {
+  var filteredClans = []; for(var i in Clans) { if(!filteredClans.find(e => e.clan_id == Clans[i].clan_id)) { filteredClans.push(Clans[i].clan_name); } }
+  let uniqueClans = [...new Set(filteredClans)];
+  const embed = new Discord.RichEmbed()
+  .setColor(0x0099FF)
+  .setAuthor("Clans Tracked")
+  .addField("Clans", uniqueClans)
+  .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+  .setTimestamp()
+  message.channel.send({embed});
 }
 
 //Rankings

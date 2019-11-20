@@ -65,37 +65,36 @@ const getDefaultChannel = (guild) => {
 //Discord Client Code
 client.on("ready", () => {
   //Init
-  var startUpScan = [];
-  for(var i in Clans) {
-    if(!startUpScan.includes(Clans[i].clan_id)) {
-      console.log("Scanning Clan: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
-      ClanData.CheckClanMembers(Clans[i].clan_id);
+  var clansScanned = [];
+  let nextClanScanTimer = undefined;
+  var clansToScan = []; for(var i in Clans) { if(!clansToScan.find(e => e.clan_id === Clans[i].clan_id)) { clansToScan.push(Clans[i]); } }
+  const SCAN_DELAY = 12000;
+  const scanNextClan = async () => {
+    if (clansToScan.length > 0) {
+      const nextClan = clansToScan.shift();
+      //console.log(`Scanning: ${ nextClan.clan_name } - ${ new Date().toLocaleString() }`);
+      await ClanData.CheckClanMembers(nextClan.clan_id);
       ClanScans++;
-      startUpScan.push(Clans[i].clan_id);
+      clansScanned.push(nextClan.clan_id);
+      nextClanScanTimer = setTimeout(scanNextClan, SCAN_DELAY);
     }
-  }
-  ClansTracked = startUpScan.length;
+    else {
+      //console.log("Refreshing List");
+      ClansTracked = clansScanned.length;
+      clansScanned = [];
+      clansToScan = []; for(var i in Clans) { if(!clansToScan.find(e => e.clan_id === Clans[i].clan_id)) { clansToScan.push(Clans[i]); } }
+      scanNextClan();
+    }
+  };
 
 	//SetTimeouts
 	setInterval(function() { UpdateActivityList() }, 10000);
-  setInterval(function() {
-    var clansScanned = [];
-    for(var i in Clans) {
-      if(!clansScanned.includes(Clans[i].clan_id)) {
-        console.log("Scanning Clan: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
-        ClanData.CheckClanMembers(Clans[i].clan_id);
-        ClanScans++;
-        clansScanned.push(Clans[i].clan_id);
-      }
-    }
-    ClansTracked = clansScanned.length;
-    clansScanned = [];
-  }, 250000);
 
   //Start Up Console Log
   console.log(Misc.GetReadableDateTime() + ' - ' + `Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
   console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + Players.length + ' players!');
   console.log(Misc.GetReadableDateTime() + ' - ' + 'Tracking ' + ClansTracked + ' clans!');
+  scanNextClan();
 });
 
 //Joined a server
@@ -104,7 +103,7 @@ client.on("guildCreate", guild => {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
     .setAuthor("Hey there!")
-    .setDescription("I am Marvin. To set me up first register with me by using the `~register example` command. Replace example with your in-game username. \n\nOnce registration is complete use the `~Registerclan` command and then wait 5 minutes whilst I scan your clan. That's it you'll be ready to go! \n\nSee `~help` to see what I can do!")
+    .setDescription("I am Marvin. To set me up first register with me by using the `~Register example` command. Replace example with your in-game username. \n\nOnce registration is complete use the `~Registerclan` command and then wait 5 minutes whilst I scan your clan. That's it you'll be ready to go! \n\nSee `~help` to see what I can do!")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp();
     getDefaultChannel(guild).send({ embed });
@@ -149,6 +148,7 @@ client.on("message", async message => {
     else if(command === "~TRIUMPH SCORE") { DiscordCommands.TriumphRankings(Clans, Players, message); }
     else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME") { DiscordCommands.TotalTime(Clans, Players, message); }
     else if(command === "~STATUS") { DiscordCommands.Status(Clans, Players, ClanScans, ClansTracked, StartupTime, client, message); }
+    else if(command === "~CLANS") { DiscordCommands.GetClansTracked(Clans, message); }
     else if(command === "~SEASON RANKS" || command === "~SEASON RANK" || command === "~SEASONRANKS" || command === "~SEASONRANK") { DiscordCommands.SeasonRankings(Clans, Players, message); }
     else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
 

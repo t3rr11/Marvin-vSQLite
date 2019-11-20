@@ -12,7 +12,7 @@ module.exports = UpdateClanData;
 flagEnum = (state, value) => !!(state & value);
 function GetItemState(state) { return { none: flagEnum(state, 0), notAcquired: flagEnum(state, 1), obscured: flagEnum(state, 2), invisible: flagEnum(state, 4), cannotAffordMaterialRequirements: flagEnum(state, 8), inventorySpaceUnavailable: flagEnum(state, 16), uniquenessViolation: flagEnum(state, 32), purchaseDisabled: flagEnum(state, 64) }; }
 function playerExists(username) { return playersInClan.some(function(el) { return el.member_name === username }); }
-function UpdateClanData(clan_id, ClanMembers) {
+async function UpdateClanData(clan_id, ClanMembers) {
   //Set Variables
   var playerId = -1;
   var processedAccounts = 0;
@@ -50,13 +50,13 @@ function UpdateClanData(clan_id, ClanMembers) {
   //GrabPlayerData
   var GrabPlayerData = setInterval(async function() {
     playerId++;
-    if(playerId < ClanMembers.length-1) { //
+    if(playerId < ClanMembers.length) {
       var processedData = processPlayerData(ClanMembers[playerId], await GrabClanMemberCharacterData(ClanMembers[playerId], playerId, "false"));
       processedAccounts++;
 
       //Store Data in Clan Data
-      if(processedData === "Private") { ClanData.Others.privatePlayers.push(ClanMembers[playerId]); }
-      else if(processedData === "Failed") {  }
+      if(processedData === "Private") { }
+      else if(processedData === "Failed") { }
       else {
         //Rankings
         ClanData.Rankings.infamyRankings.push(processedData.Rankings.infamyRankings);
@@ -87,12 +87,12 @@ function UpdateClanData(clan_id, ClanMembers) {
     }
     else {
       //This will run after all the clan info has been grabbed. It will clear the interval and then write all the data to file.
-      if(processedAccounts === ClanMembers.length-1) {
+      if(processedAccounts === ClanMembers.length) {
         clearInterval(GrabPlayerData);
         SaveToFile(clan_id, ClanData);
       }
     }
-  }, 500);
+  }, 100);
 }
 async function GrabClanMemberCharacterData(playerInfo, playerId, retried) {
   try {
@@ -109,7 +109,7 @@ async function GrabClanMemberCharacterData(playerInfo, playerId, retried) {
       return response.Response;
     }
     else {
-      console.log(`${ ClanMembers[playerId].displayName }: ${ response.ErrorStatus }`);
+      //console.log(`${ playerInfo.displayName }: ${ response.ErrorStatus }`);
       return "Failed";
     }
   }
@@ -171,7 +171,10 @@ function processPlayerData(playerInfo, playerData) {
 
       return ProcessedData;
     }
-    else { return "Private" }
+    else {
+      //console.log(`Private: ${ playerInfo.displayName }`);
+      return "Private"
+    }
   }
   else { return "Failed" }
 }
