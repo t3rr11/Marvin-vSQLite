@@ -100,6 +100,7 @@ client.on("ready", () => {
 //Joined a server
 client.on("guildCreate", guild => {
     console.log(Misc.GetReadableDateTime() + " - " + "Joined a new guild: " + guild.name);
+    Log.SaveLog("Server", Misc.GetReadableDateTime() + " - " + "Joined a new guild: " + guild.name);
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
     .setAuthor("Hey there!")
@@ -112,6 +113,7 @@ client.on("guildCreate", guild => {
 //Removed from a server
 client.on("guildDelete", guild => {
     console.log(Misc.GetReadableDateTime() + " - " + "Left a guild: " + guild.name);
+    Log.SaveLog("Server", Misc.GetReadableDateTime() + " - " + "Left a guild: " + guild.name);
     ManageClans.DeleteClan(Clans, guild.id);
 });
 
@@ -153,6 +155,7 @@ client.on("message", async message => {
     else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
 
     console.log(Misc.GetReadableDateTime() + ' - ' + 'User: ' + message.member.user.tag + ', Command: ' + command);
+    Log.SaveLog("Command", Misc.GetReadableDateTime() + ' - ' + 'User: ' + message.member.user.tag + ', Command: ' + command);
   }
 });
 

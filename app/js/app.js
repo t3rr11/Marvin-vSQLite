@@ -1,7 +1,7 @@
 var fs = require('fs');
 var files = fs.readdirSync('../data/logs'); files.reverse();
 var isRaw = false;
-var filter = { 'Notice': true, 'Error': false, 'Warning': false, 'Command': false, 'Annoucement': false, 'Denied': false };
+var filter = { 'Command': false, 'Server': false, 'Account': false, 'Error': false };
 var currentlySelectedFile = files[0];
 
 function StartLoading() {
@@ -62,12 +62,10 @@ function LoadConfiguredFile(fileName) {
         var dateTime = JSON.stringify(data[i].DateTime).split('"').join('');
         var type = JSON.stringify(data[i].Type).split('"').join('');
         var log = JSON.stringify(data[i].Log).split('"').join('');
-        if(type == 'Notice'){ var color = 'Black' }
-        if(type == 'Error'){ var color = 'Tomato' }
-        if(type == 'Warning'){ var color = 'Tomato' }
         if(type == 'Command'){ var color = 'cornflowerblue' }
-        if(type == 'Annoucement'){ var color = 'blueviolet' }
-        if(type == 'Denied'){ var color = 'Red' }
+        if(type == 'Server'){ var color = 'blueviolet' }
+        if(type == 'Account'){ var color = 'hotpink' }
+        if(type == 'Error'){ var color = 'Tomato' }
         if(CheckFilter(type) == false){
           document.getElementById('browser-table').innerHTML +=
           '<div class="table-row" style="color:'+ color +'">' +

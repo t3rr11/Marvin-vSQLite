@@ -16,9 +16,17 @@ async function Register(Players, message, discord_id, username) {
   }
   else {
     await GetMbmId(encodeURIComponent(username)).then(async function(membershipData) {
-      if(membershipData === "Too many results") { message.reply('There were too many results... Possibly change your username to something more unique or goto https://guardianstats.com and login there, then open the settings wheel and click "Get memebership ID". Once you have that ID then just use the command `~Register {ID}` without the {}.'); }
-      else if(membershipData.membershipId) { FinishRegistration(Players, message, discord_id, username, membershipData); }
-      else { message.reply('Failed to find membershipId for: ' + username); console.log(membershipData); }
+      if(membershipData === "Too many results") {
+        message.reply('There were too many results... \n\n1. Goto https://guardianstats.com and login there. \n2. Then open the settings wheel and click "Get memebership ID". \n3. Once you have that ID then just use the command like this `~Register 1234567890`.');
+      }
+      else {
+        try { FinishRegistration(Players, message, discord_id, username, membershipData); }
+        catch (err) {
+          message.reply('Sorry an error has occured, this has been logged could you message Terrii#5799 and let him know?');
+          Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + membershipData + " - " + err);
+          console.log(membershipData);
+        }
+      }
     });
   }
 }
@@ -27,6 +35,7 @@ function FinishRegistration(Players, message, discord_id, username, membershipDa
   if(isRegistered(Players, discord_id)) {
     for(var i in Players) {
       if(Players[i].discord_id === discord_id) {
+        Log.SaveLog("Account", Misc.GetReadableDateTime() + " - " + Players[i].username + " has changed their name to " + membershipData.displayName);
         Players[i] = { 'discord_id': discord_id, 'username': membershipData.displayName, 'membershipId': membershipData.membershipId, 'platform': membershipData.membershipType };
         fs.writeFile("./data/players.json", JSON.stringify(Players), (err) => { if (err) console.error(err) });
         message.reply('Your username has been updated to: ' + membershipData.displayName);
@@ -34,9 +43,11 @@ function FinishRegistration(Players, message, discord_id, username, membershipDa
     }
   }
   else {
+    Log.SaveLog("Account", Misc.GetReadableDateTime() + " - " + membershipData.displayName + " has just registered!");
     Players.push({ 'discord_id': discord_id, 'username': membershipData.displayName, 'membershipId': membershipData.membershipId, 'platform': membershipData.membershipType });
     fs.writeFile("./data/players.json", JSON.stringify(Players), (err) => { if (err) console.error(err) });
     message.reply('Your username has been set to: ' + membershipData.displayName);
+    Log.SaveLog("Account", Misc.GetReadableDateTime() + " - " + membershipData + " - " + err);
   }
 }
 
