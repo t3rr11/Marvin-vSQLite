@@ -47,7 +47,6 @@ function FinishRegistration(Players, message, discord_id, username, membershipDa
     Players.push({ 'discord_id': discord_id, 'username': membershipData.displayName, 'membershipId': membershipData.membershipId, 'platform': membershipData.membershipType });
     fs.writeFile("./data/players.json", JSON.stringify(Players), (err) => { if (err) console.error(err) });
     message.reply('Your username has been set to: ' + membershipData.displayName);
-    Log.SaveLog("Account", Misc.GetReadableDateTime() + " - " + membershipData + " - " + err);
   }
 }
 
