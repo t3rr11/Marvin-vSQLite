@@ -18,8 +18,8 @@ async function GetClanMembers(clan_id) {
   const response = await request.json();
   if(request.ok && response.ErrorCode && response.ErrorCode !== 1) {
     //Error with bungie, might have sent bad headers.
-    console.log(`Error: ${ JSON.stringify(response) }`);
-    return JSON.stringify(response);
+    try { console.log(response.ErrorStatus); } catch (err) { console.log(`Bad Error: ${ JSON.stringify(response) }`); }
+    return "Error";
   }
   else if(request.ok) {
     //Everything is ok, request was returned to sender.
@@ -27,48 +27,26 @@ async function GetClanMembers(clan_id) {
   }
   else {
     //Error in request ahhhhh!
-    console.log(`Error: ${ JSON.stringify(response) }`);
-    return JSON.stringify(response);
+    try { console.log(response.ErrorStatus); } catch (err) { console.log(`Bad Error: ${ JSON.stringify(response) }`); }
+    return "Error";
   }
 }
-async function CheckClanMembers(clan_id) {
-  var PreviousClanMembers = []; if(fs.existsSync(`./data/clans/${ clan_id }/ClanMembers.json`)) { PreviousClanMembers = fs.readFileSync(`./data/clans/${ clan_id }/ClanMembers.json`, "utf8"); }
+async function CheckClanMembers(clan_id, client) {
   var CurrentClanMembers = await GetClanMembers(clan_id);
   var ClanMembers = [];
 
-  if(PreviousClanMembers.length == 0) {
-    for(i in CurrentClanMembers) {
-      PreviousClanMembers.push({ "displayName": CurrentClanMembers[i].destinyUserInfo.displayName, "membership_Id": CurrentClanMembers[i].destinyUserInfo.membershipId, "membershipType": CurrentClanMembers[i].destinyUserInfo.membershipType });
-      ClanMembers.push({ "displayName": CurrentClanMembers[i].destinyUserInfo.displayName, "membership_Id": CurrentClanMembers[i].destinyUserInfo.membershipId, "membershipType": CurrentClanMembers[i].destinyUserInfo.membershipType });
+  if(CurrentClanMembers !== "Error") {
+    try {
+      for(i in CurrentClanMembers) {
+        ClanMembers.push({
+          "displayName": CurrentClanMembers[i].destinyUserInfo.displayName,
+          "membership_Id": CurrentClanMembers[i].destinyUserInfo.membershipId,
+          "membershipType": CurrentClanMembers[i].destinyUserInfo.membershipType
+        });
+      }
+      fs.writeFile(`./data/clans/${ clan_id }/ClanMembers.json`, JSON.stringify(ClanMembers), (err) => { if (err) console.error(err) });
+      UpdateClanData(clan_id, ClanMembers, client);
     }
-  }
-  else {
-    for(i in CurrentClanMembers){
-      ClanMembers.push({ "displayName": CurrentClanMembers[i].destinyUserInfo.displayName, "membership_Id": CurrentClanMembers[i].destinyUserInfo.membershipId, "membershipType": CurrentClanMembers[i].destinyUserInfo.membershipType });
-    }
-  }
-
-  var MembersJoined = []; try { MembersJoined = ClanMembers.filter(function(player) { return !PreviousClanMembers.find(member => member.membershipId === player.membershipId); }); } catch (err) { }
-  var MembersLeft = []; try { MembersLeft = PreviousClanMembers.filter(function(player) { return !ClanMembers.find(member => member.membershipId === player.membershipId); }); } catch (err) { }
-
-  if(MembersLeft.length > 0){ for(i in MembersLeft){ SendJoinLeaveMessage(MembersLeft[i], 'Left'); } } else { }
-  if(MembersJoined.length > 0){ for(i in MembersJoined){ SendJoinLeaveMessage(MembersJoined[i], 'Joined'); } } else { }
-
-  fs.writeFile(`./data/clans/${ clan_id }/ClanMembers.json`, JSON.stringify(ClanMembers), (err) => { if (err) console.error(err) });
-
-  //Finished Member Checks, Now get member data
-  UpdateClanData(clan_id, ClanMembers);
-}
-
-function SendJoinLeaveMessage(player, input) {
-  if(input == 'Joined') {
-    const embed = new Discord.RichEmbed().setColor(0x006400).setAuthor(player.displayName + " has joined the clan!");
-    Bot.client.channels.get('631357107651870733').send({embed});
-    Log.SaveLog('Annoucement', player.displayName + ' has joined the clan!');
-  }
-  if(input == 'Left') {
-    const embed = new Discord.RichEmbed().setColor(0xFF4100).setAuthor(player.displayName + " has left the clan!");
-    Bot.client.channels.get('631357107651870733').send({embed});
-    Log.SaveLog('Annoucement', player.displayName + ' has left the clan!');
+    catch (err) { Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + "Error Saving Clan Members: " + err); }
   }
 }

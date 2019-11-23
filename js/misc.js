@@ -70,9 +70,9 @@ function formatTime(TimeinSeconds) {
 }
 
 function DeleteMessages(message, amount) {
-  if(message.author == "<@194972321168097280>" || message.author == "<@226123337410019328>"){
+  if(message.author == "<@194972321168097280>"){
     message.channel.fetchMessages({limit: amount}).then(collected => { collected.forEach(msg => {
-      if(msg.id == "527052089575342080" || msg.id == "574073272141086721" || msg.id == "500157460577779713" || msg.id == "582368247949819915" || msg.id == "585234859186716730") { console.log('Cannot Delete This Message! ' + msg.id); }
+      if(msg.id == "527052089575342080") { console.log('Cannot Delete This Message! ' + msg.id); }
       else { msg.delete(); }
     }); });
   }

@@ -36,8 +36,8 @@ div { margin: 0px; padding:0px; }
 #browser-table {  }
 #browser-table > .table-row { display: block; min-height: 20px; }
 #browser-table > #mainTableRow { font-weight: bold; border-bottom: 1px darkgray solid; background-color: lightgray; }
-.table-row > .type { display:inline-block; float:left; min-width:100px; width:20%; margin-left: 5px; margin-right: -5px; }
-.table-row > .log { display:inline-block; float:left; min-width:300px; width: 59%; white-space: nowrap; overflow: hidden; }
+.table-row > .type { display:inline-block; float:left; min-width:100px; margin-left: 5px; margin-right: -5px; }
+.table-row > .log { display:inline-block; float:left; min-width:300px; width: 69%; white-space: nowrap; overflow: hidden; }
 .table-row > .date { display:inline-block; float:right; min-width:150px; width:20%; }
 .menubar {
   width:100%;

@@ -1,7 +1,7 @@
 var fs = require('fs');
 var files = fs.readdirSync('../data/logs'); files.reverse();
 var isRaw = false;
-var filter = { 'Command': false, 'Server': false, 'Account': false, 'Error': false };
+var filter = { 'Command': false, 'Server': false, 'Account': false, 'Clans': false, 'Warning': false, 'Error': false };
 var currentlySelectedFile = files[0];
 
 function StartLoading() {
@@ -65,6 +65,8 @@ function LoadConfiguredFile(fileName) {
         if(type == 'Command'){ var color = 'cornflowerblue' }
         if(type == 'Server'){ var color = 'blueviolet' }
         if(type == 'Account'){ var color = 'hotpink' }
+        if(type == 'Clans'){ var color = 'hotpink' }
+        if(type == 'Warning'){ var color = 'Warning' }
         if(type == 'Error'){ var color = 'Tomato' }
         if(CheckFilter(type) == false){
           document.getElementById('browser-table').innerHTML +=

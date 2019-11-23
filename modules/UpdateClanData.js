@@ -4,6 +4,7 @@ const Config = require("../data/config.json");
 const fetch = require("node-fetch");
 let Misc = require("../js/misc.js");
 let Log = require("../js/log.js");
+let Annoucements = require("./Annoucements.js");
 
 //Modules
 module.exports = UpdateClanData;
@@ -12,7 +13,7 @@ module.exports = UpdateClanData;
 flagEnum = (state, value) => !!(state & value);
 function GetItemState(state) { return { none: flagEnum(state, 0), notAcquired: flagEnum(state, 1), obscured: flagEnum(state, 2), invisible: flagEnum(state, 4), cannotAffordMaterialRequirements: flagEnum(state, 8), inventorySpaceUnavailable: flagEnum(state, 16), uniquenessViolation: flagEnum(state, 32), purchaseDisabled: flagEnum(state, 64) }; }
 function playerExists(username) { return playersInClan.some(function(el) { return el.member_name === username }); }
-async function UpdateClanData(clan_id, ClanMembers) {
+async function UpdateClanData(clan_id, ClanMembers, client) {
   //Set Variables
   var playerId = -1;
   var processedAccounts = 0;
@@ -89,7 +90,7 @@ async function UpdateClanData(clan_id, ClanMembers) {
       //This will run after all the clan info has been grabbed. It will clear the interval and then write all the data to file.
       if(processedAccounts === ClanMembers.length) {
         clearInterval(GrabPlayerData);
-        SaveToFile(clan_id, ClanData);
+        Annoucements.CheckForAnnoucements(clan_id, ClanData, client);
       }
     }
   }, 100);
@@ -265,31 +266,35 @@ function GetObtainedItems(playerInfo, playerData) {
   var revokerState = playerData.profileCollectibles.data.collectibles["3066162258"].state;
   var luminaState = playerData.profileCollectibles.data.collectibles["2924632392"].state;
   var badjujuState = playerData.profileCollectibles.data.collectibles["4207100358"].state;
+  var xenophageState = playerData.profileCollectibles.data.collectibles["1258579677"].state;
+  var divinityState = playerData.profileCollectibles.data.collectibles["1988948484"].state;
 
-  if(GetItemState(voicesState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "1000 Voices" }); }
-  if(GetItemState(cerberusState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Cerberus +1" }); }
-  if(GetItemState(malfeasanceState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Malfeasance" }); }
-  if(GetItemState(lunaState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Luna Howl" }); }
-  if(GetItemState(notForgottenState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Not Forgotten" }); }
-  if(GetItemState(broadswordState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Redrix Broadsword" }); }
-  if(GetItemState(claymoreState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Redrix Claymore" }); }
-  if(GetItemState(breakneckState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Breakneck" }); }
-  if(GetItemState(mountainTopState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Mountain Top" }); }
-  if(GetItemState(leMonarqueState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Le Monarque" }); }
-  if(GetItemState(anarchyState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Anarchy" }); }
-  if(GetItemState(thornState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Thorn" }); }
-  if(GetItemState(jotunnState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Jötunn" }); }
-  if(GetItemState(recluseState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Recluse" }); }
-  if(GetItemState(lastWordState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Last Word" }); }
-  if(GetItemState(izanagiState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Izanagis Burden" }); }
-  if(GetItemState(huckleberryState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "The Huckleberry" }); }
-  if(GetItemState(arbalestState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Arbalest" }); }
-  if(GetItemState(hushState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Hush" }); }
-  if(GetItemState(wendigoState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Wendigo GL3" }); }
-  if(GetItemState(tarrabahState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Tarrabah" }); }
-  if(GetItemState(revokerState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Revoker" }); }
-  if(GetItemState(luminaState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Lumina" }); }
-  if(GetItemState(badjujuState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_id, "item": "Bad Juju" }); }
+  if(GetItemState(voicesState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "1000 Voices" }); }
+  if(GetItemState(cerberusState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Cerberus +1" }); }
+  if(GetItemState(malfeasanceState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Malfeasance" }); }
+  if(GetItemState(lunaState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Luna Howl" }); }
+  if(GetItemState(notForgottenState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Not Forgotten" }); }
+  if(GetItemState(broadswordState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Redrix Broadsword" }); }
+  if(GetItemState(claymoreState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Redrix Claymore" }); }
+  if(GetItemState(breakneckState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Breakneck" }); }
+  if(GetItemState(mountainTopState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Mountain Top" }); }
+  if(GetItemState(leMonarqueState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Le Monarque" }); }
+  if(GetItemState(anarchyState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Anarchy" }); }
+  if(GetItemState(thornState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Thorn" }); }
+  if(GetItemState(jotunnState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Jötunn" }); }
+  if(GetItemState(recluseState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Recluse" }); }
+  if(GetItemState(lastWordState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Last Word" }); }
+  if(GetItemState(izanagiState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Izanagis Burden" }); }
+  if(GetItemState(huckleberryState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "The Huckleberry" }); }
+  if(GetItemState(arbalestState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Arbalest" }); }
+  if(GetItemState(hushState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Hush" }); }
+  if(GetItemState(wendigoState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Wendigo GL3" }); }
+  if(GetItemState(tarrabahState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Tarrabah" }); }
+  if(GetItemState(revokerState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Revoker" }); }
+  if(GetItemState(luminaState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Lumina" }); }
+  if(GetItemState(badjujuState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Bad Juju" }); }
+  if(GetItemState(xenophageState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Xenophage" }); }
+  if(GetItemState(divinityState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Divinity" }); }
 
   return { itemsObtained };
 }
@@ -324,14 +329,6 @@ function GetObtainedTitles(playerInfo, playerData) {
   if(harbinger){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Harbinger" }); }
 
   return { titlesObtained };
-}
-
-function SaveToFile(clan_id, ClanData) {
-  fs.writeFile("./data/clans/" + clan_id + "/Rankings.json", JSON.stringify(ClanData.Rankings), (err) => { if (err) console.error(err) });
-  fs.writeFile("./data/clans/" + clan_id + "/Raids.json", JSON.stringify(ClanData.Raids), (err) => { if (err) console.error(err) });
-  fs.writeFile("./data/clans/" + clan_id + "/Items.json", JSON.stringify(ClanData.Items), (err) => { if (err) console.error(err) });
-  fs.writeFile("./data/clans/" + clan_id + "/Titles.json", JSON.stringify(ClanData.Titles), (err) => { if (err) console.error(err) });
-  fs.writeFile("./data/clans/" + clan_id + "/Others.json", JSON.stringify(ClanData.Others), (err) => { if (err) console.error(err) });
 }
 
 //Not used yet.
