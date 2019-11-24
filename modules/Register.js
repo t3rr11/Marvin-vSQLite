@@ -19,6 +19,9 @@ async function Register(Players, message, discord_id, username) {
       if(membershipData === "Too many results") {
         message.reply('There were too many results... \n\n1. Goto https://guardianstats.com and login there. \n2. Then open the settings wheel and click "Get memebership ID". \n3. Once you have that ID then just use the command like this `~Register 1234567890`.');
       }
+      else if(membershipData === "Not found") {
+        message.reply('No users with that name found... Try this: \n\n1. Goto https://guardianstats.com and login there. \n2. Then open the settings wheel and click "Get memebership ID". \n3. Once you have that ID then just use the command like this `~Register 1234567890`.');
+      }
       else {
         try { FinishRegistration(Players, message, discord_id, username, membershipData); }
         catch (err) {
@@ -62,6 +65,7 @@ async function GetMbmId(displayName) {
   else if(request.ok) {
     //Everything is ok, request was returned to sender.
     if(response.Response.length > 1) { return "Too many results"; }
+    else if(response.Response.length === 0) { return "Not found"; }
     else { return response.Response[0]; }
   }
   else {
