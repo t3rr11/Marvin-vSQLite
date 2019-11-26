@@ -41,7 +41,8 @@ async function CheckClanMembers(clan_id, client) {
         ClanMembers.push({
           "displayName": CurrentClanMembers[i].destinyUserInfo.displayName,
           "membership_Id": CurrentClanMembers[i].destinyUserInfo.membershipId,
-          "membershipType": CurrentClanMembers[i].destinyUserInfo.membershipType
+          "membershipType": CurrentClanMembers[i].destinyUserInfo.membershipType,
+          "joinDate": CurrentClanMembers[i].joinDate
         });
       }
       fs.writeFile(`./data/clans/${ clan_id }/ClanMembers.json`, JSON.stringify(ClanMembers), (err) => { if (err) console.error(err) });

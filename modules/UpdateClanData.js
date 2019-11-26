@@ -4,7 +4,7 @@ const Config = require("../data/config.json");
 const fetch = require("node-fetch");
 let Misc = require("../js/misc.js");
 let Log = require("../js/log.js");
-let Annoucements = require("./Annoucements.js");
+let Announcements = require("./Announcements.js");
 
 //Modules
 module.exports = UpdateClanData;
@@ -17,6 +17,7 @@ async function UpdateClanData(clan_id, ClanMembers, client) {
   //Set Variables
   var playerId = -1;
   var processedAccounts = 0;
+  var failureCheck = false;
   var ClanData = {
     Rankings: {
       infamyRankings: [],
@@ -56,8 +57,22 @@ async function UpdateClanData(clan_id, ClanMembers, client) {
       processedAccounts++;
 
       //Store Data in Clan Data
-      if(processedData === "Private") { }
-      else if(processedData === "Failed") { }
+      if(processedData.private) {
+        //console.log(`${ processedData.playerInfo.displayName } is Private.`);
+      }
+      else if(processedData.failed) {
+        if(processedData.reason.ErrorStatus === "DestinyAccountNotFound") {
+          //console.log(`Failed: ${ processedData.playerInfo.displayName } Does not have a valid Destiny 2 account.`);
+          //Log.SaveLog("Warning", Misc.GetReadableDateTime() + " - " + `${ processedData.playerInfo.displayName } Does not have a valid Destiny 2 account.`);
+        }
+        else {
+          //console.log(`Failed: ${ processedData.playerInfo.displayName }. Here is why: ${ JSON.stringify(processedData.reason) }`);
+          if(Misc.IsJson(processedData.reason)) { Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + `${ processedData.playerInfo.displayName }. Here is why: ${ processedData.reason.ErrorStatus }`); }
+          else { Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + `${ processedData.playerInfo.displayName }. Here is why: ${ processedData.reason }`); }
+
+          failureCheck = true;
+        }
+      }
       else {
         //Rankings
         ClanData.Rankings.infamyRankings.push(processedData.Rankings.infamyRankings);
@@ -90,20 +105,28 @@ async function UpdateClanData(clan_id, ClanMembers, client) {
       //This will run after all the clan info has been grabbed. It will clear the interval and then write all the data to file.
       if(processedAccounts === ClanMembers.length) {
         clearInterval(GrabPlayerData);
-        Annoucements.CheckForAnnoucements(clan_id, ClanData, client);
+        if(!failureCheck) { Announcements.CheckForAnnouncements(clan_id, ClanData, client); }
       }
     }
   }, 100);
 }
 async function GrabClanMemberCharacterData(playerInfo, playerId, retried) {
+  const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
+  const request = await fetch(`https://bungie.net/Platform/Destiny2/${ playerInfo.membershipType }/Profile/${ playerInfo.membership_Id }/?components=100,200,202,204,800,900`, headers);
   try {
-    const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
-    const request = await fetch(`https://bungie.net/Platform/Destiny2/${ playerInfo.membershipType }/Profile/${ playerInfo.membership_Id }/?components=100,200,202,204,800,900`, headers);
     const response = await request.json();
     if(request.ok && response.ErrorCode && response.ErrorCode !== 1) {
       //Error with bungie, might have sent bad headers.
       if(retried == "false") { GrabClanMemberCharacterData(playerInfo, playerId, "true"); }
-      else if(retried == "true") { return "Failed"; }
+      else if(retried == "true") {
+        var ProcessedData = {
+          playerInfo,
+          private: false,
+          failed: true,
+          reason: "Failed to grab account twice in a row!"
+        }
+        return ProcessedData;
+      }
     }
     else if(request.ok) {
       //Data was obtained.
@@ -111,14 +134,29 @@ async function GrabClanMemberCharacterData(playerInfo, playerId, retried) {
     }
     else {
       //console.log(`${ playerInfo.displayName }: ${ response.ErrorStatus }`);
-      return "Failed";
+      var ProcessedData = {
+        playerInfo,
+        private: false,
+        failed: true,
+        reason: response
+      }
+      return ProcessedData;
     }
   }
-  catch (err) { return "Failed"; }
+  catch (err) {
+    var response = `${ request.status }: ${ request.statusText }`;
+    var ProcessedData = {
+      playerInfo,
+      private: false,
+      failed: true,
+      reason: response
+    }
+    return ProcessedData;
+  }
 }
 
 function processPlayerData(playerInfo, playerData) {
-  if(playerData !== "Failed") {
+  if(!playerData.failed) {
     if(Object.keys(playerData.profileRecords).length > 1) {
       var thisDate = new Date().toLocaleString();
       var characterIds = playerData.profile.data.characterIds;
@@ -161,7 +199,11 @@ function processPlayerData(playerInfo, playerData) {
           seasonRankings: {},
           menageire: {},
           totalTime: {}
-        }
+        },
+        playerInfo,
+        private: false,
+        failed: false,
+        reason: ""
       }
 
       ProcessedData.Rankings = GetRankings(playerInfo, playerData, characterIds);
@@ -174,10 +216,24 @@ function processPlayerData(playerInfo, playerData) {
     }
     else {
       //console.log(`Private: ${ playerInfo.displayName }`);
-      return "Private"
+      var ProcessedData = {
+        playerInfo,
+        private: true,
+        failed: false,
+        reason: ""
+      }
+      return ProcessedData;
     }
   }
-  else { return "Failed" }
+  else {
+    var ProcessedData = {
+      playerInfo,
+      private: false,
+      failed: true,
+      reason: playerData.reason
+    }
+    return ProcessedData;
+  }
 }
 
 function GetRankings(playerInfo, playerData, characterIds) {
@@ -196,7 +252,7 @@ function GetRankings(playerInfo, playerData, characterIds) {
   return {
     infamyRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "infamy": totalInfamy, "resets": infamyResets, "motesCollected": motesCollected, "lastScan": new Date() },
     valorRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "valor": totalValor, "resets": valorResets, "lastScan": new Date() },
-    gloryRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "glory": glory, "lastScan": new Date() },
+    gloryRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "glory": glory, "seasonAnnouncement": { "hasAnnounced": false, "season": null }, "lastScan": new Date() },
     ibRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "ibKills": ibKills, "ibWins": ibWins, "lastScan": new Date() }
   }
 }
@@ -329,50 +385,4 @@ function GetObtainedTitles(playerInfo, playerData) {
   if(harbinger){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Harbinger" }); }
 
   return { titlesObtained };
-}
-
-//Not used yet.
-function CheckForChanges(file, array) {
-  if(file == 'ClanMembers'){
-    var Clannies_Prev = JSON.parse(fs.readFileSync('./data/clans/' + clanID + '/ClanMembers.json', 'utf8'));
-    var Clannies_Curr = array;
-    var Clannies_Changed = Clannies_Curr.filter(({membership_id:a, highestPower:x}) => Clannies_Prev.some(({membership_id:b, highestPower:y}) => a === b && x > y));
-    for(i in Clannies_Changed){
-      for(j in Clannies_Prev){
-        if(Clannies_Prev[j].membership_id == Clannies_Changed[i].membership_id){
-          Clannies_Prev[j].highestPower = Clannies_Changed[i].highestPower;
-          console.log('Updated: ' + Clannies_Prev[j].member_name + ', HighestPower: ' + Clannies_Prev[j].highestPower);
-        }
-      }
-    }
-    playersInClan = Clannies_Prev;
-    SortClanMembers();
-  }
-  if(file == 'Items'){
-    var Items_Prev = JSON.parse(fs.readFileSync('./data/clans/' + clanID + '/Items.json', 'utf8'));
-    var Items_Curr = array;
-    if(Items_Curr.length !== Items_Prev.length){
-      var NewItems = Items_Curr.filter(({member_name:a, item:x}) => !Items_Prev.some(({member_name:b, item:y}) => a === b && x === y));
-      if(NewItems.length < 4){
-        for(i in NewItems){
-          Misc.WriteAnnoucement('Item', NewItems[i]);
-          Log.SaveLog('Annoucement', 'New Item: ' + NewItems[i].member_name + ' has obtained: ' + NewItems[i].item);
-        }
-      }
-      else {
-        Log.SaveLog('Warning', 'Max Limit Reached - Items');
-      }
-    }
-  }
-  if(file == 'Titles'){
-    var Titles_Prev = JSON.parse(fs.readFileSync('./data/clans/' + clanID + '/Titles.json', 'utf8'));
-    var Titles_Curr = array;
-    if(Titles_Curr.length !== Titles_Prev.length){
-      var NewTitles = Titles_Curr.filter(({member_name:a, title:x}) => !Titles_Prev.some(({member_name:b, title:y}) => a === b && x === y));
-      for(i in NewTitles){
-        Misc.WriteAnnoucement('Titles', NewTitles[i]);
-        Log.SaveLog('Annoucement', 'New Title: ' + NewTitles[i].member_name + ' has achieved the ' + NewTitles[i].title + ' title!');
-      }
-    }
-  }
 }

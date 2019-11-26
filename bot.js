@@ -15,7 +15,7 @@ let DiscordCommands = require(__dirname + '/modules/DiscordCommands.js');
 let ClanData = require(__dirname + '/modules/ClanData.js');
 let Register = require(__dirname + '/modules/Register.js');
 let ManageClans = require(__dirname + '/modules/ManageClans.js');
-let Annoucements = require(__dirname + '/modules/Annoucements.js');
+let Announcements = require(__dirname + '/modules/Announcements.js');
 
 //Data
 var StartupTime = new Date().getTime();
@@ -132,7 +132,7 @@ client.on("message", async message => {
     else if(command.startsWith("~WEAPON ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~WEAPON ".length)); }
     else if(command.startsWith("~TITLE ")) { DiscordCommands.TitlesObtained(Clans, Players, message, command.substr("~TITLE ".length)); }
     else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }
-    else if(command.startsWith("~SET ANNOUCEMENTS ")) { Annoucements.SetupAnnoucements(Players, Clans, message); }
+    else if(command.startsWith("~SET ANNOUNCEMENTS ")) { Announcements.SetupAnnouncements(Players, Clans, message); }
     else if(command.startsWith("~DEL")) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); }
     else if(command === "~ITEMS") { DiscordCommands.TrackedItems(Clans, Players, message); }
     else if(command === "~TITLES") { DiscordCommands.TrackedTitles(Clans, Players, message); }
@@ -142,7 +142,7 @@ client.on("message", async message => {
     else if(command === "~DONATE" || command === "~SPONSOR") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
     else if(command === "~REGISTERCLAN") { ManageClans.RegisterClan(Players, Clans, message, message.author.id); }
     else if(command === "~REMOVECLAN" || command === "~REMOVE CLAN") { ManageClans.RemoveClan(Clans, message, message.author.id); }
-    else if(command === "~REMOVEANNOUCEMENTS" || command === "~REMOVE ANNOUCEMENTS") { Annoucements.RemoveAnnoucements(Clans, message); }
+    else if(command === "~REMOVEANNOUNCEMENTS" || command === "~REMOVE ANNOUNCEMENTS") { Announcements.RemoveAnnouncements(Clans, message); }
     else if(command === "~VALOR") { DiscordCommands.ValorRankings(Clans, Players, message); }
     else if(command === "~GLORY") { DiscordCommands.GloryRankings(Clans, Players, message); }
     else if(command === "~INFAMY") { DiscordCommands.InfamyRankings(Clans, Players, message); }

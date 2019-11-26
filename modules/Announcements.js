@@ -9,7 +9,7 @@ const Config = require('../data/config.json');
 const fetch = require("node-fetch");
 
 function isRegistered(Players, discord_id) { if(Players.find(player => player.discord_id === discord_id)) { return true } else { return false } }
-async function SetupAnnoucements(Players, Clans, message) {
+async function SetupAnnouncements(Players, Clans, message) {
   if(isRegistered(Players, message.author.id)) {
     if(Clans.find(clan => clan.guild_id === message.guild.id)) {
       try {
@@ -17,17 +17,17 @@ async function SetupAnnoucements(Players, Clans, message) {
         for(var i in Clans) {
           if(Clans[i].guild_id === message.guild.id) {
             if(Clans[i].creator_id === message.author.id) {
-              Clans[i].annoucement_channel = channelId;
+              Clans[i].announcement_channel = channelId;
               fs.writeFile("./data/clans.json", JSON.stringify(Clans), (err) => { if (err) console.error(err) });
-              Log.SaveLog("Clans", Misc.GetReadableDateTime() + ' - ' + Clans[i].clan_name + " has added an annoucements channel: " + channelId);
-              message.channel.send(`Successfully set <#${ channelId }> as the annoucements channel!`);
+              Log.SaveLog("Clans", Misc.GetReadableDateTime() + ' - ' + Clans[i].clan_name + " has added an announcements channel: " + channelId);
+              message.channel.send(`Successfully set <#${ channelId }> as the announcements channel!`);
             }
             else { message.reply("Only the one who linked this server to the clan edit the clan. Message Terrii#5799 if things have changed and this is not possible."); }
           }
         }
       }
       catch (err) {
-        if(err.name === "TypeError") { message.reply("Please set the annoucements channel by tagging it in the message. E.g: `~Annoucements #general`"); }
+        if(err.name === "TypeError") { message.reply("Please set the announcements channel by tagging it in the message. E.g: `~Announcements #general`"); }
         else { console.log(err); Log.SaveLog("Error", Misc.GetReadableDateTime() + ' - ' + 'User: ' + message.member.user.tag + ', Command: ' + command + ', Error: ' + err); }
       }
     }
@@ -35,24 +35,25 @@ async function SetupAnnoucements(Players, Clans, message) {
   }
   else { message.reply("Please register first. Use: `~Register example`"); }
 }
-async function RemoveAnnoucements(Clans, message) {
+async function RemoveAnnouncements(Clans, message) {
   if(Clans.find(clan => clan.creator_id === message.author.id)) {
     for(var i in Clans) {
       if(Clans[i].guild_id === message.guild.id) {
-        console.log("Annoucements Removed: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
-        Log.SaveLog("Clans", Misc.GetReadableDateTime() + " - " + "Annoucements Removed: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
-        Clans[i].annoucement_channel = null;
+        console.log("Announcements Removed: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
+        Log.SaveLog("Clans", Misc.GetReadableDateTime() + " - " + "Announcements Removed: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
+        Clans[i].announcement_channel = null;
         fs.writeFile("./data/clans.json", JSON.stringify(Clans), (err) => { if (err) console.error(err) });
-        message.channel.send("Your clan will no longer get clan annoucements!");
+        message.channel.send("Your clan will no longer get clan announcements!");
       }
     }
   }
   else { message.reply("Only the one who linked this server to the clan edit clan. Message Terrii#5799 if things have changed and this is not possible."); }
 }
-async function CheckForAnnoucements(clan_id, ClanData, client) {
+async function CheckForAnnouncements(clan_id, ClanData, client) {
   //Try to check
   try {
     //Import old data
+    const ClanMembers = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/ClanMembers.json", "utf8"));
     const OldRankings = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Rankings.json", "utf8"));
     const OldRaids = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Raids.json", "utf8"));
     const OldItems = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Items.json", "utf8"));
@@ -67,7 +68,9 @@ async function CheckForAnnoucements(clan_id, ClanData, client) {
     const NewOthers = ClanData.Others;
 
     //Compare Arrays
-    CompareItems(OldItems.itemsObtained, NewItems.itemsObtained, NewRaids, clan_id, client);
+    CompareItems(ClanMembers, OldItems.itemsObtained, NewItems.itemsObtained, NewRaids, clan_id, client);
+    CompareTitles(ClanMembers, OldTitles.titlesObtained, NewTitles.titlesObtained, clan_id, client);
+    ClanData.Rankings.gloryRankings = await CheckGlory(ClanMembers, OldRankings.gloryRankings, NewRankings.gloryRankings, clan_id, client);
   }
   catch (err) {
     console.log(Misc.GetReadableDateTime() + " - " + "Error Comparing Clan Data: " + err);
@@ -81,11 +84,12 @@ async function CheckForAnnoucements(clan_id, ClanData, client) {
   fs.writeFile("./data/clans/" + clan_id + "/Titles.json", JSON.stringify(ClanData.Titles), (err) => { if (err) console.error(err) });
   fs.writeFile("./data/clans/" + clan_id + "/Others.json", JSON.stringify(ClanData.Others), (err) => { if (err) console.error(err) });
 }
-function CompareItems(OldItems, NewItems, NewRaids, clan_id, client) {
+function CompareItems(ClanMembers, OldItems, NewItems, NewRaids, clan_id, client) {
   if(NewItems.length !== OldItems.length) {
     var NewItemsArray = NewItems.filter(({ displayName:a, item:x }) => !OldItems.some(({ displayName:b, item:y }) => a === b && x === y));
-    if(NewItemsArray.length < 4) {
-      for(i in NewItemsArray) {
+    for(i in NewItemsArray) {
+      //Check if joined 15 minutes or less ago
+      if(new Date().getTime() - new Date(ClanMembers.find(x => x.displayName === NewItemsArray[i].displayName).joinDate).getTime() > 900000) {
         //Default Message
         var message = `${ NewItemsArray[i].displayName } has obtained the ${ NewItemsArray[i].item }`;
 
@@ -94,28 +98,68 @@ function CompareItems(OldItems, NewItems, NewRaids, clan_id, client) {
         else if(NewItemsArray[i].item === "Anarchy") { const raidData = NewRaids.scourge.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
         else if(NewItemsArray[i].item === "Tarrabah") { const raidData = NewRaids.sorrows.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
 
-        //Write Annoucement
-        WriteAnnoucement(message, clan_id, client);
+        //Write Announcement
+        WriteAnnouncement(message, clan_id, client);
       }
     }
-    else { Log.SaveLog("Warning", "Max Limit Reached - Items"); }
   }
 }
-function WriteAnnoucement(message, clan_id, client) {
+function CompareTitles(ClanMembers, OldTitles, NewTitles, clan_id, client) {
+  if(NewTitles.length !== OldTitles.length) {
+    var NewTitlesArray = NewTitles.filter(({ displayName:a, title:x }) => !OldTitles.some(({ displayName:b, title:y }) => a === b && x === y));
+    for(i in NewTitlesArray) {
+      //Check if joined 15 minutes or less ago
+      if(new Date().getTime() - new Date(ClanMembers.find(x => x.displayName === NewTitlesArray[i].displayName).joinDate).getTime() > 900000) {
+        //Default Message
+        var message = `${ NewTitlesArray[i].displayName } has achieved the ${ NewTitlesArray[i].title } title!`;
+
+        //Write Announcement
+        WriteAnnouncement(message, clan_id, client);
+      }
+    }
+  }
+}
+async function CheckGlory(ClanMembers, OldRankings, NewRankings, clan_id, client) {
+  for(var i in NewRankings) {
+    try {
+      var oldPlayerInfo = OldRankings.find(e => e.membership_Id === NewRankings[i].membership_Id);
+      if(oldPlayerInfo.seasonAnnouncement.hasAnnounced === false || oldPlayerInfo.seasonAnnouncement.season !== Config.currentSeason) {
+        if(NewRankings[i].glory === 5500) {
+          WriteAnnouncement(`${ NewRankings[i].displayName } has achieved max glory (5500) this season!`, clan_id, client);
+          NewRankings[i].seasonAnnouncement = { "hasAnnounced": true, "season": Config.currentSeason };
+        } else { NewRankings[i].seasonAnnouncement = { "hasAnnounced": oldPlayerInfo.seasonAnnouncement.hasAnnounced, "season": oldPlayerInfo.seasonAnnouncement.season }; }
+      } else { NewRankings[i].seasonAnnouncement = { "hasAnnounced": oldPlayerInfo.seasonAnnouncement.hasAnnounced, "season": oldPlayerInfo.seasonAnnouncement.season }; }
+    }
+    catch (err) {
+      console.log("Possible new player? Err: " + err);
+      Log.SaveLog("Error", Misc.GetReadableDateTime() + ' - ' + 'User: ' + NewRankings[i].displayName + ', Error: ' + err);
+    }
+  }
+  return NewRankings;
+}
+function WriteAnnouncement(message, clan_id, client) {
   const Clans = JSON.parse(fs.readFileSync("./data/clans.json", "utf8"));
   const ClanData = Clans.find(clan => clan.clan_id == clan_id);
-  const Annoucement_Channel = ClanData.annoucement_channel;
+  const Announcement_Channel = ClanData.announcement_channel;
 
-  if(ClanData.annoucement_channel !== null) {
-    const embed = new Discord.RichEmbed()
-    .setColor(0x0099FF)
-    .setAuthor("Annoucement")
-    .setDescription(message)
-    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-    .setTimestamp()
-    client.guilds.get(ClanData.guild_id).channels.get(ClanData.annoucement_channel).send({embed});
-    Log.SaveLog("Server", 'Annoucement: ' + message);
+  if(ClanData.announcement_channel !== null) {
+    try {
+      const embed = new Discord.RichEmbed()
+      .setColor(0xFFE000)
+      .setAuthor("Clan Broadcast")
+      .setDescription(message)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      client.guilds.get(ClanData.guild_id).channels.get(ClanData.announcement_channel).send({embed});
+      Log.SaveLog("Clans", `${ ClanData.clan_name } (${ ClanData.clan_id }) Announcement: ${ message }`);
+    }
+    catch (err) {
+      console.log(ClanData.announcement_channel);
+      console.log(message, clan_id);
+      console.log("Failed to send announcement due to: " + err);
+    }
   }
+  else { Log.SaveLog("Clans", `${ ClanData.clan_name } (${ ClanData.clan_id }) No Announcement: ${ message }`); }
 }
 
-module.exports = { SetupAnnoucements, RemoveAnnoucements, CheckForAnnoucements, WriteAnnoucement };
+module.exports = { SetupAnnouncements, RemoveAnnouncements, CheckForAnnouncements, WriteAnnouncement };

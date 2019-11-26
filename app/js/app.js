@@ -68,7 +68,7 @@ function LoadConfiguredFile(fileName) {
         if(type == 'Clans'){ var color = 'hotpink' }
         if(type == 'Warning'){ var color = 'Warning' }
         if(type == 'Error'){ var color = 'Tomato' }
-        if(CheckFilter(type) == false){
+        if(CheckFilter(type) == false) {
           document.getElementById('browser-table').innerHTML +=
           '<div class="table-row" style="color:'+ color +'">' +
             '<div class="date">' + dateTime + '</div>' +
