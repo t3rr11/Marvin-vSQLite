@@ -67,8 +67,12 @@ async function UpdateClanData(clan_id, ClanMembers, client) {
         }
         else {
           //console.log(`Failed: ${ processedData.playerInfo.displayName }. Here is why: ${ JSON.stringify(processedData.reason) }`);
-          if(Misc.IsJson(processedData.reason)) { Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + `${ processedData.playerInfo.displayName }. Here is why: ${ processedData.reason.ErrorStatus }`); }
-          else { Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + `${ processedData.playerInfo.displayName }. Here is why: ${ processedData.reason }`); }
+          if(Misc.IsJson(processedData.reason)) {
+            //Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + `${ processedData.playerInfo.displayName }. Here is why: ${ processedData.reason.ErrorStatus }`);
+          }
+          else {
+            //Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + `${ processedData.playerInfo.displayName }. Here is why: ${ processedData.reason }`);
+          }
 
           failureCheck = true;
         }
