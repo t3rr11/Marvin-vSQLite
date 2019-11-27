@@ -48,6 +48,6 @@ async function CheckClanMembers(clan_id, client) {
       fs.writeFile(`./data/clans/${ clan_id }/ClanMembers.json`, JSON.stringify(ClanMembers), (err) => { if (err) console.error(err) });
       UpdateClanData(clan_id, ClanMembers, client);
     }
-    catch (err) { Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + "Error Saving Clan Members: " + err); }
+    catch (err) { Log.SaveLog("Error", "Error Saving Clan Members: " + err); }
   }
 }

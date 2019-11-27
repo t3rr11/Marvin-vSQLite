@@ -19,7 +19,7 @@ async function SetupAnnouncements(Players, Clans, message) {
             if(Clans[i].creator_id === message.author.id) {
               Clans[i].announcement_channel = channelId;
               fs.writeFile("./data/clans.json", JSON.stringify(Clans), (err) => { if (err) console.error(err) });
-              Log.SaveLog("Clans", Misc.GetReadableDateTime() + ' - ' + Clans[i].clan_name + " has added an announcements channel: " + channelId);
+              Log.SaveLog("Clans", Clans[i].clan_name + " has added an announcements channel: " + channelId);
               message.channel.send(`Successfully set <#${ channelId }> as the announcements channel!`);
             }
             else { message.reply("Only the one who linked this server to the clan edit the clan. Message Terrii#5799 if things have changed and this is not possible."); }
@@ -27,8 +27,8 @@ async function SetupAnnouncements(Players, Clans, message) {
         }
       }
       catch (err) {
-        if(err.name === "TypeError") { message.reply("Please set the announcements channel by tagging it in the message. E.g: `~Announcements #general`"); }
-        else { console.log(err); Log.SaveLog("Error", Misc.GetReadableDateTime() + ' - ' + 'User: ' + message.member.user.tag + ', Command: ' + command + ', Error: ' + err); }
+        if(err.name === "TypeError") { message.reply("Please set the announcements channel by tagging it in the message. E.g: `~Set Announcements #general`"); }
+        else { console.log(err); Log.SaveLog("Error", 'User: ' + message.member.user.tag + ', Command: ' + command + ', Error: ' + err); }
       }
     }
     else { message.reply("Please register a clan to track first. Use: `~RegisterClan`"); }
@@ -40,7 +40,7 @@ async function RemoveAnnouncements(Clans, message) {
     for(var i in Clans) {
       if(Clans[i].guild_id === message.guild.id) {
         console.log("Announcements Removed: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
-        Log.SaveLog("Clans", Misc.GetReadableDateTime() + " - " + "Announcements Removed: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
+        Log.SaveLog("Clans", "Announcements Removed: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
         Clans[i].announcement_channel = null;
         fs.writeFile("./data/clans.json", JSON.stringify(Clans), (err) => { if (err) console.error(err) });
         message.channel.send("Your clan will no longer get clan announcements!");
@@ -73,8 +73,8 @@ async function CheckForAnnouncements(clan_id, ClanData, client) {
     ClanData.Rankings.gloryRankings = await CheckGlory(ClanMembers, OldRankings.gloryRankings, NewRankings.gloryRankings, clan_id, client);
   }
   catch (err) {
-    console.log(Misc.GetReadableDateTime() + " - " + "Error Comparing Clan Data: " + err);
-    //Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + "Error Comparing Clan Data: " + err);
+    console.log("Error Comparing Clan Data: " + err);
+    //Log.SaveLog("Error", "Error Comparing Clan Data: " + err);
   }
 
   //Save new data overwriting the old data
@@ -87,21 +87,24 @@ async function CheckForAnnouncements(clan_id, ClanData, client) {
 function CompareItems(ClanMembers, OldItems, NewItems, NewRaids, clan_id, client) {
   if(NewItems.length !== OldItems.length) {
     var NewItemsArray = NewItems.filter(({ displayName:a, item:x }) => !OldItems.some(({ displayName:b, item:y }) => a === b && x === y));
-    for(i in NewItemsArray) {
-      //Check if joined 15 minutes or less ago
-      if(new Date().getTime() - new Date(ClanMembers.find(x => x.displayName === NewItemsArray[i].displayName).joinDate).getTime() > 900000) {
-        //Default Message
-        var message = `${ NewItemsArray[i].displayName } has obtained the ${ NewItemsArray[i].item }`;
+    if(NewItemsArray.length < 6) {
+      for(i in NewItemsArray) {
+        //Check if joined 15 minutes or less ago
+        if(new Date().getTime() - new Date(ClanMembers.find(x => x.displayName === NewItemsArray[i].displayName).joinDate).getTime() > 900000) {
+          //Default Message
+          var message = `${ NewItemsArray[i].displayName } has obtained the ${ NewItemsArray[i].item }`;
 
-        //If raid say these:
-        if(NewItemsArray[i].item === "1000 Voices") { const raidData = NewRaids.lastWish.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
-        else if(NewItemsArray[i].item === "Anarchy") { const raidData = NewRaids.scourge.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
-        else if(NewItemsArray[i].item === "Tarrabah") { const raidData = NewRaids.sorrows.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
+          //If raid say these:
+          if(NewItemsArray[i].item === "1000 Voices") { const raidData = NewRaids.lastWish.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
+          else if(NewItemsArray[i].item === "Anarchy") { const raidData = NewRaids.scourge.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
+          else if(NewItemsArray[i].item === "Tarrabah") { const raidData = NewRaids.sorrows.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
 
-        //Write Announcement
-        WriteAnnouncement(message, clan_id, client);
+          //Write Announcement
+          WriteAnnouncement(message, clan_id, client);
+        }
       }
     }
+    else { Log.SaveLog("Error", `Error: It tried to spam items... ${ NewItemsArray.length }`); }
   }
 }
 function CompareTitles(ClanMembers, OldTitles, NewTitles, clan_id, client) {
@@ -132,7 +135,7 @@ async function CheckGlory(ClanMembers, OldRankings, NewRankings, clan_id, client
     }
     catch (err) {
       console.log("Possible new player? Err: " + err);
-      Log.SaveLog("Error", Misc.GetReadableDateTime() + ' - ' + 'User: ' + NewRankings[i].displayName + ', Error: ' + err);
+      Log.SaveLog("Error", 'User: ' + NewRankings[i].displayName + ', Error: ' + err);
     }
   }
   return NewRankings;

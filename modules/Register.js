@@ -26,7 +26,7 @@ async function Register(Players, message, discord_id, username) {
         try { FinishRegistration(Players, message, discord_id, username, membershipData); }
         catch (err) {
           message.reply('Sorry an error has occured, this has been logged could you message Terrii#5799 and let him know?');
-          Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + membershipData + " - " + err);
+          Log.SaveLog("Error", membershipData + " - " + err);
           console.log(membershipData);
         }
       }
@@ -38,7 +38,7 @@ function FinishRegistration(Players, message, discord_id, username, membershipDa
   if(isRegistered(Players, discord_id)) {
     for(var i in Players) {
       if(Players[i].discord_id === discord_id) {
-        Log.SaveLog("Account", Misc.GetReadableDateTime() + " - " + Players[i].username + " has changed their name to " + membershipData.displayName);
+        Log.SaveLog("Account", Players[i].username + " has changed their name to " + membershipData.displayName);
         Players[i] = { 'discord_id': discord_id, 'username': membershipData.displayName, 'membershipId': membershipData.membershipId, 'platform': membershipData.membershipType };
         fs.writeFile("./data/players.json", JSON.stringify(Players), (err) => { if (err) console.error(err) });
         message.reply('Your username has been updated to: ' + membershipData.displayName);
@@ -46,7 +46,7 @@ function FinishRegistration(Players, message, discord_id, username, membershipDa
     }
   }
   else {
-    Log.SaveLog("Account", Misc.GetReadableDateTime() + " - " + membershipData.displayName + " has just registered!");
+    Log.SaveLog("Account", membershipData.displayName + " has just registered!");
     Players.push({ 'discord_id': discord_id, 'username': membershipData.displayName, 'membershipId': membershipData.membershipId, 'platform': membershipData.membershipType });
     fs.writeFile("./data/players.json", JSON.stringify(Players), (err) => { if (err) console.error(err) });
     message.reply('Your username has been set to: ' + membershipData.displayName);

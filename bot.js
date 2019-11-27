@@ -101,11 +101,11 @@ client.on("ready", () => {
 //Joined a server
 client.on("guildCreate", guild => {
     console.log(Misc.GetReadableDateTime() + " - " + "Joined a new guild: " + guild.name);
-    Log.SaveLog("Server", Misc.GetReadableDateTime() + " - " + "Joined a new guild: " + guild.name);
+    Log.SaveLog("Server", "Joined a new guild: " + guild.name);
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
     .setAuthor("Hey there!")
-    .setDescription("I am Marvin. To set me up first register with me by using the `~Register example` command. Replace example with your in-game username. \n\nOnce registration is complete use the `~Registerclan` command and then wait 5 minutes whilst I scan your clan. That's it you'll be ready to go! \n\nSee `~help` to see what I can do!")
+    .setDescription("I am Marvin. To set me up first register with me by using the `~Register example` command. Replace example with your in-game username. \n\nOnce registration is complete use the `~Registerclan` command and then wait 5 minutes whilst I scan your clan. That's it you'll be ready to go! \n\nTry out clan broadcasts this can be set up by typing `~Set Announcements #general` (does not have to be general). \n\nSee `~help` to see what I can do!")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp();
     getDefaultChannel(guild).send({ embed });
@@ -114,7 +114,7 @@ client.on("guildCreate", guild => {
 //Removed from a server
 client.on("guildDelete", guild => {
     console.log(Misc.GetReadableDateTime() + " - " + "Left a guild: " + guild.name);
-    Log.SaveLog("Server", Misc.GetReadableDateTime() + " - " + "Left a guild: " + guild.name);
+    Log.SaveLog("Server", "Left a guild: " + guild.name);
     ManageClans.DeleteClan(Clans, guild.id);
 });
 
@@ -134,6 +134,7 @@ client.on("message", async message => {
     else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }
     else if(command.startsWith("~SET ANNOUNCEMENTS ")) { Announcements.SetupAnnouncements(Players, Clans, message); }
     else if(command.startsWith("~DEL")) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); }
+    else if(command.startsWith("~WRITE ")) { DiscordCommands.WriteToServer(message, default_command, client); }
     else if(command === "~ITEMS") { DiscordCommands.TrackedItems(Clans, Players, message); }
     else if(command === "~TITLES") { DiscordCommands.TrackedTitles(Clans, Players, message); }
     else if(command === "~WEAPONS") { DiscordCommands.TrackedItems(Clans, Players, message); }
@@ -159,7 +160,7 @@ client.on("message", async message => {
     else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
 
     console.log(Misc.GetReadableDateTime() + ' - ' + 'User: ' + message.member.user.tag + ', Command: ' + command);
-    Log.SaveLog("Command", Misc.GetReadableDateTime() + ' - ' + 'User: ' + message.member.user.tag + ', Command: ' + command);
+    Log.SaveLog("Command", 'User: ' + message.member.user.tag + ', Command: ' + command);
   }
 });
 

@@ -9,7 +9,8 @@ const Players = require('../data/players.json');
 
 //Exports
 module.exports = {
-  Help, Status, Request, GetClansTracked, ValorRankings, GloryRankings, IronBannerRankings, SeasonRankings, InfamyRankings,
+  Help, Status, Request, GetClansTracked, WriteToServer,
+  ValorRankings, GloryRankings, IronBannerRankings, SeasonRankings, InfamyRankings,
   LastWishRankings, ScourgeRankings, SorrowsRankings, GardenRankings,
   TriumphRankings, ItemsObtained, TrackedItems, TitlesObtained, TrackedTitles, TotalTime
 };
@@ -29,8 +30,8 @@ function Help(message) {
   .setAuthor("Hey there! I am Marvin. Here is a list of my commands!")
   .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~SeasonRanks`")
   .addField("Raids", "`~LW`, `~SoTP`, `~CoS`, `~GoS`")
-  .addField("Items", "`~Items`, `~Item Example`")
-  .addField("Titles", "`~Titles`, `~Title Example`")
+  .addField("Items / Titles", "`~Items`, `~Titles`, `~Item Example`, `~Title Example`")
+  .addField("Announcements", "`~Set Announcements #general`, ``~Remove Announcements`")
   .addField("Others", "`~Donate`, `~Triumph Score`")
   .addField("Request", "If you see something that isn't there that you'd like me to track request it like this: `~request I would like to see Marvin track season ranks!`")
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
@@ -73,6 +74,28 @@ function GetClansTracked(Clans, message) {
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});
+}
+function WriteToServer(message, fullMessage, client) {
+  //Example message: ~write 630967941076221954 631357107651870733 [Message Text]
+  if(message.author.id == "194972321168097280") {
+    try {
+      var semiMessage = fullMessage.substr("~write ".length);
+      var guildInfo = semiMessage.split(" ", 2);
+      var startMsg = fullMessage.indexOf('[');
+      var finishMsg = fullMessage.indexOf(']');
+      var messageToGuild = fullMessage.substr(startMsg + 1, finishMsg - startMsg - 1);
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor(`${ message.author.username }#${ message.author.discriminator } says:`)
+      .setDescription(messageToGuild)
+      .setFooter("I can't see replies to this", Config.defaultLogoURL)
+      .setTimestamp()
+      client.guilds.get(guildInfo[0]).channels.get(guildInfo[1]).send({embed});
+    }
+    catch (err) { Log.SaveLog("Error", `Error: Failed to send custom written message to channel: ${ guildInfo[1] } in guild: ${ guildInfo[0] }`); }
+  }
+  else { message.reply("You are not allowed to use this command. Sorry."); }
 }
 
 //Rankings

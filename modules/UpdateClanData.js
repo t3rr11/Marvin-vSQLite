@@ -63,15 +63,15 @@ async function UpdateClanData(clan_id, ClanMembers, client) {
       else if(processedData.failed) {
         if(processedData.reason.ErrorStatus === "DestinyAccountNotFound") {
           //console.log(`Failed: ${ processedData.playerInfo.displayName } Does not have a valid Destiny 2 account.`);
-          //Log.SaveLog("Warning", Misc.GetReadableDateTime() + " - " + `${ processedData.playerInfo.displayName } Does not have a valid Destiny 2 account.`);
+          //Log.SaveLog("Warning", `${ processedData.playerInfo.displayName } Does not have a valid Destiny 2 account.`);
         }
         else {
           //console.log(`Failed: ${ processedData.playerInfo.displayName }. Here is why: ${ JSON.stringify(processedData.reason) }`);
           if(Misc.IsJson(processedData.reason)) {
-            //Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + `${ processedData.playerInfo.displayName }. Here is why: ${ processedData.reason.ErrorStatus }`);
+            //Log.SaveLog("Error", `${ processedData.playerInfo.displayName }. Here is why: ${ processedData.reason.ErrorStatus }`);
           }
           else {
-            //Log.SaveLog("Error", Misc.GetReadableDateTime() + " - " + `${ processedData.playerInfo.displayName }. Here is why: ${ processedData.reason }`);
+            //Log.SaveLog("Error", `${ processedData.playerInfo.displayName }. Here is why: ${ processedData.reason }`);
           }
 
           failureCheck = true;
