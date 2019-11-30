@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 const Request = require('request');
 const Long = require("long");
 const fs = require('fs');
+const fsExtra = require('fs-extra');
 const client = new Discord.Client();
 
 //Modules
@@ -49,6 +50,12 @@ function SetTimeout(message) {
   setTimeout(function() { TimedOutUsers.splice(TimedOutUsers.findIndex(id => id === message.author.id), 1); }, 300000);
 }
 
+function PushClanData() {
+  var source = './data/clans/';
+  var destination = '../../var/www/html/marvin/clans/';
+  fsExtra.copy(source, destination, function (err) { if(err) { console.log('An error occured while copying the folder.'); } });
+}
+
 const getDefaultChannel = (guild) => {
   if(guild.channels.has(guild.id))
     return guild.channels.get(guild.id)
@@ -90,6 +97,7 @@ client.on("ready", () => {
 
 	//SetTimeouts
 	setInterval(function() { UpdateActivityList() }, 10000);
+  setInterval(function() { PushClanData() }, 30000);
 
   //Start Up Console Log
   console.log(Misc.GetReadableDateTime() + ' - ' + `Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);

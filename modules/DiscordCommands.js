@@ -31,7 +31,7 @@ function Help(message) {
   .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~SeasonRanks`")
   .addField("Raids", "`~LW`, `~SoTP`, `~CoS`, `~GoS`")
   .addField("Items / Titles", "`~Items`, `~Titles`, `~Item Example`, `~Title Example`")
-  .addField("Announcements", "`~Set Announcements #general`, ``~Remove Announcements`")
+  .addField("Announcements", "`~Set Announcements #general`, `~Remove Announcements`")
   .addField("Others", "`~Donate`, `~Triumph Score`")
   .addField("Request", "If you see something that isn't there that you'd like me to track request it like this: `~request I would like to see Marvin track season ranks!`")
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
