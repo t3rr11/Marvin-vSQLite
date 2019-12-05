@@ -156,9 +156,16 @@ function WriteAnnouncement(message, data, clan_id, client) {
       .setAuthor("Clan Broadcast")
       .setDescription(message)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-      .setTimestamp()
-      client.guilds.get(ClanData.guild_id).channels.get(ClanData.announcement_channel).send({embed});
-      Log.SaveLog("Clans", `${ ClanData.clan_name } (${ ClanData.clan_id }) Announcement: ${ message }`);
+      .setTimestamp();
+      if(Config.enableBroadcasts) {
+        //If broadcasts enabled, show them.
+        client.guilds.get(ClanData.guild_id).channels.get(ClanData.announcement_channel).send({embed});
+        Log.SaveLog("Clans", `${ ClanData.clan_name } (${ ClanData.clan_id }) Announcement: ${ message }`);
+      }
+      else {
+        //If broadcasts are disabled only log them. (To test things)
+        Log.SaveLog("Error", `${ ClanData.clan_name } (${ ClanData.clan_id }) Tried to announce but disabled: ${ message }`);
+      }
       Announcements.push({ "data": data, "date": new Date() });
     }
     catch (err) {

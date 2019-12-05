@@ -374,19 +374,19 @@ function GetObtainedTitles(playerInfo, playerData) {
   var enlightened = playerData.profileRecords.data.records["3387213440"].objectives[0].complete;
   var harbinger = playerData.profileRecords.data.records["3793754396"].objectives[0].complete;
 
-  if(wayfarer){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Wayfarer" }); }
-  if(dredgen){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Dredgen" }); }
-  if(unbroken){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Unbroken" }); }
-  if(chronicler){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Chronicler" }); }
-  if(cursebreaker){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Cursebreaker" }); }
-  if(rivensbane){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Rivensbane" }); }
-  if(blacksmith){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Blacksmith" }); }
-  if(reckoner){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Reckoner" }); }
-  if(mmxix){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "MMXIX" }); }
-  if(shadow){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Shadow" }); }
-  if(undying){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Undying" }); }
-  if(enlightened){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Enlightened" }); }
-  if(harbinger){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_id": playerInfo.membership_Id, "title": "Harbinger" }); }
+  if(wayfarer){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Wayfarer" }); }
+  if(dredgen){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Dredgen" }); }
+  if(unbroken){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Unbroken" }); }
+  if(chronicler){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Chronicler" }); }
+  if(cursebreaker){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Cursebreaker" }); }
+  if(rivensbane){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Rivensbane" }); }
+  if(blacksmith){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Blacksmith" }); }
+  if(reckoner){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Reckoner" }); }
+  if(mmxix){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "MMXIX" }); }
+  if(shadow){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Shadow" }); }
+  if(undying){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Undying" }); }
+  if(enlightened){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Enlightened" }); }
+  if(harbinger){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Harbinger" }); }
 
   return { titlesObtained };
 }

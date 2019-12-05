@@ -42,6 +42,10 @@ async function CheckClanMembers(clan_id, client) {
           "displayName": CurrentClanMembers[i].destinyUserInfo.displayName,
           "membership_Id": CurrentClanMembers[i].destinyUserInfo.membershipId,
           "membershipType": CurrentClanMembers[i].destinyUserInfo.membershipType,
+          "membershipTypes": CurrentClanMembers[i].destinyUserInfo.applicableMembershipTypes,
+          "memberType": CurrentClanMembers[i].memberType,
+          "isOnline": CurrentClanMembers[i].isOnline,
+          "lastOnlineStatusChange": CurrentClanMembers[i].lastOnlineStatusChange,
           "joinDate": CurrentClanMembers[i].joinDate
         });
       }

@@ -81,7 +81,7 @@ client.on("ready", () => {
     if (clansToScan.length > 0) {
       const nextClan = clansToScan.shift();
       //console.log(`Scanning: ${ nextClan.clan_name } - ${ new Date().toLocaleString() }`);
-      await ClanData.CheckClanMembers(nextClan.clan_id, client);
+      try { await ClanData.CheckClanMembers(nextClan.clan_id, client); } catch (err) { console.log("Failed to update clan: " + nextClan.clan_id); }
       ClanScans++;
       clansScanned.push(nextClan.clan_id);
       nextClanScanTimer = setTimeout(scanNextClan, SCAN_DELAY);
