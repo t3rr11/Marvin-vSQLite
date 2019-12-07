@@ -45,7 +45,8 @@ async function UpdateClanData(clan_id, ClanMembers, client) {
       seasonRankings: [],
       menageire: [],
       totalTime: [],
-      privatePlayers: []
+      privatePlayers: [],
+      clanMembers: []
     }
   }
 
@@ -103,6 +104,7 @@ async function UpdateClanData(clan_id, ClanMembers, client) {
         ClanData.Others.wellsRankings.push(processedData.Others.wellsRankings);
         ClanData.Others.epRankings.push(processedData.Others.epRankings);
         ClanData.Others.totalTime.push(processedData.Others.totalTime);
+        ClanData.Others.clanMembers.push(processedData.Others.clanMembers);
       }
     }
     else {
@@ -202,7 +204,8 @@ function processPlayerData(playerInfo, playerData) {
           epRankings: {},
           seasonRankings: {},
           menageire: {},
-          totalTime: {}
+          totalTime: {},
+          clanMembers: {}
         },
         playerInfo,
         private: false,
@@ -298,6 +301,7 @@ function GetOthers(playerInfo, playerData, characterIds) {
     wellsRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "wellsCompleted": wellsCompleted, "lastScan": new Date() },
     epRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "epsCompleted": epsCompleted, "lastScan": new Date() },
     totalTime: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "totalTime": totalTime, "lastScan": new Date() },
+    clanMembers: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "lastScan": new Date() },
   }
 }
 function GetObtainedItems(playerInfo, playerData) {

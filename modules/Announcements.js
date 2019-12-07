@@ -68,9 +68,9 @@ async function CheckForAnnouncements(clan_id, ClanData, client) {
     const NewOthers = ClanData.Others;
 
     //Compare Arrays
-    CompareItems(ClanMembers, OldItems.itemsObtained, NewItems.itemsObtained, NewRaids, clan_id, client);
-    CompareTitles(ClanMembers, OldTitles.titlesObtained, NewTitles.titlesObtained, clan_id, client);
-    ClanData.Rankings.gloryRankings = await CheckGlory(ClanMembers, OldRankings.gloryRankings, NewRankings.gloryRankings, clan_id, client);
+    CompareItems(OldOthers.clanMembers, OldItems.itemsObtained, NewItems.itemsObtained, NewRaids, clan_id, client);
+    CompareTitles(OldOthers.clanMembers, OldTitles.titlesObtained, NewTitles.titlesObtained, clan_id, client);
+    ClanData.Rankings.gloryRankings = await CheckGlory(OldRankings.gloryRankings, NewRankings.gloryRankings, clan_id, client);
   }
   catch (err) {
     console.log("Error Comparing Clan Data: " + err);
@@ -84,56 +84,50 @@ async function CheckForAnnouncements(clan_id, ClanData, client) {
   fs.writeFile("./data/clans/" + clan_id + "/Titles.json", JSON.stringify(ClanData.Titles), (err) => { if (err) console.error(err) });
   fs.writeFile("./data/clans/" + clan_id + "/Others.json", JSON.stringify(ClanData.Others), (err) => { if (err) console.error(err) });
 }
-function CompareItems(ClanMembers, OldItems, NewItems, NewRaids, clan_id, client) {
+function CompareItems(OldClanMembers, OldItems, NewItems, NewRaids, clan_id, client) {
   if(NewItems.length !== OldItems.length) {
     var NewItemsArray = NewItems.filter(({ displayName:a, item:x }) => !OldItems.some(({ displayName:b, item:y }) => a === b && x === y));
-    if(NewItemsArray.length < 6) {
-      for(i in NewItemsArray) {
-        //Check if joined 15 minutes or less ago
-        if(new Date().getTime() - new Date(ClanMembers.find(x => x.displayName === NewItemsArray[i].displayName).joinDate).getTime() > 900000) {
-          //Default Message
-          var message = `${ NewItemsArray[i].displayName } has obtained the ${ NewItemsArray[i].item }`;
+    for(i in NewItemsArray) {
+      //Check old clan members to see if it's a new player or not, if not then announce.
+      if(OldClanMembers.find(e => e.membership_Id === NewItemsArray[i].membership_Id)) {
+        //Default Message
+        var message = `${ NewItemsArray[i].displayName } has obtained the ${ NewItemsArray[i].item }`;
 
-          //If raid say these:
-          if(NewItemsArray[i].item === "1000 Voices") { const raidData = NewRaids.lastWish.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
-          else if(NewItemsArray[i].item === "Anarchy") { const raidData = NewRaids.scourge.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
-          else if(NewItemsArray[i].item === "Tarrabah") { const raidData = NewRaids.sorrows.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
+        //If raid say these:
+        if(NewItemsArray[i].item === "1000 Voices") { const raidData = NewRaids.lastWish.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
+        else if(NewItemsArray[i].item === "Anarchy") { const raidData = NewRaids.scourge.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
+        else if(NewItemsArray[i].item === "Tarrabah") { const raidData = NewRaids.sorrows.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
 
-          //Write Announcement
-          WriteAnnouncement(message, NewItemsArray[i], clan_id, client);
-        }
+        //Write Announcement
+        WriteAnnouncement(message, NewItemsArray[i], clan_id, client);
       }
     }
-    else { Log.SaveLog("Error", `Error: It tried to spam items... ${ NewItemsArray.length }`); }
   }
 }
-function CompareTitles(ClanMembers, OldTitles, NewTitles, clan_id, client) {
+function CompareTitles(OldClanMembers, OldTitles, NewTitles, clan_id, client) {
   if(NewTitles.length !== OldTitles.length) {
     var NewTitlesArray = NewTitles.filter(({ displayName:a, title:x }) => !OldTitles.some(({ displayName:b, title:y }) => a === b && x === y));
-    if(NewTitlesArray.length < 2) {
-      for(i in NewTitlesArray) {
-        //Check if joined 15 minutes or less ago
-        if(new Date().getTime() - new Date(ClanMembers.find(x => x.displayName === NewTitlesArray[i].displayName).joinDate).getTime() > 900000) {
-          //Default Message
-          var message = `${ NewTitlesArray[i].displayName } has achieved the ${ NewTitlesArray[i].title } title!`;
+    for(i in NewTitlesArray) {
+        //Check old clan members to see if it's a new player or not, if not then announce.
+        if(OldClanMembers.find(e => e.membership_Id === NewTitlesArray[i].membership_Id)) {
+        //Default Message
+        var message = `${ NewTitlesArray[i].displayName } has achieved the ${ NewTitlesArray[i].title } title!`;
 
-          //Write Announcement
-          WriteAnnouncement(message, NewTitlesArray[i], clan_id, client);
-        }
+        //Write Announcement
+        WriteAnnouncement(message, NewTitlesArray[i], clan_id, client);
       }
     }
-    else { Log.SaveLog("Error", `Error: It tried to spam titles... ${ NewTitlesArray.length }`); }
   }
 }
-async function CheckGlory(ClanMembers, OldRankings, NewRankings, clan_id, client) {
+async function CheckGlory(OldRankings, NewRankings, clan_id, client) {
   for(var i in NewRankings) {
     try {
       var oldPlayerInfo = OldRankings.find(e => e.membership_Id === NewRankings[i].membership_Id);
       if(oldPlayerInfo) {
         if(oldPlayerInfo.seasonAnnouncement.hasAnnounced === false || oldPlayerInfo.seasonAnnouncement.season !== Config.currentSeason) {
           if(NewRankings[i].glory === 5500) {
-            WriteAnnouncement(`${ NewRankings[i].displayName } has achieved max glory (5500) this season!`, NewRankings[i], clan_id, client);
             NewRankings[i].seasonAnnouncement = { "hasAnnounced": true, "season": Config.currentSeason };
+            WriteAnnouncement(`${ NewRankings[i].displayName } has achieved max glory (5500) this season!`, NewRankings[i], clan_id, client);
           } else { NewRankings[i].seasonAnnouncement = { "hasAnnounced": oldPlayerInfo.seasonAnnouncement.hasAnnounced, "season": oldPlayerInfo.seasonAnnouncement.season }; }
         } else { NewRankings[i].seasonAnnouncement = { "hasAnnounced": oldPlayerInfo.seasonAnnouncement.hasAnnounced, "season": oldPlayerInfo.seasonAnnouncement.season }; }
       }
