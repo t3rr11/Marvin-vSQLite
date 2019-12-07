@@ -81,7 +81,7 @@ client.on("ready", () => {
     if (clansToScan.length > 0) {
       const nextClan = clansToScan.shift();
       //console.log(`Scanning: ${ nextClan.clan_name } - ${ new Date().toLocaleString() }`);
-      try { await ClanData.CheckClanMembers(nextClan.clan_id, client); } catch (err) { console.log("Failed to update clan: " + nextClan.clan_id); }
+      try { await ClanData.CheckClanMembers(nextClan.clan_id, client); } catch (err) { console.log("Failed to update clan: " + nextClan.clan_id); console.log(err); }
       ClanScans++;
       clansScanned.push(nextClan.clan_id);
       nextClanScanTimer = setTimeout(scanNextClan, SCAN_DELAY);
@@ -113,7 +113,7 @@ client.on("guildCreate", guild => {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
     .setAuthor("Hey there!")
-    .setDescription("I am Marvin. To set me up first register with me by using the `~Register example` command. Replace example with your in-game username. \n\nOnce registration is complete use the `~Registerclan` command and then wait 5 minutes whilst I scan your clan. That's it you'll be ready to go! \n\nTry out clan broadcasts this can be set up by typing `~Set Announcements #general` (does not have to be general). \n\nSee `~help` to see what I can do!")
+    .setDescription("I am Marvin. To set me up first register with me by using the `~Register example` command. Replace example with your in-game username. \n\nOnce registration is complete use the `~Add clan` command and then wait 5 minutes whilst I scan your clan. That's it you'll be ready to go! \n\nTry out clan broadcasts this can be set up by typing `~Set Announcements #general` (does not have to be general). \n\nSee `~help` to see what I can do!")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp();
     getDefaultChannel(guild).send({ embed });
@@ -149,7 +149,8 @@ client.on("message", async message => {
     else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
     else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message); }
     else if(command === "~DONATE" || command === "~SPONSOR") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
-    else if(command === "~REGISTERCLAN") { ManageClans.RegisterClan(Players, Clans, message, message.author.id); }
+    else if(command === "~ADDCLAN" || command === "~ADD CLAN") { ManageClans.RegisterClan(Players, Clans, message, message.author.id); }
+    else if(command === "~REGISTERCLAN") { message.reply("This command has been deprecated please use `~Add clan` instead."); }
     else if(command === "~REMOVECLAN" || command === "~REMOVE CLAN") { ManageClans.RemoveClan(Clans, message, message.author.id); }
     else if(command === "~REMOVEANNOUNCEMENTS" || command === "~REMOVE ANNOUNCEMENTS") { Announcements.RemoveAnnouncements(Clans, message); }
     else if(command === "~VALOR") { DiscordCommands.ValorRankings(Clans, Players, message); }
