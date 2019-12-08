@@ -52,7 +52,7 @@ function SetTimeout(message) {
 
 function PushClanData() {
   var source = './data/clans/';
-  var destination = '../../var/www/html/marvin/clans/';
+  var destination = '../../var/www/html/data/marvin/clans/';
   fsExtra.copy(source, destination, function (err) { if(err) { console.log('An error occured while copying the folder.'); } });
 }
 
