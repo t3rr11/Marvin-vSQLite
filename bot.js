@@ -137,6 +137,7 @@ client.on("message", async message => {
   if(command.startsWith('~') && !command.startsWith('~~')) {
     if(command.startsWith("~REGISTER ")) { Register(Players, message, message.author.id, command.substr("~REGISTER ".length)); }
     else if(command.startsWith("~ITEM ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~ITEM ".length)); }
+    else if(command.startsWith("~FILTER ")) { Announcements.FilterItemsFromAnnouncements(Clans, Players, message, default_command.substr("~FILTER ".length)); }
     else if(command.startsWith("~WEAPON ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~WEAPON ".length)); }
     else if(command.startsWith("~TITLE ")) { DiscordCommands.TitlesObtained(Clans, Players, message, command.substr("~TITLE ".length)); }
     else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }

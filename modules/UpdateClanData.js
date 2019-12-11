@@ -249,16 +249,20 @@ function GetRankings(playerInfo, playerData, characterIds) {
   var valor = playerData.characterProgressions.data[characterIds[0]].progressions["3882308435"].currentProgress;
   var glory = playerData.characterProgressions.data[characterIds[0]].progressions["2679551909"].currentProgress;
   var infamyResets = playerData.profileRecords.data.records["3901785488"].objectives[0].progress;
-  var valorResets = playerData.profileRecords.data.records["510151900"].objectives[1].progress;
+  var valorResets = playerData.profileRecords.data.records["2282573299"].objectives[1].progress;
   var totalInfamy = parseInt(infamy) + (parseInt('15000') * parseInt(infamyResets));
   var totalValor = parseInt(valor) + (parseInt('2000') * parseInt(valorResets));
   var ibKills = playerData.profileRecords.data.records["2023796284"].intervalObjectives[2].progress;
   var ibWins = playerData.profileRecords.data.records["759958308"].intervalObjectives[2].progress;
   var motesCollected = playerData.profileRecords.data.records["1767590660"].intervalObjectives[2].progress;
 
+  //Legacy
+  var valor_s8_resets = playerData.profileRecords.data.records["510151900"].objectives[1].progress;
+  var totalValor_s8 = (parseInt('2000') * parseInt(valor_s8_resets));
+
   return {
     infamyRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "infamy": totalInfamy, "resets": infamyResets, "motesCollected": motesCollected, "lastScan": new Date() },
-    valorRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "valor": totalValor, "resets": valorResets, "lastScan": new Date() },
+    valorRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "valor_s8": totalValor_s8, "valor": totalValor, "resets": valorResets, "lastScan": new Date() },
     gloryRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "glory": glory, "seasonAnnouncement": { "hasAnnounced": false, "season": null }, "lastScan": new Date() },
     ibRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "ibKills": ibKills, "ibWins": ibWins, "lastScan": new Date() }
   }
@@ -287,17 +291,16 @@ function GetOthers(playerInfo, playerData, characterIds) {
   try { var totalTime1 = playerData.characters.data[characterIds[1]].minutesPlayedTotal; } catch (err) { var totalTime1 = 0; }
   try { var totalTime2 = playerData.characters.data[characterIds[2]].minutesPlayedTotal; } catch (err) { var totalTime2 = 0; }
   var totalTime = "0"; totalTime = parseInt(totalTime0) + parseInt(totalTime1) + parseInt(totalTime2);
-  var seasonRank = "0";
-  try {
-    var seasonRankBefore = playerData.characterProgressions.data[characterIds[0]].progressions["1628407317"].level;
-    var seasonRankAfter = playerData.characterProgressions.data[characterIds[0]].progressions["3184735011"].level;
-    seasonRank = seasonRankBefore + seasonRankAfter;
-  } catch (err) { }
+
+  //Season Ranks
+  var season8Rank = "0"; try { var seasonRankBefore = playerData.characterProgressions.data[characterIds[0]].progressions["1628407317"].level; var seasonRankAfter = playerData.characterProgressions.data[characterIds[0]].progressions["3184735011"].level; season8Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
+  var season9Rank = "0"; try { var seasonRankBefore = playerData.characterProgressions.data[characterIds[0]].progressions["3256821400"].level; var seasonRankAfter = playerData.characterProgressions.data[characterIds[0]].progressions["2140885848"].level; season9Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
+
 
   return {
     menageire: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "encounters": encounters, "runes": runes, "lastScan": new Date() },
     triumphRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "triumphScore": triumphScore, "lastScan": new Date() },
-    seasonRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "seasonRank": seasonRank, "finishers": finishers, "lastScan": new Date() },
+    seasonRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "seasonRank": season9Rank, "finishers": finishers, "lastScan": new Date() },
     wellsRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "wellsCompleted": wellsCompleted, "lastScan": new Date() },
     epRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "epsCompleted": epsCompleted, "lastScan": new Date() },
     totalTime: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "totalTime": totalTime, "lastScan": new Date() },
@@ -332,6 +335,9 @@ function GetObtainedItems(playerInfo, playerData) {
   var badjujuState = playerData.profileCollectibles.data.collectibles["4207100358"].state;
   var xenophageState = playerData.profileCollectibles.data.collectibles["1258579677"].state;
   var divinityState = playerData.profileCollectibles.data.collectibles["1988948484"].state;
+  var komodo4FRState = playerData.profileCollectibles.data.collectibles["4116184726"].state;
+  var pythonState = playerData.profileCollectibles.data.collectibles["3972149937"].state;
+  var buzzardState = playerData.profileCollectibles.data.collectibles["2011258732"].state;
 
   if(GetItemState(voicesState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "1000 Voices" }); }
   if(GetItemState(cerberusState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Cerberus +1" }); }
@@ -359,6 +365,9 @@ function GetObtainedItems(playerInfo, playerData) {
   if(GetItemState(badjujuState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Bad Juju" }); }
   if(GetItemState(xenophageState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Xenophage" }); }
   if(GetItemState(divinityState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Divinity" }); }
+  if(GetItemState(komodo4FRState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Komodo-4FR" }); }
+  if(GetItemState(pythonState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Python" }); }
+  if(GetItemState(buzzardState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Buzzard" }); }
 
   return { itemsObtained };
 }
@@ -377,6 +386,7 @@ function GetObtainedTitles(playerInfo, playerData) {
   var undying = playerData.profileRecords.data.records["2707428411"].objectives[0].complete;
   var enlightened = playerData.profileRecords.data.records["3387213440"].objectives[0].complete;
   var harbinger = playerData.profileRecords.data.records["3793754396"].objectives[0].complete;
+  var savior = playerData.profileRecords.data.records["2460356851"].objectives[0].complete;
 
   if(wayfarer){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Wayfarer" }); }
   if(dredgen){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Dredgen" }); }
@@ -391,6 +401,7 @@ function GetObtainedTitles(playerInfo, playerData) {
   if(undying){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Undying" }); }
   if(enlightened){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Enlightened" }); }
   if(harbinger){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Harbinger" }); }
+  if(savior){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Savior" }); }
 
   return { titlesObtained };
 }

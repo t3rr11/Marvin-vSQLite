@@ -16,7 +16,7 @@ async function RegisterClan(Players, Clans, message, discord_id) {
       if(Clan !== "Error") {
         console.log("Clan Added: " + Clan.name + " (" + Clan.id + ")");
         Log.SaveLog("Clans", "Clan Added: " + Clan.name + " (" + Clan.id + ")");
-        Clans.push({ 'guild_id': message.guild.id, 'creator_id': Player.discord_id, 'creator_name': Player.name, 'clan_id': Clan.id, 'clan_name': Clan.name, 'announcement_channel': null });
+        Clans.push({ 'guild_id': message.guild.id, 'creator_id': Player.discord_id, 'creator_name': Player.name, 'clan_id': Clan.id, 'clan_name': Clan.name, 'announcement_channel': null, 'filteredItems': [] });
         fs.writeFile("./data/clans.json", JSON.stringify(Clans), (err) => { if (err) console.error(err) });
         if(!fs.existsSync(`./data/clans/${ Clan.id }`)){ fs.mkdirSync(`./data/clans/${ Clan.id }`); }
         message.reply('Your clan has been set to: ' + Clan.name);
