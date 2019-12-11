@@ -114,7 +114,7 @@ async function CheckForAnnouncements(clan_id, ClanData, client) {
 function CompareItems(OldClanMembers, OldItems, NewItems, NewRaids, clan_id, client) {
   if(NewItems.length !== OldItems.length) {
     var NewItemsArray = NewItems.filter(({ displayName:a, item:x }) => !OldItems.some(({ displayName:b, item:y }) => a === b && x === y));
-    if(NewItemsArray.length > 6) {
+    if(NewItemsArray.length < 6) {
       for(i in NewItemsArray) {
         //Check old clan members to see if it's a new player or not, if not then announce.
         if(OldClanMembers.find(e => e.membership_Id === NewItemsArray[i].membership_Id)) {
@@ -137,7 +137,7 @@ function CompareItems(OldClanMembers, OldItems, NewItems, NewRaids, clan_id, cli
 function CompareTitles(OldClanMembers, OldTitles, NewTitles, clan_id, client) {
   if(NewTitles.length !== OldTitles.length) {
     var NewTitlesArray = NewTitles.filter(({ displayName:a, title:x }) => !OldTitles.some(({ displayName:b, title:y }) => a === b && x === y));
-    if(NewItemsArray.length > 2) {
+    if(NewItemsArray.length < 2) {
       for(i in NewTitlesArray) {
           //Check old clan members to see if it's a new player or not, if not then announce.
           if(OldClanMembers.find(e => e.membership_Id === NewTitlesArray[i].membership_Id)) {

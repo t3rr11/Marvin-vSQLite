@@ -9,7 +9,7 @@ const Players = require('../data/players.json');
 
 //Exports
 module.exports = {
-  Help, Status, Request, GetClansTracked, WriteToServer,
+  Help, Status, Request, GetClansTracked, WriteToServer, WriteToAllServers,
   ValorRankings, GloryRankings, IronBannerRankings, SeasonRankings, InfamyRankings,
   LastWishRankings, ScourgeRankings, SorrowsRankings, GardenRankings,
   TriumphRankings, ItemsObtained, TrackedItems, TitlesObtained, TrackedTitles, TotalTime
@@ -94,6 +94,28 @@ function WriteToServer(message, fullMessage, client) {
       client.guilds.get(guildInfo[0]).channels.get(guildInfo[1]).send({embed});
     }
     catch (err) { Log.SaveLog("Error", `Error: Failed to send custom written message to channel: ${ guildInfo[1] } in guild: ${ guildInfo[0] }`); }
+  }
+  else { message.reply("You are not allowed to use this command. Sorry."); }
+}
+function WriteToAllServers(Clans, message, fullMessage, client) {
+  if(message.author.id == "194972321168097280") {
+    for(var i in Clans) {
+      var announcement = fullMessage.substr("~writeall ".length);
+      var guild_id = Clans[i].guild_id;
+      var guild = client.guilds.get(guild_id);
+      var default_channel = Misc.getDefaultChannel(guild).id;
+      try {
+        const embed = new Discord.RichEmbed()
+        .setColor(0x0099FF)
+        .setAuthor(`${ message.author.username }#${ message.author.discriminator } says:`)
+        .setDescription(announcement)
+        .setFooter("I can't see replies to this", Config.defaultLogoURL)
+        .setTimestamp()
+        client.guilds.get(guild_id).channels.get(default_channel).send({embed});
+        console.log(`Wrote message to channel: ${ default_channel } in guild: ${ guild_id }`);
+      }
+      catch (err) { Log.SaveLog("Error", `Error: Failed to send custom written message to channel: ${ default_channel } in guild: ${ guild_id }`); }
+    }
   }
   else { message.reply("You are not allowed to use this command. Sorry."); }
 }

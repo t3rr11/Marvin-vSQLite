@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Bot = require("../bot.js");
-module.exports = { GetDateString, GetReadableDateTime, formatTime, IsJson, AddCommas, DeleteMessages, WriteAnnoucement, WriteCustomAnnoucement, GetClanID, GetMembershipID };
+module.exports = { GetDateString, GetReadableDateTime, formatTime, IsJson, AddCommas, DeleteMessages, WriteAnnoucement, WriteCustomAnnoucement, GetClanID, GetMembershipID, getDefaultChannel };
 
 function AddCommas(x) { try { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") } catch (err) { return x } }
 function IsJson(str) { try { JSON.parse(str); } catch (e) { return false; } return true; }
@@ -106,3 +106,16 @@ function WriteCustomAnnoucement(data) {
 }
 function GetClanID(Clans, guild_id) { for(var i in Clans) { if(Clans[i].guild_id === guild_id) { return Clans[i].clan_id; } } return false; }
 function GetMembershipID(Players, discord_id) { for(var i in Players) { if(Players[i].discord_id === discord_id) { return Players[i].membershipId; } } return false; }
+function getDefaultChannel(guild) {
+  if(guild.channels.has(guild.id))
+    return guild.channels.get(guild.id)
+  const generalChannel = guild.channels.find(channel => channel.name === "general");
+  if (generalChannel)
+    return generalChannel;
+  return guild.channels
+   .filter(c => c.type === "text" &&
+     c.permissionsFor(guild.client.user).has("SEND_MESSAGES"))
+   .sort((a, b) => a.position - b.position ||
+     Long.fromString(a.id).sub(Long.fromString(b.id)).toNumber())
+   .first();
+}

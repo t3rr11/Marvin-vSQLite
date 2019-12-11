@@ -144,6 +144,7 @@ client.on("message", async message => {
     else if(command.startsWith("~SET ANNOUNCEMENTS ")) { Announcements.SetupAnnouncements(Players, Clans, message); }
     else if(command.startsWith("~DEL")) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); }
     else if(command.startsWith("~WRITE ")) { DiscordCommands.WriteToServer(message, default_command, client); }
+    else if(command.startsWith("~WRITEALL ")) { DiscordCommands.WriteToAllServers(Clans, message, default_command, client); }
     else if(command === "~ITEMS") { DiscordCommands.TrackedItems(Clans, Players, message); }
     else if(command === "~TITLES") { DiscordCommands.TrackedTitles(Clans, Players, message); }
     else if(command === "~WEAPONS") { DiscordCommands.TrackedItems(Clans, Players, message); }
