@@ -117,10 +117,10 @@ client.on("guildCreate", guild => {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
     .setAuthor("Hey there!")
-    .setDescription("I am Marvin. To set me up first register with me by using the `~Register example` command. Replace example with your in-game username. \n\nOnce registration is complete use the `~Add clan` command and then wait 5 minutes whilst I scan your clan. That's it you'll be ready to go! \n\nTry out clan broadcasts this can be set up by typing `~Set Announcements #general` (does not have to be general). \n\nSee `~help` to see what I can do!")
+    .setDescription("I am Marvin. To set me up first register with me by using the `~Register example` command. Replace example with your in-game username. \n\nOnce registration is complete use the `~Add clan` command and **then wait 5 minutes** whilst I scan your clan. That's it you'll be ready to go! \n\nTry out clan broadcasts this can be set up by typing `~Set Announcements #general` (does not have to be general). \n\nSee `~help` to see what I can do!")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp();
-    getDefaultChannel(guild).send({ embed });
+    try { getDefaultChannel(guild).send({ embed }) } catch (err) { console.log(`Failed to give welcome message to: ${ guild.name } (${ guild.id })`); }
 });
 
 //Removed from a server
@@ -139,7 +139,7 @@ client.on("message", async message => {
   //Commands
   if(message.author.bot) return;
   if(command.startsWith('~') && !command.startsWith('~~')) {
-    if(command.startsWith("~REGISTER ")) { Register(Players, message, message.author.id, command.substr("~REGISTER ".length)); }
+    if(command.startsWith("~REGISTER ")) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(Players, message, message.author.id, command.substr("~REGISTER ".length)); } else { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
     else if(command.startsWith("~ITEM ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~ITEM ".length)); }
     else if(command.startsWith("~ITEMS ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~ITEMS ".length)); }
     else if(command.startsWith("~FILTER ")) { Announcements.FilterItemsFromAnnouncements(Clans, Players, message, default_command.substr("~FILTER ".length)); }

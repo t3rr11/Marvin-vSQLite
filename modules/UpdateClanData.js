@@ -321,6 +321,7 @@ function GetObtainedItems(playerInfo, playerData) {
   var komodo4FRState = playerData.profileCollectibles.data.collectibles["4116184726"].state;
   var pythonState = playerData.profileCollectibles.data.collectibles["3972149937"].state;
   var buzzardState = playerData.profileCollectibles.data.collectibles["2011258732"].state;
+  var loadedQuestionState = playerData.profileCollectibles.data.collectibles["3810740723"].state;
 
   if(GetItemState(voicesState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "1000 Voices" }); }
   if(GetItemState(cerberusState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Cerberus +1" }); }
@@ -351,6 +352,7 @@ function GetObtainedItems(playerInfo, playerData) {
   if(GetItemState(komodo4FRState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Komodo-4FR" }); }
   if(GetItemState(pythonState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Python" }); }
   if(GetItemState(buzzardState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Buzzard" }); }
+  if(GetItemState(loadedQuestionState).notAcquired == false){ itemsObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "item": "Loaded Question" }); }
 
   return { itemsObtained };
 }
