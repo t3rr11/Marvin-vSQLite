@@ -9,18 +9,38 @@ const Players = require('../data/players.json');
 
 //Exports
 module.exports = {
-  Help, Status, Request, GetClansTracked, WriteToServer, WriteToAllServers,
-  ValorRankings, GloryRankings, IronBannerRankings, SeasonRankings, InfamyRankings,
+  Help, AnnouncementsHelp, Status, Request, GetClansTracked, WriteToServer, WriteToAllServers, WriteToSpecificServer,
+  ValorRankings, GloryRankings, IronBannerRankings, InfamyRankings,
   LastWishRankings, ScourgeRankings, SorrowsRankings, GardenRankings,
-  TriumphRankings, ItemsObtained, TrackedItems, TitlesObtained, TrackedTitles, TotalTime
+  TriumphRankings, ItemsObtained, TrackedItems, TitlesObtained, TrackedTitles, TotalTime,
+  SeasonRankings, SundialRankings
 };
 
-function GetArray(type, clan_id) {
-  if(type == "Rankings"){ return JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Rankings.json", "utf8")); }
-  if(type == "Raids"){ return JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Raids.json", "utf8")); }
-  if(type == "Items"){ return JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Items.json", "utf8")); }
-  if(type == "Titles"){ return JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Titles.json", "utf8")); }
-  if(type == "Others"){ return JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Others.json", "utf8")); }
+function GetArray(type, clan_id, message) {
+  if(type == "Rankings"){
+    var data = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Rankings.json", "utf8", (err) => { if (err) console.error(err) }));
+    if(data) { return data; } else { message.reply("Still scanning your clan for the first time, This should only take 2-5 minutes depending on the API."); Log.SaveLog("Info", "Told " + clan_id + " to wait until i have grabbed their clan data."); }
+  }
+  if(type == "Raids"){
+    var data = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Raids.json", "utf8", (err) => { if (err) console.error(err) }));
+    if(data) { return data; } else { message.reply("Still scanning your clan for the first time, This should only take 2-5 minutes depending on the API."); Log.SaveLog("Info", "Told " + clan_id + " to wait until i have grabbed their clan data."); }
+  }
+  if(type == "Items"){
+    var data = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Items.json", "utf8", (err) => { if (err) console.error(err) }));
+    if(data) { return data; } else { message.reply("Still scanning your clan for the first time, This should only take 2-5 minutes depending on the API."); Log.SaveLog("Info", "Told " + clan_id + " to wait until i have grabbed their clan data."); }
+  }
+  if(type == "Titles"){
+    var data = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Titles.json", "utf8", (err) => { if (err) console.error(err) }));
+    if(data) { return data; } else { message.reply("Still scanning your clan for the first time, This should only take 2-5 minutes depending on the API."); Log.SaveLog("Info", "Told " + clan_id + " to wait until i have grabbed their clan data."); }
+  }
+  if(type == "Seasonal"){
+    var data = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Seasonal.json", "utf8", (err) => { if (err) console.error(err) }));
+    if(data) { return data; } else { message.reply("Still scanning your clan for the first time, This should only take 2-5 minutes depending on the API."); Log.SaveLog("Info", "Told " + clan_id + " to wait until i have grabbed their clan data."); }
+  }
+  if(type == "Others"){
+    var data = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Others.json", "utf8", (err) => { if (err) console.error(err) }));
+    if(data) { return data; } else { message.reply("Still scanning your clan for the first time, This should only take 2-5 minutes depending on the API."); Log.SaveLog("Info", "Told " + clan_id + " to wait until i have grabbed their clan data."); }
+  }
 }
 
 //Important
@@ -28,12 +48,22 @@ function Help(message) {
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Hey there! I am Marvin. Here is a list of my commands!")
-  .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~SeasonRanks`")
+  .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`")
   .addField("Raids", "`~LW`, `~SoTP`, `~CoS`, `~GoS`")
   .addField("Items / Titles", "`~Items`, `~Titles`, `~Item Example`, `~Title Example`")
-  .addField("Announcements", "`~Set Announcements #general`, `~Remove Announcements`")
+  .addField("Seasonal", "`~SeasonRanks`, `~Sundial`")
+  .addField("Announcements", "`~Announcements Help`")
   .addField("Others", "`~Donate`, `~Triumph Score`")
   .addField("Request", "If you see something that isn't there that you'd like me to track request it like this: `~request I would like to see Marvin track season ranks!`")
+  .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+  .setTimestamp()
+  message.channel.send({embed});
+}
+function AnnouncementsHelp(message) {
+  const embed = new Discord.RichEmbed()
+  .setColor(0x0099FF)
+  .setAuthor("Announcements Help Menu")
+  .setDescription("`~Set Announcements #general` \n`~Remove Announcements` \n`~filter item name`")
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});
@@ -58,11 +88,12 @@ function Request(client, message) {
   const request = message.content.substr("~request ".length);
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
-  .setAuthor(`New Request by ${ message.author.username }#${ message.author.discriminator }`)
+  .setAuthor(`New Request by ${ message.author.username }#${ message.author.discriminator }, ID: ${ message.author.id }`)
   .setDescription(request)
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
-  client.guilds.get('630967941076221954').channels.get('639582004710735883').send({embed})
+  client.guilds.get('630967941076221954').channels.get('639582004710735883').send({embed});
+  message.reply("Your request has been sent, Thank your for your valuable feedback!");
 }
 function GetClansTracked(Clans, message) {
   var filteredClans = []; for(var i in Clans) { if(!filteredClans.find(e => e.clan_id == Clans[i].clan_id)) { filteredClans.push(Clans[i].clan_name); } }
@@ -104,6 +135,7 @@ function WriteToAllServers(Clans, message, fullMessage, client) {
       var guild_id = Clans[i].guild_id;
       var guild = client.guilds.get(guild_id);
       var default_channel = Misc.getDefaultChannel(guild).id;
+      if(Clans[i].announcement_channel !== null) { default_channel = Clans[i].announcement_channel; }
       try {
         const embed = new Discord.RichEmbed()
         .setColor(0x0099FF)
@@ -119,7 +151,34 @@ function WriteToAllServers(Clans, message, fullMessage, client) {
   }
   else { message.reply("You are not allowed to use this command. Sorry."); }
 }
+function WriteToSpecificServer(Clans, message, fullMessage, client) {
+  if(message.author.id == "194972321168097280") {
+    try {
+      var semiMessage = fullMessage.substr("~writeto ".length);
+      var clan_details = semiMessage.split(" ", 1);
+      var startMsg = fullMessage.indexOf('[');
+      var finishMsg = fullMessage.indexOf(']');
+      var messageToGuild = fullMessage.substr(startMsg + 1, finishMsg - startMsg - 1);
 
+      for(var i in Clans) {
+        if(Clans[i].clan_id === clan_details[0] || Clans[i].clan_name === clan_details[0]) {
+          var guild_id = Clans[i].guild_id;
+          var guild = client.guilds.get(guild_id);
+          var default_channel = Misc.getDefaultChannel(guild).id;
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setAuthor(`${ message.author.username }#${ message.author.discriminator } says:`)
+          .setDescription(messageToGuild)
+          .setFooter("I can't see replies to this", Config.defaultLogoURL)
+          .setTimestamp()
+          client.guilds.get(guild_id).channels.get(default_channel).send({embed});
+        }
+      }
+    }
+    catch (err) { Log.SaveLog("Error", `Error: Failed to send custom written message to ${ clan_id }`); }
+  }
+  else { message.reply("You are not allowed to use this command. Sorry."); }
+}
 //Rankings
 function ValorRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
@@ -254,40 +313,6 @@ function IronBannerRankings(Clans, Players, message) {
     .addField("Name", names, true)
     .addField("Kills", kills, true)
     .addField("Wins", wins, true)
-    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-    .setTimestamp()
-    message.channel.send({embed});
-  }
-  else { message.reply("No clan added, to add one use: ~RegisterClan"); }
-}
-function SeasonRankings(Clans, Players, message) {
-  if(Misc.GetClanID(Clans, message.guild.id)) {
-    var clan_id = Misc.GetClanID(Clans, message.guild.id);
-    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var seasonRankings = GetArray("Others", clan_id).seasonRankings;
-    seasonRankings.sort(function(a, b) { return b.seasonRank - a.seasonRank; });
-    var seasonRanks = seasonRankings.slice(0, 10); var names = []; var seasonRank = [];
-    for(i in seasonRanks) { names.push(seasonRanks[i].displayName); seasonRank.push(seasonRanks[i].seasonRank); }
-
-    try {
-      if(membership_Id) {
-        var rank = seasonRankings.indexOf(seasonRankings.find(e => e.membership_Id === membership_Id));
-        var player = seasonRankings.find(e => e.membership_Id === membership_Id);
-        names.push(""); seasonRank.push("");
-        names.push(`${ rank+1 }: ${ player.displayName }`); seasonRank.push(player.seasonRank);
-      }
-      else {
-        names.push(""); seasonRank.push("");
-        names.push("~Register to see rank!");
-      }
-    }
-    catch (err) { }
-
-    const embed = new Discord.RichEmbed()
-    .setColor(0x0099FF)
-    .setAuthor("Top 10 Season Ranks")
-    .addField("Name", names, true)
-    .addField("Season Rank", seasonRank, true)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -441,11 +466,12 @@ function ItemsObtained(Clans, Players, message, item) {
     var ItemsTracked = []; for(i in Items){ if(!ItemsTracked.includes(Items[i].item)) { ItemsTracked.push(Items[i].item); } }
     var ItemsLeft = ItemsTracked.slice(0, Math.floor(ItemsTracked.length / 2));
     var ItemsRight = ItemsTracked.slice(Math.floor(ItemsTracked.length / 2), ItemsTracked.length);
+    if(item == "JOTUNN"){ item = "JÖTUNN" }
     var FilteredItems = Items.filter(e => e.item.toUpperCase() === item);
     if(FilteredItems.length == 1) {
       const embed = new Discord.RichEmbed()
       .setColor(0x0099FF)
-      .setAuthor("The only person to own the " + FilteredItems[0].item + " is: ")
+      .setAuthor("The only person to own " + FilteredItems[0].item + " is: ")
       .setDescription(FilteredItems[0].displayName)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp()
@@ -458,7 +484,7 @@ function ItemsObtained(Clans, Players, message, item) {
       for(i in secondHalf){ rNames.push(secondHalf[i].displayName); }
       const embed = new Discord.RichEmbed()
       .setColor(0x0099FF)
-      .setAuthor("People who own the " + firstHalf[0].item)
+      .setAuthor("People who own " + firstHalf[0].item)
       .addField('Names', rNames, true)
       .addField('Names', lNames, true)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
@@ -536,6 +562,76 @@ function TrackedTitles(Clans, Players, message) {
     .setAuthor("We either don't track that title or nobody has obtained it yet. Here is a list of titles we do track! Use: `~Title ExampleName` to see who has them!")
     .addField("Titles", TitlesRight, true)
     .addField("Titles", TitlesLeft, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else { message.reply("No clan added, to add one use: ~RegisterClan"); }
+}
+
+//Seasonal
+function SeasonRankings(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
+    var seasonRankings = GetArray("Seasonal", clan_id).seasonRankings;
+    seasonRankings.sort(function(a, b) { return b.seasonRank - a.seasonRank; });
+    var seasonRanks = seasonRankings.slice(0, 10); var names = []; var seasonRank = [];
+    for(i in seasonRanks) { names.push(seasonRanks[i].displayName); seasonRank.push(seasonRanks[i].seasonRank); }
+
+    try {
+      if(membership_Id) {
+        var rank = seasonRankings.indexOf(seasonRankings.find(e => e.membership_Id === membership_Id));
+        var player = seasonRankings.find(e => e.membership_Id === membership_Id);
+        names.push(""); seasonRank.push("");
+        names.push(`${ rank+1 }: ${ player.displayName }`); seasonRank.push(player.seasonRank);
+      }
+      else {
+        names.push(""); seasonRank.push("");
+        names.push("~Register to see rank!");
+      }
+    }
+    catch (err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Season Ranks")
+    .addField("Name", names, true)
+    .addField("Season Rank", seasonRank, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else { message.reply("No clan added, to add one use: ~RegisterClan"); }
+}
+function SundialRankings(Clans, Players, message) {
+  if(Misc.GetClanID(Clans, message.guild.id)) {
+    var clan_id = Misc.GetClanID(Clans, message.guild.id);
+    var membership_Id = Misc.GetMembershipID(Players, message.author.id);
+    var sundialRankings = GetArray("Seasonal", clan_id).sundial;
+    sundialRankings.sort(function(a, b) { return b.completions - a.completions; });
+    var sundialRank = sundialRankings.slice(0, 10); var names = []; var completions = [];
+    for(i in sundialRank) { names.push(sundialRank[i].displayName); completions.push(sundialRank[i].completions); }
+
+    try {
+      if(membership_Id) {
+        var rank = sundialRankings.indexOf(sundialRankings.find(e => e.membership_Id === membership_Id));
+        var player = sundialRankings.find(e => e.membership_Id === membership_Id);
+        names.push(""); completions.push("");
+        names.push(`${ rank+1 }: ${ player.displayName }`); completions.push(player.completions);
+      }
+      else {
+        names.push(""); completions.push("");
+        names.push("~Register to see rank!");
+      }
+    }
+    catch (err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Sundial Completion Rankings")
+    .addField("Name", names, true)
+    .addField("Completions", completions, true)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});

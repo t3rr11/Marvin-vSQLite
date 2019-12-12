@@ -38,11 +38,14 @@ async function UpdateClanData(clan_id, ClanMembers, client) {
     Titles: {
       titlesObtained: []
     },
+    Seasonal: {
+      seasonRankings: [],
+      sundial: []
+    },
     Others: {
       triumphRankings: [],
       wellsRankings: [],
       epRankings: [],
-      seasonRankings: [],
       menageire: [],
       totalTime: [],
       privatePlayers: [],
@@ -97,10 +100,13 @@ async function UpdateClanData(clan_id, ClanMembers, client) {
         //Titles
         for(var i in processedData.Titles.titlesObtained) { ClanData.Titles.titlesObtained.push(processedData.Titles.titlesObtained[i]); }
 
+        //Seasonal
+        ClanData.Seasonal.seasonRankings.push(processedData.Seasonal.seasonRankings);
+        ClanData.Seasonal.sundial.push(processedData.Seasonal.sundial);
+
         //Others
         ClanData.Others.menageire.push(processedData.Others.menageire);
         ClanData.Others.triumphRankings.push(processedData.Others.triumphRankings);
-        ClanData.Others.seasonRankings.push(processedData.Others.seasonRankings);
         ClanData.Others.wellsRankings.push(processedData.Others.wellsRankings);
         ClanData.Others.epRankings.push(processedData.Others.epRankings);
         ClanData.Others.totalTime.push(processedData.Others.totalTime);
@@ -114,7 +120,7 @@ async function UpdateClanData(clan_id, ClanMembers, client) {
         if(!failureCheck) { Announcements.CheckForAnnouncements(clan_id, ClanData, client); }
       }
     }
-  }, 100);
+  }, 40);
 }
 async function GrabClanMemberCharacterData(playerInfo, playerId, retried) {
   const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
@@ -198,11 +204,14 @@ function processPlayerData(playerInfo, playerData) {
         Titles: {
           titlesObtained: {}
         },
+        Seasonal: {
+          seasonRankings: {},
+          sundial: {}
+        },
         Others: {
           triumphRankings: {},
           wellsRankings: {},
           epRankings: {},
-          seasonRankings: {},
           menageire: {},
           totalTime: {},
           clanMembers: {}
@@ -217,6 +226,7 @@ function processPlayerData(playerInfo, playerData) {
       ProcessedData.Raids = GetRaids(playerInfo, playerData, characterIds);
       ProcessedData.Items = GetObtainedItems(playerInfo, playerData);
       ProcessedData.Titles = GetObtainedTitles(playerInfo, playerData);
+      ProcessedData.Seasonal = GetSeasonal(playerInfo, playerData, characterIds);
       ProcessedData.Others = GetOthers(playerInfo, playerData, characterIds);
 
       return ProcessedData;
@@ -278,33 +288,6 @@ function GetRaids(playerInfo, playerData, characterIds) {
     scourge: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "completions": scourgeCompletions, "lastScan": new Date() },
     sorrows: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "completions": sorrowsCompletions, "lastScan": new Date() },
     garden: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "completions": gardenCompletions, "lastScan": new Date() }
-  }
-}
-function GetOthers(playerInfo, playerData, characterIds) {
-  var runes = playerData.profileRecords.data.records["2422246600"].objectives[0].progress;
-  var encounters = playerData.profileRecords.data.records["1363982253"].objectives[0].progress;
-  var triumphScore = "0"; try { var triumphScore = playerData.profileRecords.data.score; } catch (err) {  }
-  var wellsCompleted = "0"; try { var wellsCompleted = playerData.profileRecords.data.records["819775261"].objectives[0].progress; } catch (err) {  }
-  var epsCompleted = "0"; try { var epsCompleted = playerData.profileRecords.data.records["3350489579"].objectives[0].progress; } catch (err) {  }
-  var finishers = "0"; try { var finishers = playerData.characterRecords.data[characterIds[0]].records["630510424"].objectives[0].progress; } catch (err) {  }
-  try { var totalTime0 = playerData.characters.data[characterIds[0]].minutesPlayedTotal; } catch (err) { var totalTime0 = 0; }
-  try { var totalTime1 = playerData.characters.data[characterIds[1]].minutesPlayedTotal; } catch (err) { var totalTime1 = 0; }
-  try { var totalTime2 = playerData.characters.data[characterIds[2]].minutesPlayedTotal; } catch (err) { var totalTime2 = 0; }
-  var totalTime = "0"; totalTime = parseInt(totalTime0) + parseInt(totalTime1) + parseInt(totalTime2);
-
-  //Season Ranks
-  var season8Rank = "0"; try { var seasonRankBefore = playerData.characterProgressions.data[characterIds[0]].progressions["1628407317"].level; var seasonRankAfter = playerData.characterProgressions.data[characterIds[0]].progressions["3184735011"].level; season8Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
-  var season9Rank = "0"; try { var seasonRankBefore = playerData.characterProgressions.data[characterIds[0]].progressions["3256821400"].level; var seasonRankAfter = playerData.characterProgressions.data[characterIds[0]].progressions["2140885848"].level; season9Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
-
-
-  return {
-    menageire: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "encounters": encounters, "runes": runes, "lastScan": new Date() },
-    triumphRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "triumphScore": triumphScore, "lastScan": new Date() },
-    seasonRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "seasonRank": season9Rank, "finishers": finishers, "lastScan": new Date() },
-    wellsRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "wellsCompleted": wellsCompleted, "lastScan": new Date() },
-    epRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "epsCompleted": epsCompleted, "lastScan": new Date() },
-    totalTime: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "totalTime": totalTime, "lastScan": new Date() },
-    clanMembers: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "lastScan": new Date() },
   }
 }
 function GetObtainedItems(playerInfo, playerData) {
@@ -404,4 +387,36 @@ function GetObtainedTitles(playerInfo, playerData) {
   if(savior){ titlesObtained.push({ "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "title": "Savior" }); }
 
   return { titlesObtained };
+}
+function GetSeasonal(playerInfo, playerData, characterIds) {
+  //Season Ranks
+  var season8Rank = "0"; try { var seasonRankBefore = playerData.characterProgressions.data[characterIds[0]].progressions["1628407317"].level; var seasonRankAfter = playerData.characterProgressions.data[characterIds[0]].progressions["3184735011"].level; season8Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
+  var season9Rank = "0"; try { var seasonRankBefore = playerData.characterProgressions.data[characterIds[0]].progressions["3256821400"].level; var seasonRankAfter = playerData.characterProgressions.data[characterIds[0]].progressions["2140885848"].level; season9Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
+
+  var finishers = "0"; try { var finishers = playerData.characterRecords.data[characterIds[0]].records["630510424"].objectives[0].progress; } catch (err) {  }
+  var sundialCompletions = playerData.profileRecords.data.records["3801239892"].objectives[0].progress;
+  return {
+    seasonRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "seasonRank": season9Rank, "finishers": finishers, "lastScan": new Date() },
+    sundial: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "completions": sundialCompletions, "lastScan": new Date() }
+  }
+}
+function GetOthers(playerInfo, playerData, characterIds) {
+  var runes = playerData.profileRecords.data.records["2422246600"].objectives[0].progress;
+  var encounters = playerData.profileRecords.data.records["1363982253"].objectives[0].progress;
+  var triumphScore = "0"; try { var triumphScore = playerData.profileRecords.data.score; } catch (err) {  }
+  var wellsCompleted = "0"; try { var wellsCompleted = playerData.profileRecords.data.records["819775261"].objectives[0].progress; } catch (err) {  }
+  var epsCompleted = "0"; try { var epsCompleted = playerData.profileRecords.data.records["3350489579"].objectives[0].progress; } catch (err) {  }
+  try { var totalTime0 = playerData.characters.data[characterIds[0]].minutesPlayedTotal; } catch (err) { var totalTime0 = 0; }
+  try { var totalTime1 = playerData.characters.data[characterIds[1]].minutesPlayedTotal; } catch (err) { var totalTime1 = 0; }
+  try { var totalTime2 = playerData.characters.data[characterIds[2]].minutesPlayedTotal; } catch (err) { var totalTime2 = 0; }
+  var totalTime = "0"; totalTime = parseInt(totalTime0) + parseInt(totalTime1) + parseInt(totalTime2);
+
+  return {
+    menageire: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "encounters": encounters, "runes": runes, "lastScan": new Date() },
+    triumphRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "triumphScore": triumphScore, "lastScan": new Date() },
+    wellsRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "wellsCompleted": wellsCompleted, "lastScan": new Date() },
+    epRankings: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "epsCompleted": epsCompleted, "lastScan": new Date() },
+    totalTime: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "totalTime": totalTime, "lastScan": new Date() },
+    clanMembers: { "displayName": playerInfo.displayName, "membership_Id": playerInfo.membership_Id, "lastScan": new Date() },
+  }
 }

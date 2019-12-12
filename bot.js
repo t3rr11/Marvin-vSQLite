@@ -76,12 +76,13 @@ client.on("ready", () => {
   var clansScanned = [];
   let nextClanScanTimer = undefined;
   var clansToScan = []; for(var i in Clans) { if(!clansToScan.find(e => e.clan_id === Clans[i].clan_id)) { clansToScan.push(Clans[i]); } }
-  const SCAN_DELAY = 12000;
+  const SCAN_DELAY = 4000;
+  var startTime = new Date().getTime();
   const scanNextClan = async () => {
     if (clansToScan.length > 0) {
       const nextClan = clansToScan.shift();
       //console.log(`Scanning: ${ nextClan.clan_name } - ${ new Date().toLocaleString() }`);
-      try { await ClanData.CheckClanMembers(nextClan.clan_id, client); } catch (err) { console.log("Failed to update clan: " + nextClan.clan_id); console.log(err); }
+      try { await ClanData.CheckClanMembers(nextClan.clan_id, client); } catch (err) { console.log("Failed to update clan: " + nextClan.clan_id, err.type); }
       ClanScans++;
       clansScanned.push(nextClan.clan_id);
       nextClanScanTimer = setTimeout(scanNextClan, SCAN_DELAY);
@@ -91,6 +92,9 @@ client.on("ready", () => {
       ClansTracked = clansScanned.length;
       clansScanned = [];
       clansToScan = []; for(var i in Clans) { if(!clansToScan.find(e => e.clan_id === Clans[i].clan_id)) { clansToScan.push(Clans[i]); } }
+      console.log(`Scanned ${ ClansTracked } Clans in ${ Misc.formatTime((new Date().getTime() - startTime) / 1000) }`);
+      Log.SaveLog("Info", `Scanned ${ ClansTracked } Clans in ${ Misc.formatTime((new Date().getTime() - startTime) / 1000) }`);
+      startTime = new Date().getTime();
       scanNextClan();
     }
   };
@@ -137,19 +141,22 @@ client.on("message", async message => {
   if(command.startsWith('~') && !command.startsWith('~~')) {
     if(command.startsWith("~REGISTER ")) { Register(Players, message, message.author.id, command.substr("~REGISTER ".length)); }
     else if(command.startsWith("~ITEM ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~ITEM ".length)); }
+    else if(command.startsWith("~ITEMS ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~ITEMS ".length)); }
     else if(command.startsWith("~FILTER ")) { Announcements.FilterItemsFromAnnouncements(Clans, Players, message, default_command.substr("~FILTER ".length)); }
-    else if(command.startsWith("~WEAPON ")) { DiscordCommands.ItemsObtained(Clans, Players, message, command.substr("~WEAPON ".length)); }
     else if(command.startsWith("~TITLE ")) { DiscordCommands.TitlesObtained(Clans, Players, message, command.substr("~TITLE ".length)); }
+    else if(command.startsWith("~TITLES ")) { DiscordCommands.TitlesObtained(Clans, Players, message, command.substr("~TITLES ".length)); }
     else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }
     else if(command.startsWith("~SET ANNOUNCEMENTS ")) { Announcements.SetupAnnouncements(Players, Clans, message); }
     else if(command.startsWith("~DEL")) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); }
     else if(command.startsWith("~WRITE ")) { DiscordCommands.WriteToServer(message, default_command, client); }
     else if(command.startsWith("~WRITEALL ")) { DiscordCommands.WriteToAllServers(Clans, message, default_command, client); }
+    else if(command.startsWith("~WRITETO ")) { DiscordCommands.WriteToSpecificServer(Clans, message, default_command, client); }
     else if(command === "~ITEMS") { DiscordCommands.TrackedItems(Clans, Players, message); }
     else if(command === "~TITLES") { DiscordCommands.TrackedTitles(Clans, Players, message); }
     else if(command === "~WEAPONS") { DiscordCommands.TrackedItems(Clans, Players, message); }
     else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
     else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message); }
+    else if(command === "~ANNOUNCEMENTS HELP") { DiscordCommands.AnnouncementsHelp(message); }
     else if(command === "~DONATE" || command === "~SPONSOR") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
     else if(command === "~ADDCLAN" || command === "~ADD CLAN") { ManageClans.RegisterClan(Players, Clans, message, message.author.id); }
     else if(command === "~REGISTERCLAN") { message.reply("This command has been deprecated please use `~Add clan` instead."); }
@@ -168,6 +175,7 @@ client.on("message", async message => {
     else if(command === "~STATUS") { DiscordCommands.Status(Clans, Players, ClanScans, ClansTracked, StartupTime, client, message); }
     else if(command === "~CLANS") { DiscordCommands.GetClansTracked(Clans, message); }
     else if(command === "~SEASON RANKS" || command === "~SEASON RANK" || command === "~SEASONRANKS" || command === "~SEASONRANK") { DiscordCommands.SeasonRankings(Clans, Players, message); }
+    else if(command === "~SUNDIAL") { DiscordCommands.SundialRankings(Clans, Players, message); }
     else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
 
     console.log(Misc.GetReadableDateTime() + ' - ' + 'User: ' + message.member.user.tag + ', Command: ' + command);

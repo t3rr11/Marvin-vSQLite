@@ -81,10 +81,18 @@ async function CheckForAnnouncements(clan_id, ClanData, client) {
   try {
     //Import old data
     const ClanMembers = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/ClanMembers.json", "utf8"));
-    const OldRankings = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Rankings.json", "utf8"));
+    const OldRankings = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Rankings.json", "utf8", (err) => {
+      if (err) {
+        const ClanData = Clans.find(clan => clan.clan_id == clan_id);
+        const guild = client.guilds.get(ClanData.guild_id);
+        getDefaultChannel(guild).send("Your clan has finished loading, you should now be able to use commands!");
+        Log.SaveLog("Info", "Finished loading " + clan_id + "'s clans data for the first time!");
+      }
+    }));
     const OldRaids = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Raids.json", "utf8"));
     const OldItems = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Items.json", "utf8"));
     const OldTitles = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Titles.json", "utf8"));
+    const OldSeasonal = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Seasonal.json", "utf8"));
     const OldOthers = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Others.json", "utf8"));
 
     //Sort the new data to make it easier to work with
@@ -92,6 +100,7 @@ async function CheckForAnnouncements(clan_id, ClanData, client) {
     const NewRaids = ClanData.Raids;
     const NewItems = ClanData.Items;
     const NewTitles = ClanData.Titles;
+    const NewSeasonal = ClanData.Seasonal;
     const NewOthers = ClanData.Others;
 
     //Compare Arrays
@@ -109,6 +118,7 @@ async function CheckForAnnouncements(clan_id, ClanData, client) {
   fs.writeFile("./data/clans/" + clan_id + "/Raids.json", JSON.stringify(ClanData.Raids), (err) => { if (err) console.error(err) });
   fs.writeFile("./data/clans/" + clan_id + "/Items.json", JSON.stringify(ClanData.Items), (err) => { if (err) console.error(err) });
   fs.writeFile("./data/clans/" + clan_id + "/Titles.json", JSON.stringify(ClanData.Titles), (err) => { if (err) console.error(err) });
+  fs.writeFile("./data/clans/" + clan_id + "/Seasonal.json", JSON.stringify(ClanData.Seasonal), (err) => { if (err) console.error(err) });
   fs.writeFile("./data/clans/" + clan_id + "/Others.json", JSON.stringify(ClanData.Others), (err) => { if (err) console.error(err) });
 }
 function CompareItems(OldClanMembers, OldItems, NewItems, NewRaids, clan_id, client) {

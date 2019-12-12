@@ -17,5 +17,6 @@ function SaveLog(type, log) {
     var dataToSave = [{'DateTime': dateTime, 'Type': type, 'Log': log}];
     TotalLogData.push(dataToSave[0]);
     fs.writeFile('./data/logs/' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
+    fs.writeFile('../../var/www/html/data/marvin/currentLog.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
   }
 }

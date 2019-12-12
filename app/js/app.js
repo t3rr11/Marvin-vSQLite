@@ -1,7 +1,7 @@
 var fs = require('fs');
 var files = fs.readdirSync('../data/logs'); files.reverse();
 var isRaw = false;
-var filter = { 'Command': false, 'Server': false, 'Account': false, 'Clans': false, 'Warning': false, 'Error': false };
+var filter = { 'Info': false, 'Command': false, 'Server': false, 'Account': false, 'Clans': false, 'Warning': false, 'Error': false };
 var currentlySelectedFile = files[0];
 
 function StartLoading() {
@@ -9,22 +9,24 @@ function StartLoading() {
     files = fs.readdirSync('../data/logs');
     files.reverse();
     SetSidebar();
-    LoadFile(currentlySelectedFile);
-  }, 30000);
+    LoadCurrentLog()
+  }, 5000);
   SetSidebar();
-  LoadFile(currentlySelectedFile);
+  LoadCurrentLog()
 }
 
 function SetSidebar() {
   document.getElementById('sidebar').innerHTML = '';
-  for(i in files){
+  document.getElementById('sidebar').innerHTML += '<p style="margin:2px;padding:5px;" onclick="LoadCurrentLog()">Current Log</p>';
+  document.getElementById('sidebar').innerHTML += '<p style="margin:2px;padding:5px;">Others</p>';
+  for(i in files) {
     document.getElementById('sidebar').innerHTML += '<p style="margin:2px;" onclick="LoadFile(\'' + files[i] + '\')">' + files[i] + '</p>';
   }
 }
 
 function ToggleRawVersion() { if(isRaw == false) { isRaw = true; } else { isRaw = false;  } LoadFile(currentlySelectedFile); }
 function Filter(option) { if(filter[option] == true) { filter[option] = false } else { filter[option] = true; } LoadFile(currentlySelectedFile); }
-function CheckFilter(option) { console.log(option); return filter[option]; }
+function CheckFilter(option) { return filter[option]; }
 
 function LoadFile(fileName){
   if(fileName == 'Default'){ fileName = currentlySelectedFile; }
@@ -32,7 +34,6 @@ function LoadFile(fileName){
   else { LoadRawFile(fileName); }
   document.getElementById('title').innerHTML = 'Marvin Tool - ' + fileName;
 }
-
 function LoadRawFile(fileName) {
   if(fileName == 'None'){ $("#browser").html('<pre id="browser-data">Please Select A File First!</pre>'); }
   else {
@@ -43,7 +44,6 @@ function LoadRawFile(fileName) {
     currentlySelectedFile = fileName;
   }
 }
-
 function LoadConfiguredFile(fileName) {
   if(fileName == 'None'){ $("#browser").html('<pre id="browser-data">Please Select A File First!</pre>'); }
   else {
@@ -80,4 +80,43 @@ function LoadConfiguredFile(fileName) {
     });
     currentlySelectedFile = fileName;
   }
+}
+async function LoadCurrentLog() {
+  var data = await GetCurrentLog();
+  data.reverse();
+  document.getElementById('browser').innerHTML =
+  '<div id="browser-table">' +
+    '<div class="table-row" id="mainTableRow">' +
+      '<div class="date">Date</div>' +
+      '<div class="type">Type</div>' +
+      '<div class="log">Log</div>' +
+    '</div>' +
+  '</div>';
+  for(i in data) {
+    var dateTime = JSON.stringify(data[i].DateTime).split('"').join('');
+    var type = JSON.stringify(data[i].Type).split('"').join('');
+    var log = JSON.stringify(data[i].Log).split('"').join('');
+    if(type == 'Command'){ var color = 'cornflowerblue' }
+    if(type == 'Server'){ var color = 'blueviolet' }
+    if(type == 'Account'){ var color = 'hotpink' }
+    if(type == 'Clans'){ var color = 'hotpink' }
+    if(type == 'Warning'){ var color = 'Warning' }
+    if(type == 'Error'){ var color = 'Tomato' }
+    if(CheckFilter(type) == false) {
+      document.getElementById('browser-table').innerHTML +=
+      '<div class="table-row" style="color:'+ color +'">' +
+        '<div class="date">' + dateTime + '</div>' +
+        '<div class="type">' + type + '</div>' +
+        '<div class="log">' + log + '</div>' +
+      '</div>';
+    }
+  }
+}
+async function GetCurrentLog() {
+  const headers = { headers: { "Content-Type": "application/json" } };
+  const request = await fetch(`https://guardianstats.com/data/marvin/currentLog.json?`, headers);
+  const response = await request.json();
+  if(!request.ok) { return `Request Not Ok: ${ JSON.stringify(response) }` }
+  else if(request.ok) { return response }
+  else { return `Request Error: ${ JSON.stringify(response) }`; }
 }
