@@ -81,14 +81,7 @@ async function CheckForAnnouncements(clan_id, ClanData, client) {
   try {
     //Import old data
     const ClanMembers = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/ClanMembers.json", "utf8"));
-    const OldRankings = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Rankings.json", "utf8", (err) => {
-      if (err) {
-        const ClanData = Clans.find(clan => clan.clan_id == clan_id);
-        const guild = client.guilds.get(ClanData.guild_id);
-        getDefaultChannel(guild).send("Your clan has finished loading, you should now be able to use commands!");
-        Log.SaveLog("Info", "Finished loading " + clan_id + "'s clans data for the first time!");
-      }
-    }));
+    const OldRankings = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Rankings.json", "utf8"));
     const OldRaids = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Raids.json", "utf8"));
     const OldItems = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Items.json", "utf8"));
     const OldTitles = JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Titles.json", "utf8"));
