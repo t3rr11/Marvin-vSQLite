@@ -145,9 +145,9 @@ function CompareItems(OldClanMembers, OldItems, NewItems, NewRaids, clan_id, cli
           var message = `${ NewItemsArray[i].displayName } has obtained the ${ NewItemsArray[i].item }`;
 
           //If raid say these:
-          if(NewItemsArray[i].item === "1000 Voices") { const raidData = NewRaids.lastWish.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
-          else if(NewItemsArray[i].item === "Anarchy") { const raidData = NewRaids.scourge.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
-          else if(NewItemsArray[i].item === "Tarrabah") { const raidData = NewRaids.sorrows.find(user => user.membership_Id == NewItemsArray[i].membership_Id); message = message + " in " + raidData.completions + " raids!"; }
+          if(NewItemsArray[i].item === "1000 Voices") { const raidData = NewRaids.lastWish.find(user => user.membership_Id == NewItemsArray[i].membership_Id); if(raidData.completions > 1) { message = `${ message } in ${ raidData.completions } raids!` } else { message = `${ message } in ${ raidData.completions } raid!` } }
+          else if(NewItemsArray[i].item === "Anarchy") { const raidData = NewRaids.scourge.find(user => user.membership_Id == NewItemsArray[i].membership_Id); if(raidData.completions > 1) { message = `${ message } in ${ raidData.completions } raids!` } else { message = `${ message } in ${ raidData.completions } raid!` } }
+          else if(NewItemsArray[i].item === "Tarrabah") { const raidData = NewRaids.sorrows.find(user => user.membership_Id == NewItemsArray[i].membership_Id); if(raidData.completions > 1) { message = `${ message } in ${ raidData.completions } raids!` } else { message = `${ message } in ${ raidData.completions } raid!` } }
 
           //Write Announcement
           WriteAnnouncement(message, NewItemsArray[i], "item", clan_id, client);
