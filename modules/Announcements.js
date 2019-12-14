@@ -172,7 +172,7 @@ function CompareTitles(OldClanMembers, OldTitles, NewTitles, clan_id, client) {
         }
       }
     }
-    else { for(i in NewTitlesArray) { Log.SaveLog("Error", 'User: ' + NewTitlesArray[i].displayName + ', Tried to spam tiles: ' + NewTitlesArray[i].item); } }
+    else { for(i in NewTitlesArray) { Log.SaveLog("Error", 'User: ' + NewTitlesArray[i].displayName + ', Tried to spam titles: ' + NewTitlesArray[i].title); } }
   }
 }
 async function CheckGlory(OldRankings, NewRankings, clan_id, client) {

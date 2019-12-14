@@ -127,7 +127,7 @@ async function LoadCurrentLog() {
 }
 async function GetCurrentLog() {
   const headers = { headers: { "Content-Type": "application/json" } };
-  const request = await fetch(`https://guardianstats.com/data/marvin/currentLog.json`, headers);
+  const request = await fetch(`https://guardianstats.com/data/marvin/currentLog.json?`, headers);
   const response = await request.json();
   if(!request.ok) { return `Request Not Ok: ${ JSON.stringify(response) }` }
   else if(request.ok) { return response }
