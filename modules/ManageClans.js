@@ -52,7 +52,7 @@ async function GetClanIDFromMbmID(mbmType, mbmId) {
 }
 function isRegistered(Players, discord_id) { if(Players.find(player => player.discord_id === discord_id)) { return true } else { return false } }
 function RemoveClan(Clans, message, discord_id) {
-  if(Clans.find(clan => clan.creator_id === discord_id)) {
+  if(Clans.find(clan => clan.creator_id === discord_id) || message.member.hasPermission("ADMINISTRATOR")) {
     for(var i in Clans) {
       if(Clans[i].guild_id === message.guild.id) {
         console.log("Clan Deleted: " + Clans[i].clan_name + " (" + Clans[i].clan_id + ")");
@@ -64,7 +64,7 @@ function RemoveClan(Clans, message, discord_id) {
     }
   }
   else {
-    message.reply("Only the one who linked this server to the clan can remove the clan from the server. Message Terrii#5799 if things have changed and this is not possible.");
+    message.reply("Only discord administrators or the one who linked this server can remove the clan from the server.");
   }
 }
 function DeleteClan(Clans, guild_id) {

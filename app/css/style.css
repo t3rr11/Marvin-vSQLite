@@ -1,6 +1,7 @@
+@import url('https://fonts.googleapis.com/css?family=Lato|Open+Sans|Source+Sans+Pro&display=swap');
 @import 'toggleswitch.css';
 
-body { margin:0px; padding:0px; }
+body { margin:0px; padding:0px; font-family: 'Source Sans Pro'; font-size: 14px; }
 div { margin: 0px; padding:0px; }
 #data {
   height:100%;
@@ -11,7 +12,7 @@ div { margin: 0px; padding:0px; }
   min-width: 200px;
   background-color: #dadada;
   color: black;
-  font-size: 14px;
+  font-size: 12px;
   border-right: 1px darkgray solid;
   border-bottom: 1px darkgray solid;
   text-align: center;

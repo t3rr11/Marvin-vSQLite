@@ -9,7 +9,7 @@ const Players = require('../data/players.json');
 
 //Exports
 module.exports = {
-  Help, AnnouncementsHelp, Status, Request, GetClansTracked, WriteToServer, WriteToAllServers, WriteToSpecificServer,
+  Help, AnnouncementsHelp, Status, Request, GetClansTracked, WriteToServer, WriteToAllServers, WriteToSpecificServer, GetClanFromDiscordID,
   ValorRankings, GloryRankings, IronBannerRankings, InfamyRankings,
   LastWishRankings, ScourgeRankings, SorrowsRankings, GardenRankings,
   TriumphRankings, ItemsObtained, TrackedItems, TitlesObtained, TrackedTitles, TotalTime,
@@ -17,6 +17,8 @@ module.exports = {
 };
 
 function GetArray(type, clan_id, message) {
+  const Clans = JSON.parse(fs.readFileSync("./data/clans.json", "utf8"));
+  const ClanInfo = Clans.find(clan => clan.clan_id == clan_id);
   try {
     if(type == "Rankings") { return JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Rankings.json", "utf8")); }
     if(type == "Raids") { return JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Raids.json", "utf8")); }
@@ -26,9 +28,9 @@ function GetArray(type, clan_id, message) {
     if(type == "Others") { return JSON.parse(fs.readFileSync("./data/clans/" + clan_id + "/Others.json", "utf8")); }
   }
   catch (err) {
-    message.reply("Still scanning your clan for the first time, This should only take 2-5 minutes depending on the API.");
-    console.log(`Told ${ clan_id } to wait until i have grabbed their clan data.`);
-    Log.SaveLog("Info", `Told ${ clan_id } to wait until i have grabbed their clan data.`);
+    message.reply("Still scanning your clan for the first time, This should only take 5-10 minutes depending on the API.");
+    console.log(`Informed ${ ClanInfo.clan_name } (${ ClanInfo.clan_id }) to wait until i have grabbed their clan data.`);
+    Log.SaveLog("Info", `Informed ${ ClanInfo.clan_name } (${ ClanInfo.clan_id }) to wait until i have grabbed their clan data.`);
     return null;
   }
 }
@@ -155,6 +157,7 @@ function WriteToSpecificServer(Clans, message, fullMessage, client) {
           var guild_id = Clans[i].guild_id;
           var guild = client.guilds.get(guild_id);
           var default_channel = Misc.getDefaultChannel(guild).id;
+          if(Clans[i].announcement_channel !== null) { default_channel = Clans[i].announcement_channel; }
           const embed = new Discord.RichEmbed()
           .setColor(0x0099FF)
           .setAuthor(`${ message.author.username }#${ message.author.discriminator } says:`)
@@ -162,6 +165,7 @@ function WriteToSpecificServer(Clans, message, fullMessage, client) {
           .setFooter("I can't see replies to this", Config.defaultLogoURL)
           .setTimestamp()
           client.guilds.get(guild_id).channels.get(default_channel).send({embed});
+          message.reply(`Your message has Successfully been sent to: ${ guild.name }`);
         }
       }
     }
@@ -169,12 +173,30 @@ function WriteToSpecificServer(Clans, message, fullMessage, client) {
   }
   else { message.reply("You are not allowed to use this command. Sorry."); }
 }
+function GetClanFromDiscordID(Clans, message, id) {
+  if(message.author.id == "194972321168097280") {
+    for(var i in Clans) {
+      try {
+        var clanMembers = JSON.parse(fs.readFileSync("./data/clans/" + Clans[i].clan_id + "/ClanMembers.json", "utf8"));
+        for(var j in clanMembers) {
+          if(clanMembers[j].membership_Id == id) {
+            console.log(`${ clanMembers[j].displayName } belongs to the clan: ${ Clans[i].clan_name }`);
+            message.channel.send(`${ clanMembers[j].displayName } belongs to the clan: ${ Clans[i].clan_name }`);
+          }
+        }
+      }
+      catch(err) { console.log(`Could not find clan: ${ Clans[i].clan_id }`, err); }
+    }
+  }
+  else { message.reply("You are not allowed to use this command. Sorry."); }
+}
+
 //Rankings
 function ValorRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var valorRankings = GetArray("Rankings", clan_id, message).valorRankings;
+    var valorRankings = null; try { valorRankings = GetArray("Rankings", clan_id, message).valorRankings; } catch (err) {  }
     if(valorRankings !== null) {
       valorRankings.sort(function(a, b) { return b.valor - a.valor; });
       var valorRanks = valorRankings.slice(0, 10); var names = []; var valor = []; var resets = [];
@@ -207,7 +229,7 @@ function GloryRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var gloryRankings = GetArray("Rankings", clan_id, message).gloryRankings;
+    var gloryRankings = null; try { gloryRankings = GetArray("Rankings", clan_id, message).gloryRankings; } catch (err) { }
     if(gloryRankings !== null) {
       gloryRankings.sort(function(a, b) { return b.glory - a.glory; });
       var gloryRanks = gloryRankings.slice(0, 10); var names = []; var glory = [];
@@ -243,7 +265,7 @@ function InfamyRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var infamyRankings = GetArray("Rankings", clan_id, message).infamyRankings;
+    var infamyRankings = null; try { infamyRankings = GetArray("Rankings", clan_id, message).infamyRankings; } catch (err) { }
     if(infamyRankings !== null) {
       infamyRankings.sort(function(a, b) { return b.infamy - a.infamy; });
       var infamyRanks = infamyRankings.slice(0, 10); var names = []; var infamy = []; var motes = [];
@@ -280,7 +302,7 @@ function IronBannerRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var ibRankings = GetArray("Rankings", clan_id, message).ibRankings;
+    var ibRankings = null; try { ibRankings = GetArray("Rankings", clan_id, message).ibRankings; } catch (err) { }
     if(ibRankings !== null) {
       ibRankings.sort(function(a, b) { return b.ibKills - a.ibKills; });
       var ibRanks = ibRankings.slice(0, 10); var names = []; var kills = []; var wins = [];
@@ -319,7 +341,7 @@ function LastWishRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var lastWishRankings = GetArray("Raids", clan_id, message).lastWish;
+    var lastWishRankings = null; try { lastWishRankings = GetArray("Raids", clan_id, message).lastWish; } catch (err) { }
     if(lastWishRankings !== null) {
       lastWishRankings.sort(function(a, b) { return b.completions - a.completions; });
       var lastWishRanks = lastWishRankings.slice(0, 10); var names = []; var completions = [];
@@ -355,7 +377,7 @@ function ScourgeRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var scourgeRankings = GetArray("Raids", clan_id, message).scourge;
+    var scourgeRankings = null; try { scourgeRankings = GetArray("Raids", clan_id, message).scourge; } catch (err) {  }
     if(scourgeRankings !== null) {
       scourgeRankings.sort(function(a, b) { return b.completions - a.completions; });
       var scourgeRanks = scourgeRankings.slice(0, 10); var names = []; var completions = [];
@@ -391,7 +413,7 @@ function SorrowsRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var sorrowsRankings = GetArray("Raids", clan_id, message).sorrows;
+    var sorrowsRankings = null; try { sorrowsRankings = GetArray("Raids", clan_id, message).sorrows; } catch (err) { }
     if(sorrowsRankings !== null) {
       sorrowsRankings.sort(function(a, b) { return b.completions - a.completions; });
       var sorrowsRanks = sorrowsRankings.slice(0, 10); var names = []; var completions = [];
@@ -427,7 +449,7 @@ function GardenRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var gardenRankings = GetArray("Raids", clan_id, message).garden;
+    var gardenRankings = null; try { gardenRankings = GetArray("Raids", clan_id, message).garden; } catch (err) { }
     if(gardenRankings !== null) {
       gardenRankings.sort(function(a, b) { return b.completions - a.completions; });
       var gardenRanks = gardenRankings.slice(0, 10); var names = []; var completions = [];
@@ -464,7 +486,7 @@ function GardenRankings(Clans, Players, message) {
 function ItemsObtained(Clans, Players, message, item) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
-    var Items = GetArray("Items", clan_id, message).itemsObtained;
+    var Items = null; try { Items = GetArray("Items", clan_id, message).itemsObtained; } catch (err) { }
     if(Items !== null) {
       var ItemsTracked = []; for(i in Items){ if(!ItemsTracked.includes(Items[i].item)) { ItemsTracked.push(Items[i].item); } }
       var ItemsLeft = ItemsTracked.slice(0, Math.floor(ItemsTracked.length / 2));
@@ -502,7 +524,7 @@ function ItemsObtained(Clans, Players, message, item) {
 function TrackedItems(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
-    var Items = GetArray("Items", clan_id, message).itemsObtained;
+    var Items = null; try { Items = GetArray("Items", clan_id, message).itemsObtained; } catch (err) { }
     if(Items !== null) {
       var ItemsTracked = []; for(i in Items){ if(!ItemsTracked.includes(Items[i].item)) { ItemsTracked.push(Items[i].item); } }
       var ItemsLeft = ItemsTracked.slice(0, Math.floor(ItemsTracked.length / 2));
@@ -524,7 +546,7 @@ function TrackedItems(Clans, Players, message) {
 function TitlesObtained(Clans, Players, message, title) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
-    var Titles = GetArray("Titles", clan_id, message).titlesObtained;
+    var Titles = null; try { Titles = GetArray("Titles", clan_id, message).titlesObtained; } catch (err) { }
     if(Titles !== null) {
       var TitlesTracked = []; for(i in Titles){ if(!TitlesTracked.includes(Titles[i].title)) { TitlesTracked.push(Titles[i].title); } }
       var TitlesLeft = TitlesTracked.slice(0, Math.floor(TitlesTracked.length / 2));
@@ -561,7 +583,7 @@ function TitlesObtained(Clans, Players, message, title) {
 function TrackedTitles(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
-    var Titles = GetArray("Titles", clan_id, message).titlesObtained;
+    var Titles = null; try { Titles = GetArray("Titles", clan_id, message).titlesObtained; } catch (err) { }
     if(Titles !== null) {
       var TitlesTracked = []; for(i in Titles){ if(!TitlesTracked.includes(Titles[i].title)) { TitlesTracked.push(Titles[i].title); } }
       var TitlesLeft = TitlesTracked.slice(0, Math.floor(TitlesTracked.length / 2));
@@ -584,7 +606,7 @@ function SeasonRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var seasonRankings = GetArray("Seasonal", clan_id, message).seasonRankings;
+    var seasonRankings = null; try { seasonRankings = GetArray("Seasonal", clan_id, message).seasonRankings; } catch (err) { }
     if(seasonRankings !== null) {
       seasonRankings.sort(function(a, b) { return b.seasonRank - a.seasonRank; });
       var seasonRanks = seasonRankings.slice(0, 10); var names = []; var seasonRank = [];
@@ -620,7 +642,7 @@ function SundialRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var sundialRankings = GetArray("Seasonal", clan_id, message).sundial;
+    var sundialRankings = null; try { sundialRankings = GetArray("Seasonal", clan_id, message).sundial; } catch (err) { }
     if(sundialRankings !== null) {
       sundialRankings.sort(function(a, b) { return b.completions - a.completions; });
       var sundialRank = sundialRankings.slice(0, 10); var names = []; var completions = [];
@@ -658,7 +680,7 @@ function TriumphRankings(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var triumphRankings = GetArray("Others", clan_id, message).triumphRankings;
+    var triumphRankings = null; try { triumphRankings = GetArray("Others", clan_id, message).triumphRankings; } catch (err) { }
     if(triumphRankings !== null) {
       triumphRankings.sort(function(a, b) { return b.triumphScore - a.triumphScore; });
       var triumphRanks = triumphRankings.slice(0, 10); var names = []; var score = [];
@@ -694,7 +716,7 @@ function TotalTime(Clans, Players, message) {
   if(Misc.GetClanID(Clans, message.guild.id)) {
     var clan_id = Misc.GetClanID(Clans, message.guild.id);
     var membership_Id = Misc.GetMembershipID(Players, message.author.id);
-    var totalTimeArray = GetArray("Others", clan_id, message).totalTime;
+    var totalTimeArray = null; try { totalTimeArray = GetArray("Others", clan_id, message).totalTime; } catch (err) { }
     if(totalTimeArray !== null) {
       totalTimeArray.sort(function(a, b) { return b.totalTime - a.totalTime; });
       var totalMinutesPlayed = 0;
@@ -716,7 +738,7 @@ function TotalTime(Clans, Players, message) {
       .setDescription(embedMessage)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp()
-      message.channel.send({embed});  
+      message.channel.send({embed});
     }
   }
   else { message.reply("No clan added, to add one use: ~RegisterClan"); }

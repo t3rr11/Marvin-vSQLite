@@ -151,6 +151,7 @@ client.on("message", async message => {
     else if(command.startsWith("~WRITE ")) { DiscordCommands.WriteToServer(message, default_command, client); }
     else if(command.startsWith("~WRITEALL ")) { DiscordCommands.WriteToAllServers(Clans, message, default_command, client); }
     else if(command.startsWith("~WRITETO ")) { DiscordCommands.WriteToSpecificServer(Clans, message, default_command, client); }
+    else if(command.startsWith("~GETCLAN ")) { DiscordCommands.GetClanFromDiscordID(Clans, message, command.substr("~GETCLAN ".length)); }
     else if(command === "~ITEMS") { DiscordCommands.TrackedItems(Clans, Players, message); }
     else if(command === "~TITLES") { DiscordCommands.TrackedTitles(Clans, Players, message); }
     else if(command === "~WEAPONS") { DiscordCommands.TrackedItems(Clans, Players, message); }

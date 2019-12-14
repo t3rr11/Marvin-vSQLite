@@ -1,6 +1,7 @@
 var fs = require('fs');
 var files = fs.readdirSync('../data/logs'); files.reverse();
 var isRaw = false;
+var isCurrentLogActive = true;
 var filter = { 'Info': false, 'Command': false, 'Server': false, 'Account': false, 'Clans': false, 'Warning': false, 'Error': false };
 var currentlySelectedFile = files[0];
 var previousData = "";
@@ -18,7 +19,7 @@ function StartLoading() {
 
 function SetSidebar() {
   document.getElementById('sidebar').innerHTML = '';
-  document.getElementById('sidebar').innerHTML += '<p style="margin:2px;padding:5px;" onclick="LoadCurrentLog()">Current Log</p>';
+  document.getElementById('sidebar').innerHTML += '<p style="margin:2px;padding:5px;" onclick="LoadTheCurrentLog();">Current Log</p>';
   document.getElementById('sidebar').innerHTML += '<p style="margin:2px;padding:5px;">Others</p>';
   for(i in files) {
     document.getElementById('sidebar').innerHTML += '<p style="margin:2px;" onclick="LoadFile(\'' + files[i] + '\')">' + files[i] + '</p>';
@@ -26,10 +27,11 @@ function SetSidebar() {
 }
 
 function ToggleRawVersion() { if(isRaw == false) { isRaw = true; } else { isRaw = false;  } LoadFile(currentlySelectedFile); }
-function Filter(option) { if(filter[option] == true) { filter[option] = false } else { filter[option] = true; } LoadFile(currentlySelectedFile); }
+function Filter(option) { if(filter[option] == true) { filter[option] = false } else { filter[option] = true; } if(isCurrentLogActive) { LoadTheCurrentLog(); } else { LoadFile(currentlySelectedFile); } }
 function CheckFilter(option) { return filter[option]; }
 
 function LoadFile(fileName){
+  isCurrentLogActive = false;
   if(fileName == 'Default'){ fileName = currentlySelectedFile; }
   if(isRaw == false){ LoadConfiguredFile(fileName); }
   else { LoadRawFile(fileName); }
@@ -83,7 +85,12 @@ function LoadConfiguredFile(fileName) {
     currentlySelectedFile = fileName;
   }
 }
+function LoadTheCurrentLog() {
+  previousData = "";
+  LoadCurrentLog();
+}
 async function LoadCurrentLog() {
+  isCurrentLogActive = true;
   var data = await GetCurrentLog();
   data.reverse();
   if(previousData.length < data.length) {
@@ -120,7 +127,7 @@ async function LoadCurrentLog() {
 }
 async function GetCurrentLog() {
   const headers = { headers: { "Content-Type": "application/json" } };
-  const request = await fetch(`https://guardianstats.com/data/marvin/currentLog.json?`, headers);
+  const request = await fetch(`https://guardianstats.com/data/marvin/currentLog.json`, headers);
   const response = await request.json();
   if(!request.ok) { return `Request Not Ok: ${ JSON.stringify(response) }` }
   else if(request.ok) { return response }
