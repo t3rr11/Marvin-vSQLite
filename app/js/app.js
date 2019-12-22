@@ -11,18 +11,19 @@ function StartLoading() {
     files = fs.readdirSync('../data/logs');
     files.reverse();
     SetSidebar();
-    LoadCurrentLog()
+    LoadStatus();
+    LoadCurrentLog();
   }, 5000);
   SetSidebar();
   LoadCurrentLog()
 }
 
 function SetSidebar() {
-  document.getElementById('sidebar').innerHTML = '';
-  document.getElementById('sidebar').innerHTML += '<p style="margin:2px;padding:5px;" onclick="LoadTheCurrentLog();">Current Log</p>';
-  document.getElementById('sidebar').innerHTML += '<p style="margin:2px;padding:5px;">Others</p>';
+  document.getElementById('logs').innerHTML = '';
+  document.getElementById('logs').innerHTML += '<p style="margin:2px;padding:5px;" onclick="LoadTheCurrentLog();">Current Log</p>';
+  document.getElementById('logs').innerHTML += '<p style="margin:2px;padding:5px;">Others</p>';
   for(i in files) {
-    document.getElementById('sidebar').innerHTML += '<p style="margin:2px;" onclick="LoadFile(\'' + files[i] + '\')">' + files[i] + '</p>';
+    document.getElementById('logs').innerHTML += '<p style="margin:2px;" onclick="LoadFile(\'' + files[i] + '\')">' + files[i] + '</p>';
   }
 }
 
@@ -125,9 +126,28 @@ async function LoadCurrentLog() {
     }
   }
 }
+async function LoadStatus() {
+  const Status = await GetStatus();
+  document.getElementById('status').innerHTML = '';
+  document.getElementById('status').innerHTML += `<div>Users: ${ Status.users }</div>`;
+  document.getElementById('status').innerHTML += `<div>Servers: ${ Status.servers }</div>`;
+  document.getElementById('status').innerHTML += `<div>Clans: ${ Status.clans }</div>`;
+  document.getElementById('status').innerHTML += `<div>Players: ${ Status.players }</div>`;
+  document.getElementById('status').innerHTML += `<div>Scans: ${ Status.scans }</div>`;
+  document.getElementById('status').innerHTML += `<div>Uptime: ${ Status.uptime }</div>`;
+
+}
 async function GetCurrentLog() {
   const headers = { headers: { "Content-Type": "application/json" } };
   const request = await fetch(`https://guardianstats.com/data/marvin/currentLog.json?`, headers);
+  const response = await request.json();
+  if(!request.ok) { return `Request Not Ok: ${ JSON.stringify(response) }` }
+  else if(request.ok) { return response }
+  else { return `Request Error: ${ JSON.stringify(response) }`; }
+}
+async function GetStatus() {
+  const headers = { headers: { "Content-Type": "application/json" } };
+  const request = await fetch(`https://guardianstats.com/data/marvin/status.json?`, headers);
   const response = await request.json();
   if(!request.ok) { return `Request Not Ok: ${ JSON.stringify(response) }` }
   else if(request.ok) { return response }

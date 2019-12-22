@@ -102,6 +102,7 @@ client.on("ready", () => {
 	//SetTimeouts
 	setInterval(function() { UpdateActivityList() }, 10000);
   setInterval(function() { PushClanData() }, 30000);
+  setInterval(function() { Log.SaveDiscordLog(Clans, Players, ClanScans, ClansTracked, StartupTime, client) }, 30000);
 
   //Start Up Console Log
   console.log(Misc.GetReadableDateTime() + ' - ' + `Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
@@ -179,8 +180,14 @@ client.on("message", async message => {
     else if(command === "~SUNDIAL") { DiscordCommands.SundialRankings(Clans, Players, message); }
     else { message.reply('I\'m not sure what that commands is sorry.').then(msg => { msg.delete(2000) }).catch(); }
 
-    console.log(Misc.GetReadableDateTime() + ' - ' + 'User: ' + message.member.user.tag + ', Command: ' + command);
-    Log.SaveLog("Command", 'User: ' + message.member.user.tag + ', Command: ' + command);
+    try {
+      console.log(Misc.GetReadableDateTime() + ' - ' + 'User: ' + message.member.user.tag + ', Command: ' + command);
+      Log.SaveLog("Command", 'User: ' + message.member.user.tag + ', Command: ' + command);
+    }
+    catch (err) {
+      console.log(Misc.GetReadableDateTime() + ' - ' + 'Tried to log command in: ' + message.guild.name + ', Command: ' + command);
+      Log.SaveLog("Error", 'Tried to log command in: ' + message.guild.name + ', Command: ' + command);
+    }
   }
 });
 
