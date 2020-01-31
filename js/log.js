@@ -61,11 +61,11 @@ function SaveErrorCounter(type) {
   if(type !== null) {
     if(type === "DestinyShardRelayProxyTimeout") { ShardErrors++; }
     else { OtherErrors++; }
-    var errors = {
-      "shardErrors": ShardErrors,
-      "otherErrors": OtherErrors
-    }
-    fs.writeFile('./data/errors.json', JSON.stringify(errors), (err) => { if (err) console.error(err) });
-    fs.writeFile('../../var/www/html/data/marvin/errors.json', JSON.stringify(errors), (err) => { if (err) console.error(err) });
   }
+  var errors = {
+    "shardErrors": ShardErrors,
+    "otherErrors": OtherErrors
+  }
+  fs.writeFile('./data/errors.json', JSON.stringify(errors), (err) => { if (err) console.error(err) });
+  fs.writeFile('../../var/www/html/data/marvin/errors.json', JSON.stringify(errors), (err) => { if (err) console.error(err) });
 }

@@ -181,6 +181,7 @@ client.on("ready", async () => {
 	setInterval(function() { UpdateUsersClans() }, 30000);
 	setInterval(function() { CheckMaintenance() }, 1000 * 60 * 5);
   setInterval(function() { Log.SaveDiscordLog(Users, Players, ClanScans, ProcessingClans, ScanLength, LastScanTime, ClansTracked, StartupTime, APIDisabled, client) }, 10000);
+  setInterval(function() { Log.SaveErrorCounter(null) }, 10000);
 
   //Start Up Console Log
   Log.SaveLog("Info", `Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
