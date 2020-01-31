@@ -1,31 +1,31 @@
 //Required Libraraies
-const Request = require('request');
 const fs = require('fs');
 const Bot = require("../bot.js");
 const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
 const Config = require('../data/config.json');
 const fetch = require("node-fetch");
+const Database = require('./Database.js');
 
-async function Register(Players, message, discord_id, username) {
+async function Register(message, discord_id, username) {
   if(!isNaN(username)) {
     await GetMbmDataFromId(username).then(async function(membershipData) {
-      if(membershipData.membershipId) { FinishRegistration(Players, message, discord_id, username, membershipData); }
+      if(membershipData.membershipId) { FinishRegistration(message, discord_id, username, membershipData); }
       else { message.reply('Failed to find membershipId for: ' + membershipData); console.log(membershipData); }
     });
   }
   else {
     await GetMbmId(encodeURIComponent(username)).then(async function(membershipData) {
       if(membershipData === "Too many results") {
-        message.reply('There were too many results... \n\n1. Goto https://guardianstats.com and login there. \n2. Then open the settings wheel and click "Get memebership ID". \n3. Once you have that ID then just use the command like this `~Register 1234567890`.');
+        message.reply('There were too many results... \n\n1. Goto https://guardianstats.com and login there. \n2. Then if required choose a platform. \n3. If not then just click your name next to the setting wheel which will reveal your membershipId. \n4. Once you have copied that ID then just use the command like this `~Register 1234567890`.');
       }
       else if(membershipData === "Not found") {
-        message.reply('No users with that name found... Try this: \n\n1. Goto https://guardianstats.com and login there. \n2. Then open the settings wheel and click "Get memebership ID". \n3. Once you have that ID then just use the command like this `~Register 1234567890`.');
+        message.reply('No users with that name found... Try this: \n\n1. Goto https://guardianstats.com and login there. \n2. Then if required choose a platform. \n3. If not then just click your name next to the setting wheel which will reveal your membershipId. \n4. Once you have copied that ID then just use the command like this `~Register 1234567890`.');
       }
       else {
-        try { FinishRegistration(Players, message, discord_id, username, membershipData); }
+        try { FinishRegistration(message, discord_id, username, membershipData); }
         catch (err) {
-          message.reply('Sorry an error has occured, this has been logged could you message Terrii#5799 and let him know?');
+          message.reply('Sorry an error has occured, this has been logged!');
           Log.SaveLog("Error", membershipData + " - " + err);
           console.log(membershipData);
         }
@@ -34,23 +34,17 @@ async function Register(Players, message, discord_id, username) {
   }
 }
 
-function FinishRegistration(Players, message, discord_id, username, membershipData) {
-  if(isRegistered(Players, discord_id)) {
-    for(var i in Players) {
-      if(Players[i].discord_id === discord_id) {
-        Log.SaveLog("Account", Players[i].username + " has changed their name to " + membershipData.displayName);
-        Players[i] = { 'discord_id': discord_id, 'username': membershipData.displayName, 'membershipId': membershipData.membershipId, 'platform': membershipData.membershipType };
-        fs.writeFile("./data/players.json", JSON.stringify(Players), (err) => { if (err) console.error(err) });
-        message.reply('Your username has been updated to: ' + membershipData.displayName);
-      }
+async function FinishRegistration(message, discord_id, username, membershipData) {
+  Database.AddTrackedPlayer(discord_id, membershipData, function(isError, isAdded, isUpdated) {
+    if(!isError) {
+      if(isAdded) { Log.SaveLog("Account", membershipData.displayName + " has just registered!"); message.reply('Your username has been set to: ' + membershipData.displayName); }
+      if(isUpdated) { Log.SaveLog("Account", membershipData.displayName + " has updated their details!"); message.reply('Your username has been updated to: ' + membershipData.displayName); }
     }
-  }
-  else {
-    Log.SaveLog("Account", membershipData.displayName + " has just registered!");
-    Players.push({ 'discord_id': discord_id, 'username': membershipData.displayName, 'membershipId': membershipData.membershipId, 'platform': membershipData.membershipType });
-    fs.writeFile("./data/players.json", JSON.stringify(Players), (err) => { if (err) console.error(err) });
-    message.reply('Your username has been set to: ' + membershipData.displayName);
-  }
+    else {
+      Log.SaveError(`Failed to set username for: ${ membershipData.displayName }, Discord: ${ message.author.name } (${ message.author.id })`);
+      message.reply('Failed to set your username to: ' + membershipData.displayName + ' this has been logged.');
+    }
+  });
 }
 
 async function GetMbmId(displayName) {
@@ -95,6 +89,5 @@ async function GetMbmDataFromId(mbmId) {
     return JSON.stringify(response);
   }
 }
-function isRegistered(Players, discord_id) { if(Players.find(player => player.discord_id === discord_id)) { return true } else { return false } }
 
 module.exports = Register;

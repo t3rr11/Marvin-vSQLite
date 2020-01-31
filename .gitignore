@@ -2,9 +2,7 @@
 
 # dependencies
 /node_modules
-/app/node_modules
-/tool/node_modules
-/data
+/app
 /.pnp
 .pnp.js
 

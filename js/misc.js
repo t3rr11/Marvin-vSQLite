@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
+const Long = require('long');
 const Bot = require("../bot.js");
-module.exports = { GetDateString, GetReadableDateTime, formatTime, IsJson, AddCommas, DeleteMessages, WriteAnnoucement, WriteCustomAnnoucement, GetClanID, GetMembershipID, getDefaultChannel };
+module.exports = { GetDateString, GetReadableDateTime, GetReadableDate, formatTime, IsJson, AddCommas, DeleteMessages, WriteAnnoucement, WriteCustomAnnoucement, GetClanID, GetMembershipID, getDefaultChannel, cleanString };
 
 function AddCommas(x) { try { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") } catch (err) { return x } }
 function IsJson(str) { try { JSON.parse(str); } catch (e) { return false; } return true; }
@@ -8,7 +9,7 @@ function IsJson(str) { try { JSON.parse(str); } catch (e) { return false; } retu
 function GetDateString() {
   var d = new Date();
   var day = d.getDate();
-  var month = d.getMonth();
+  var month = d.getMonth() + 1;
   var year = d.getFullYear();
   var hour = d.getHours();
   var minute = d.getMinutes();
@@ -24,7 +25,7 @@ function GetDateString() {
 function GetReadableDateTime() {
   var d = new Date();
   var day = d.getDate();
-  var month = d.getMonth();
+  var month = d.getMonth() + 1;
   var year = d.getFullYear();
   var hour = d.getHours();
   var minute = d.getMinutes();
@@ -35,6 +36,22 @@ function GetReadableDateTime() {
   if(minute.toString().length == 1){ minute = '0' + minute }
   if(seconds.toString().length == 1){ seconds = '0' + seconds }
   var dateString = day + "-" + month + "-" + year + " " + hour + ":" + minute + ":" + seconds;
+  return dateString;
+}
+function GetReadableDate() {
+  var d = new Date();
+  var day = d.getDate();
+  var month = d.getMonth() + 1;
+  var year = d.getFullYear();
+  var hour = d.getHours();
+  var minute = d.getMinutes();
+  var seconds = d.getSeconds();
+  if(day.toString().length == 1){ day = '0' + day }
+  if(month.toString().length == 1){ month = '0' + month }
+  if(hour.toString().length == 1){ hour = '0' + hour }
+  if(minute.toString().length == 1){ minute = '0' + minute }
+  if(seconds.toString().length == 1){ seconds = '0' + seconds }
+  var dateString = day + "-" + month + "-" + year;
   return dateString;
 }
 function formatTime(TimeinSeconds) {
@@ -118,4 +135,9 @@ function getDefaultChannel(guild) {
    .sort((a, b) => a.position - b.position ||
      Long.fromString(a.id).sub(Long.fromString(b.id)).toNumber())
    .first();
+}
+function cleanString(input) {
+  var output = "";
+  for(var i=0; i<input.length; i++) { if (input.charCodeAt(i) <= 127) { output += input.charAt(i); } }
+  return output;
 }

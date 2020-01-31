@@ -1,1 +1,1 @@
-nodemon --ignore '*.json' --ignore 'app/'
+nodemon --ignore '*.json' --ignore 'app/' --max-old-space-size=8192
