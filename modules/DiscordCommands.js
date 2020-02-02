@@ -11,7 +11,7 @@ const Database = require("./Database");
 //Exports
 module.exports = {
   Help, BroadcastsHelp, Status, Request,
-  GetClansTracked, GlobalRankings, Rankings, GlobalDryStreak, GetTrackedItems, DryStreak,
+  GetTrackedClans, GlobalRankings, Rankings, GlobalDryStreak, GetTrackedItems, DryStreak,
   Profile, GetTrackedTitles, ForceFullScan, ToggleWhitelist, RenewLeadership, TransferLeadership,
   DisplayClanRankings
 };

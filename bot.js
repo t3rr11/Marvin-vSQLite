@@ -260,7 +260,7 @@ client.on("message", async message => {
         else if(command === "~SUNDIAL") { DiscordCommands.Rankings("sundial", message); }
         else if(command === "~FRACTALINE") { DiscordCommands.Rankings("fractaline", message); }
         else if(command === "~TRIUMPH SCORE" || command === "~TRIUMPHSCORE") { DiscordCommands.Rankings("triumphScore", message); }
-        else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME") { DiscordCommands.Rankings("totalTime", message);  }
+        else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME" || command === "~TIME") { DiscordCommands.Rankings("totalTime", message);  }
         else if(command === "~SEASON RANKS" || command === "~SEASONRANKS" || command === "~SEASON RANK" || command === "~SEASONRANK") { DiscordCommands.Rankings("seasonRank", message); }
         else if(command === "~ITEMS") { DiscordCommands.GetTrackedItems(message); }
         else if(command === "~TITLES") { DiscordCommands.GetTrackedTitles(message); }
@@ -278,7 +278,7 @@ client.on("message", async message => {
         else if(command === "~TOGGLE WHITELIST") { DiscordCommands.ToggleWhitelist(message); }
         else if(command === "~SET CLAN") { ManageClans.RegisterClan(message); }
         else if(command === "~DELETE CLAN") { ManageClans.UserDeleteClan(message); }
-        else if(command === "~TRACKED CLANS" || command === "CLANS TRACKED") { DiscordCommands.GetTrackedClans(message); }
+        else if(command === "~TRACKED CLANS" || command === "~CLANS TRACKED") { DiscordCommands.GetTrackedClans(message); }
         else if(command === "~REAUTH") { DiscordCommands.RenewLeadership(message); }
 
         //Globals
@@ -302,7 +302,7 @@ client.on("message", async message => {
     catch (err) {
       try { message.reply("Missing permissions."); }
       catch (err) { Log.SaveError("Failed to send permissions message due to missing permissions... Duh."); }
-      Log.SaveError("Failed to send message due to missing permissions."); 
+      Log.SaveError("Failed to send message due to missing permissions.");
     }
   }
 });

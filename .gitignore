@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /app
+/data/status.json
 /.pnp
 .pnp.js
 
