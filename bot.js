@@ -14,7 +14,7 @@ let DiscordCommands = require(__dirname + '/modules/DiscordCommands.js');
 let ClanData = require(__dirname + '/modules/ClanData.js');
 let Register = require(__dirname + '/modules/Register.js');
 let ManageClans = require(__dirname + '/modules/ManageClans.js');
-let Announcements = require(__dirname + '/modules/Announcements.js');
+let Broadcasts = require(__dirname + '/modules/Broadcasts.js');
 
 //Data
 var Users = [];
@@ -242,19 +242,13 @@ client.on("message", async message => {
         else if(command === "~TRACKED CLANS") { DiscordCommands.GetTrackedClans(message); }
         else if(command === "~REAUTH") { DiscordCommands.RenewLeadership(message); }
 
-        //Announcements and Broadcasts
-        else if(command.startsWith("~SET BROADCASTS ")) { Announcements.SetupBroadcasts(message); }
-        else if(command.startsWith("~SET ANNOUNCEMENTS ")) { Announcements.SetupAnnouncements(message); }
-        else if(command.startsWith("~FILTER ")) { Announcements.AddToBlacklist(message, default_command.substr("~FILTER ".length)); }
-        else if(command.startsWith("~WHITELIST ")) { Announcements.AddToWhitelist(message, default_command.substr("~WHITELIST ".length)); }
-        else if(command === "~ANNOUNCEMENTS HELP") { DiscordCommands.AnnouncementsHelp(message); }
+        //Broadcasts
+        else if(command.startsWith("~SET BROADCASTS ")) { Broadcasts.SetupBroadcasts(message); }
+        else if(command.startsWith("~FILTER ")) { Broadcasts.AddToBlacklist(message, default_command.substr("~FILTER ".length)); }
+        else if(command.startsWith("~WHITELIST ")) { Broadcasts.AddToWhitelist(message, default_command.substr("~WHITELIST ".length)); }
         else if(command === "~BROADCASTS HELP") { DiscordCommands.BroadcastsHelp(message); }
-        else if(command === "~REMOVE BROADCASTS") { Announcements.RemoveBroadcasts(message); }
-        else if(command === "~REMOVE ANNOUNCEMENTS") { Announcements.RemoveAnnouncements(message); }
-        else if(command === "~DISABLE ANNOUNCEMENTS") { Announcements.DisableAnnouncements(message); }
-        else if(command === "~ENABLE ANNOUNCEMENTS") { Announcements.EnableAnnouncements(message); }
+        else if(command === "~REMOVE BROADCASTS") { Broadcasts.RemoveBroadcasts(message); }
         else if(command === "~SET BROADCASTS") { message.reply("Please set the broadcasts channel by tagging it in the message. E.g: `~Set Broadcasts #general`"); }
-        else if(command === "~SET ANNOUNCEMENTS") { message.reply("Please set the announcements channel by tagging it in the message. E.g: `~Set Announcements #general`"); }
         else if(command === "~TOGGLE WHITELIST") { DiscordCommands.ToggleWhitelist(message); }
 
         //Rankings
@@ -268,9 +262,13 @@ client.on("message", async message => {
         else if(command === "~COS" || command === "~CROWN") { DiscordCommands.Rankings("sorrows", message); }
         else if(command === "~GOS" || command === "~GARDEN") { DiscordCommands.Rankings("garden", message); }
         else if(command === "~SUNDIAL") { DiscordCommands.Rankings("sundial", message); }
+        else if(command === "~FRACTALINE") { DiscordCommands.Rankings("fractaline", message); }
         else if(command === "~TRIUMPH SCORE" || command === "~TRIUMPHSCORE") { DiscordCommands.Rankings("triumphScore", message); }
         else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME") { DiscordCommands.Rankings("totalTime", message);  }
         else if(command === "~SEASON RANKS" || command === "~SEASONRANKS" || command === "~SEASON RANK" || command === "~SEASONRANK") { DiscordCommands.Rankings("seasonRank", message); }
+
+        //Clan Rankings
+        else if(command === "~CLANRANK FRACTALINE") {  DiscordCommands.DisplayClanRankings("fractaline", message);  }
 
         //Commands
         else if(command.startsWith("~REGISTER ")) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)); } else { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }

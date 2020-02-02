@@ -69,14 +69,16 @@ async function CheckClanMembers(guild_id, client) {
         }
         //If that was the first time to scan, change the value to false as we only want to scan online players after the first scan to save on requests.
         if(data.firstScan === "true") {
-          Database.UpdateClanFirstScan(guild_id, async function(isError, displayName) {
+          Database.UpdateClanFirstScan(guild_id, async function(isError, sendMsg) {
             if(!isError) {
-              if(new Date() - new Date(parseInt(data.joinedOn)) < 1800000) {
-                const embed = new Discord.RichEmbed().setColor(0xFFE000).setAuthor("Clan Broadcast").setDescription("Your clan has finished loading! If this is the first time you are free to use commands now, If not then i most likely pushed an update that required me to force a rescan of every clan.").setFooter(Config.defaultFooter, Config.defaultLogoURL).setTimestamp();
-                try { var guild = client.guilds.get(data.guild_id); Misc.getDefaultChannel(guild).send({embed}); } catch(err) { console.log(`Failed to broadcast to ${ data.guild_id } because of ${ err }`); }
-                Log.SaveLog("Info", `${ guild_id } has finished loading for the first time!`);
+              if(sendMsg) {
+                if(new Date() - new Date(parseInt(data.joinedOn)) < 1800000) {
+                  const embed = new Discord.RichEmbed().setColor(0xFFE000).setAuthor("Clan Broadcast").setDescription("Your clan has finished loading! If this is the first time you are free to use commands now, If not then i most likely pushed an update that required me to force a rescan of every clan.").setFooter(Config.defaultFooter, Config.defaultLogoURL).setTimestamp();
+                  try { var guild = client.guilds.get(data.guild_id); Misc.getDefaultChannel(guild).send({embed}); } catch(err) { console.log(`Failed to broadcast to ${ data.guild_id } because of ${ err }`); }
+                  Log.SaveLog("Info", `${ guild_id } has finished loading for the first time!`);
+                }
+                else { Log.SaveLog("Info", `${ guild_id } has finished re-scanning!`); }
               }
-              else { Log.SaveLog("Info", `${ guild_id } has finished re-scanning!`); }
             }
             else { Log.SaveError(`Failed to update clan details for ${ guild_id }`); }
           });
@@ -351,13 +353,15 @@ function GetSeasonal(response) {
   var characterIds = response.playerData.profile.data.characterIds;
   var season8Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["1628407317"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["3184735011"].level; season8Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
   var season9Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["3256821400"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["2140885848"].level; season9Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
+  var fractalineDonated = response.playerData.profileRecords.data.records["3393252660"].intervalObjectives[3].progress;
 
   //Sundial
   var sundialCompletions = response.playerData.profileRecords.data.records["3801239892"].objectives[0].progress;
 
   return {
     "seasonRank": season9Rank,
-    "sundial": sundialCompletions
+    "sundial": sundialCompletions,
+    "fractalineDonated": fractalineDonated
   }
 }
 function GetOthers(response) {
@@ -451,7 +455,10 @@ function SendBroadcast(data, type, broadcast, count, client) {
           var message = null;
           if(type === "item") {
             if(count === -1) { message = `${ data.AccountInfo.displayName } has obtained ${ broadcast }`; }
-            else { message = `${ data.AccountInfo.displayName } has obtained ${ broadcast } in ${ count } ${ count > 1 ? "raids!" : "raid!" }` }
+            else {
+              if(data.AccountInfo.membershipId === "4611686018467191987") { message = `I might need to double check this but i think ${ data.AccountInfo.displayName } has finally obtained ${ broadcast } in ${ count } ${ count > 1 ? "raids!" : "raid!" }` }
+              else { message = `${ data.AccountInfo.displayName } has obtained ${ broadcast } in ${ count } ${ count > 1 ? "raids!" : "raid!" }` }
+            }
           }
           else if(type === "title") { message = `${ data.AccountInfo.displayName } has obtained the ${ broadcast } title!` }
           Database.GetRegisteredClansFromDB(function(isError, Clans) {

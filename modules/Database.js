@@ -9,10 +9,10 @@ module.exports = {
   GetRegisteredClansFromDB, GetRegisteredUsersFromDB, GetTrackedPlayersFromDB, GetClanDetails, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
   GetGlobalDryStreak, GetFromBroadcasts, GetFromClanBroadcasts, GetClanDryStreaks,
   CheckRegistered, CheckNewBroadcast, CheckFirstBroadcast,
-  AddTrackedPlayer, AddClanBroadcastsChannel, AddClanAnnouncementChannel, AddNewClan, AddClanToExisting, AddNewBroadcast,
+  AddTrackedPlayer, AddClanBroadcastsChannel, AddNewClan, AddClanToExisting, AddNewBroadcast,
   UpdateClanDetails, UpdateClanMembers, GetPlayerDetails, UpdatePlayerDetails, UpdateClanFirstScan,
-  RemoveClanBroadcastsChannel, RemoveClanAnnouncementChannel, RemoveClan,
-  DisableClanAnnouncementChannel, EnableClanAnnouncementChannel, EnableWhitelist, DisableWhitelist, ToggleWhitelistFilter, ToggleBlacklistFilter, DeleteClan, ForceFullScan, ReAuthClan, TransferClan,
+  RemoveClanBroadcastsChannel, RemoveClan,
+  EnableWhitelist, DisableWhitelist, ToggleWhitelistFilter, ToggleBlacklistFilter, DeleteClan, ForceFullScan, ReAuthClan, TransferClan,
   DisableTracking, EnableTracking
 };
 
@@ -257,15 +257,6 @@ function AddClanBroadcastsChannel(channel_Id, guild_id, callback) {
     else { callback(false); }
   });
 }
-function AddClanAnnouncementChannel(channel_Id, guild_id, callback) {
-  var sql = "UPDATE clans SET announcement_channel = ? WHERE guild_id = ?";
-  var inserts = [channel_Id, guild_id];
-  sql = db.format(sql, inserts);
-  db.query(sql, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error updating announcements channel for: ${ guild_id }, Error: ${ error }`); callback(true); }
-    else { callback(false); }
-  });
-}
 function AddClanToExisting(guild_id, clan_ids, callback) {
   var sql = `UPDATE clans SET server_clan_ids = "${ clan_ids }", firstScan = ?, joinedOn = "${ new Date().getTime() }" WHERE guild_id = ?`;
   var inserts = ['true', guild_id];
@@ -304,15 +295,6 @@ function RemoveClanBroadcastsChannel(guild_id, callback) {
     else { callback(false); }
   });
 }
-function RemoveClanAnnouncementChannel(guild_id, callback) {
-  var sql = "UPDATE clans SET announcement_channel = ? WHERE guild_id = ?";
-  var inserts = ['null', guild_id];
-  sql = db.format(sql, inserts);
-  db.query(sql, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error removing announcements channel for: ${ guild_id }, Error: ${ error }`); callback(true); }
-    else { callback(false); }
-  });
-}
 function RemoveClan(guild_id, clan_id, callback) {
   var sql = "SELECT * FROM clans WHERE guild_id = ?";
   var inserts = [guild_id];
@@ -344,12 +326,23 @@ function UpdateClanDetails(Data, callback) {
   });
 }
 function UpdateClanFirstScan(guild_id, callback) {
-  var sql = "UPDATE clans SET firstScan = ? WHERE guild_id = ?";
-  var inserts = ["false", guild_id];
+  var sql = "SELECT * FROM clans WHERE guild_id = ?";
+  var inserts = [guild_id];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error setting first scan to false on guild: ${ guild_id }, Error: ${ error }`); callback(true); }
-    else { callback(false); }
+    if(!!error) { Log.SaveError(`Error getting clan: ${ clan_id } from guild: ${ guild_id }, Error: ${ error }`); callback(true); }
+    else {
+      if(rows[0].firstScan === "true") {
+        var sqlu = "UPDATE clans SET firstScan = ? WHERE guild_id = ?";
+        var inserts = ["false", guild_id];
+        sqlu = db.format(sqlu, inserts);
+        db.query(sqlu, function(error, rows, fields) {
+          if(!!error) { Log.SaveError(`Error setting first scan to false on guild: ${ guild_id }, Error: ${ error }`); callback(true, false); }
+          else { callback(false, true); }
+        });
+      }
+      else { callback(false, false); }
+    }
   });
 }
 function UpdateClanMembers(ClanMembers, clanId) {
@@ -384,7 +377,7 @@ function UpdateClanMembers(ClanMembers, clanId) {
   });
 }
 function UpdatePlayerDetails(Data, callback) {
-  var sql = `UPDATE playerInfo SET clanId = ?, displayName = ?, timePlayed = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }", infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, wellsCompleted = ?, epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, lastPlayed = ?, firstLoad = ? WHERE membershipId = ?`;
+  var sql = `UPDATE playerInfo SET clanId = ?, displayName = ?, timePlayed = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }", infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, fractalineDonated = ?, wellsCompleted = ?, epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, lastPlayed = ?, firstLoad = ? WHERE membershipId = ?`;
   var inserts = [
     Data.AccountInfo.clanId,
     Misc.cleanString(Data.AccountInfo.displayName),
@@ -400,6 +393,7 @@ function UpdatePlayerDetails(Data, callback) {
     Data.Rankings.ibWins,
     Data.Seasonal.seasonRank,
     Data.Seasonal.sundial,
+    Data.Seasonal.fractalineDonated,
     Data.Others.wellsRankings,
     Data.Others.epRankings,
     Data.Others.menageire,
@@ -421,24 +415,6 @@ function UpdatePlayerDetails(Data, callback) {
 }
 
 //Others
-function DisableClanAnnouncementChannel(guild_id, callback) {
-  var sql = "UPDATE clans SET enable_announcements = ? WHERE guild_id = ?";
-  var inserts = ['false', guild_id];
-  sql = db.format(sql, inserts);
-  db.query(sql, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error disabling clan announcements for: ${ clanId }, Error: ${ error }`); callback(true); }
-    else { callback(false); }
-  });
-}
-function EnableClanAnnouncementChannel(guild_id, callback) {
-  var sql = "UPDATE clans SET enable_announcements = ? WHERE guild_id = ?";
-  var inserts = ['true', guild_id];
-  sql = db.format(sql, inserts);
-  db.query(sql, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error enabling clan announcements for: ${ clanId }, Error: ${ error }`); callback(true); }
-    else { callback(false); }
-  });
-}
 function EnableWhitelist(guild_id, callback) {
   var sql = "UPDATE clans SET enable_whitelist = ? WHERE guild_id = ?";
   var inserts = ['true', guild_id];

@@ -8,7 +8,7 @@ const Config = require('../data/config.json');
 const fetch = require("node-fetch");
 const Database = require('./Database.js');
 
-module.exports = { SetupBroadcasts, RemoveBroadcasts, AddToBlacklist, AddToWhitelist, SetupAnnouncements, RemoveAnnouncements, DisableAnnouncements, EnableAnnouncements };
+module.exports = { SetupBroadcasts, RemoveBroadcasts, AddToBlacklist, AddToWhitelist };
 
 async function SetupBroadcasts(message) {
   Database.CheckRegistered(message.author.id, function(isError, isFound, data) {
@@ -26,7 +26,7 @@ async function SetupBroadcasts(message) {
                       message.channel.send(`Successfully set <#${ channel_Id }> as the broadcasts channel!`);
                     } else { Log.SaveError("Failed to set broadcasts channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
                   });
-                } else { message.reply("Please set the broadcasts channel by tagging it in the message. E.g: `~Set Announcements #general`"); }
+                } else { message.reply("Please set the broadcasts channel by tagging it in the message. E.g: `~Set Broadcasts #general`"); }
               } else { message.reply("Only discord administrators or the one who linked this server to the clan edit the clan."); }
             } else { message.reply("Please register a clan to track first. Use: `~Set clan`"); }
           } else { Log.SaveError("Failed to set broadcasts channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
@@ -55,97 +55,6 @@ async function RemoveBroadcasts(message) {
         });
       } else { message.reply("Please register first. Use: `~Register example`"); }
     } else { Log.SaveError("Failed to remove broadcasts channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-  });
-}
-async function SetupAnnouncements(message) {
-  Database.CheckRegistered(message.author.id, function(isError, isFound, data) {
-    if(!isError) {
-      if(isFound) {
-        Database.GetClanDetails(message.guild.id, false, function(isError, isFound, data) {
-          if(!isError) {
-            if(isFound) {
-              if(data.creator_id === message.author.id || message.member.hasPermission("ADMINISTRATOR")) {
-                var channel_Id = null; try { channel_Id = message.mentions.channels.first().id } catch (err) {  }
-                if(channel_Id !== null) {
-                  Database.AddClanAnnouncementChannel(channel_Id, message.guild.id, function(isError) {
-                    if(!isError) {
-                      Log.SaveLog("Clans", data.clan_name + " has added an announcements channel: " + channel_Id);
-                      message.channel.send(`Successfully set <#${ channel_Id }> as the announcements channel!`);
-                    } else { Log.SaveError("Failed to set announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-                  });
-                } else { message.reply("Please set the announcements channel by tagging it in the message. E.g: `~Set Announcements #general`"); }
-              } else { message.reply("Only discord administrators or the one who linked this server to the clan edit the clan."); }
-            } else { message.reply("Please register a clan to track first. Use: `~Set clan`"); }
-          } else { Log.SaveError("Failed to set announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-        });
-      } else { message.reply("Please register first. Use: `~Register example`"); }
-    } else { Log.SaveError("Failed to set announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-  });
-}
-async function RemoveAnnouncements(message) {
-  Database.CheckRegistered(message.author.id, function(isError, isFound, data) {
-    if(!isError) {
-      if(isFound) {
-        Database.GetClanDetails(message.guild.id, false, function(isError, isFound, data) {
-          if(!isError) {
-            if(isFound) {
-              if(data.creator_id === message.author.id || message.member.hasPermission("ADMINISTRATOR")) {
-                Database.RemoveClanAnnouncementChannel(message.guild.id, function(isError) {
-                  if(!isError) {
-                    Log.SaveLog("Clans", data.clan_name + " has removed their an announcements channel");
-                    message.channel.send(`Successfully removed the announcements channel!`);
-                  } else { Log.SaveError("Failed to remove announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-                });
-              } else { message.reply("Only discord administrators or the one who linked this server to the clan edit the clan."); }
-            } else { message.reply("Please register a clan to track first. Use: `~Set clan`"); }
-          } else { Log.SaveError("Failed to remove announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-        });
-      } else { message.reply("Please register first. Use: `~Register example`"); }
-    } else { Log.SaveError("Failed to remove announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-  });
-}
-async function DisableAnnouncements(message) {
-  Database.CheckRegistered(message.author.id, function(isError, isFound, data) {
-    if(!isError) {
-      if(isFound) {
-        Database.GetClanDetails(message.guild.id, false, function(isError, isFound, data) {
-          if(!isError) {
-            if(isFound) {
-              if(data.creator_id === message.author.id || message.member.hasPermission("ADMINISTRATOR")) {
-                Database.DisableClanAnnouncementChannel(message.guild.id, function(isError) {
-                  if(!isError) {
-                    Log.SaveLog("Clans", data.clan_name + " has disabled their an announcements channel");
-                    message.channel.send(`Successfully disabled the announcements channel!`);
-                  } else { Log.SaveError("Failed to disabled announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-                });
-              } else { message.reply("Only discord administrators or the one who linked this server to the clan edit the clan."); }
-            } else { message.reply("Please register a clan to track first. Use: `~Set clan`"); }
-          } else { Log.SaveError("Failed to disabled announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-        });
-      } else { message.reply("Please register first. Use: `~Register example`"); }
-    } else { Log.SaveError("Failed to disabled announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-  });
-}
-async function EnableAnnouncements(message) {
-  Database.CheckRegistered(message.author.id, function(isError, isFound, data) {
-    if(!isError) {
-      if(isFound) {
-        Database.GetClanDetails(message.guild.id, false, function(isError, isFound, data) {
-          if(!isError) {
-            if(isFound) {
-              if(data.creator_id === message.author.id || message.member.hasPermission("ADMINISTRATOR")) {
-                Database.EnableClanAnnouncementChannel(message.guild.id, function(isError) {
-                  if(!isError) {
-                    Log.SaveLog("Clans", data.clan_name + " has enabled their an announcements channel");
-                    message.channel.send(`Successfully enabled the announcements channel!`);
-                  } else { Log.SaveError("Failed to enabled announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-                });
-              } else { message.reply("Only discord administrators or the one who linked this server to the clan edit the clan."); }
-            } else { message.reply("Please register a clan to track first. Use: `~Set clan`"); }
-          } else { Log.SaveError("Failed to enabled announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
-        });
-      } else { message.reply("Please register first. Use: `~Register example`"); }
-    } else { Log.SaveError("Failed to enabled announcement channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
   });
 }
 async function AddToBlacklist(message, item) {

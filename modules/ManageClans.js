@@ -85,7 +85,7 @@ function AddClan(message, clan_id) {
                         else { message.reply(`There was an error trying to add clan. Sorry please try again.`); }
                       });
                     }
-                    else { message.reply(`${ Clan.name } (${ clan.groupId }) is already being tracked by this server. Whatcha doing willis?`); }
+                    else { message.reply(`${ Clan.name } (${ Clan.groupId }) is already being tracked by this server. Whatcha doing willis?`); }
                   }
                   else { console.log(`Could not find clan with the ID: ${ clan_id }`); }
                 }

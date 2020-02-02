@@ -10,10 +10,10 @@ const Database = require("./Database");
 
 //Exports
 module.exports = {
-  Help, AnnouncementsHelp, BroadcastsHelp, Status, Request,
-  GetClansTracked, GetTrackedClans, WriteToServer, WriteToAllServers, WriteToSpecificServer,
-  GlobalRankings, Rankings, GlobalDryStreak, GetTrackedItems, DryStreak, Profile,
-  GetTrackedTitles, ForceFullScan, ToggleWhitelist, RenewLeadership, TransferLeadership
+  Help, BroadcastsHelp, Status, Request,
+  GetClansTracked, GetTrackedClans, GlobalRankings, Rankings, GlobalDryStreak, GetTrackedItems, DryStreak,
+  Profile, GetTrackedTitles, ForceFullScan, ToggleWhitelist, RenewLeadership, TransferLeadership,
+  DisplayClanRankings
 };
 
 //Important
@@ -21,23 +21,14 @@ function Help(message) {
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Hey there! I am Marvin. Here is a list of my commands! The globals are only of tracked clans. Not whole population.")
-  .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`, `~Drystreak 1000 Voices`, `~Drystreak Anarchy`")
+  .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`")
   .addField("Raids", "`~LW`, `~SoTP`, `~CoS`, `~GoS`")
   .addField("Items / Titles", "`~Items`, `~Titles`, `~Item Example`, `~Title Example`")
-  .addField("Seasonal", "`~Season Rank`, `~Sundial`")
+  .addField("Seasonal", "`~Season Rank`, `~Sundial`, `~Fractaline`")
+  .addField("Clan Rankings", "`~Clanrank Fractaline`")
   .addField("Globals", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreak 1000 Voices`, `~Global Drystreak Anarchy`")
-  .addField("Others", "`~Donate`, `~Broadcasts Help`, `~Announcements Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`, `~Delete Clan`")
+  .addField("Others", "`~Donate`, `~Broadcasts Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`, `~Delete Clan`, `~Drystreak 1000 Voices`, `~Drystreak Anarchy`")
   .addField("Request", "If you see something that isn't there that you'd like me to track request it like this: `~request I would like to see Marvin track season ranks!`")
-  .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-  .setTimestamp()
-  message.channel.send({embed});
-}
-function AnnouncementsHelp(message) {
-  const embed = new Discord.RichEmbed()
-  .setColor(0x0099FF)
-  .setAuthor("Announcements Help Menu")
-  .setDescription("By default important messages from the creator of Marvin will be sent to your default channel. This is usually where you see those 'has joined the server' messages. You can change this by setting an announcement channel. Optionally if you never want to see updates from me you can disable announcements.")
-  .addField("Announcement Commands", "`~Set Announcements #channelName` \n`~Remove Announcements` \n`~Disable Announcements` \n`~Enable Announcements`")
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});
@@ -134,99 +125,6 @@ function GetTrackedClans(message) {
     message.channel.send({embed});
   });
 }
-function WriteToServer(message, fullMessage, client) {
-  //Example message: ~write 630967941076221954 631357107651870733 [Message Text]
-  if(message.author.id == "194972321168097280") {
-    try {
-      var semiMessage = fullMessage.substr("~write ".length);
-      var guildInfo = semiMessage.split(" ", 2);
-      var startMsg = fullMessage.indexOf('[');
-      var finishMsg = fullMessage.indexOf(']');
-      var messageToGuild = fullMessage.substr(startMsg + 1, finishMsg - startMsg - 1);
-
-      const embed = new Discord.RichEmbed()
-      .setColor(0x0099FF)
-      .setAuthor(`${ message.author.username }#${ message.author.discriminator } says:`)
-      .setDescription(messageToGuild)
-      .setFooter("I can't see replies to this", Config.defaultLogoURL)
-      .setTimestamp()
-      client.guilds.get(guildInfo[0]).channels.get(guildInfo[1]).send({embed});
-    }
-    catch (err) { Log.SaveLog("Error", `Error: Failed to send custom written message to channel: ${ guildInfo[1] } in guild: ${ guildInfo[0] }`); }
-  }
-  else { message.reply("You are not allowed to use this command. Sorry."); }
-}
-function WriteToAllServers(message, fullMessage, client) {
-  if(message.author.id == "194972321168097280") {
-    Database.GetRegisteredClansFromDB(function(isError, Clans) {
-      if(!isError) {
-        for(var i in Clans) {
-          if(Clans[i].enable_announcements === "true") {
-            try {
-              var announcement = fullMessage.substr("~writeall ".length);
-              var guild_id = Clans[i].guild_id;
-              var guild = client.guilds.get(guild_id);
-              var default_channel = Misc.getDefaultChannel(guild).id;
-              if(Clans[i].announcement_channel !== "null") { default_channel = Clans[i].announcement_channel; }
-              const embed = new Discord.RichEmbed()
-              .setColor(0x0099FF)
-              .setAuthor(`${ message.author.username }#${ message.author.discriminator } says:`)
-              .setDescription(announcement)
-              .setFooter("I can't see replies to this", Config.defaultLogoURL)
-              .setTimestamp()
-              client.guilds.get(guild_id).channels.get(default_channel).send({embed});
-              console.log(`Wrote message to channel: ${ default_channel } in guild: ${ guild_id }`);
-            }
-            catch (err) { Log.SaveLog("Error", `Error: Failed to send custom written message to guild: ${ Clans[i].guild_id }`); }
-          }
-          else { console.log(`${ Clans[i].clan_name } has their announcements disabled.`); }
-        }
-      }
-      else { message.reply("Error grabbing all clans info."); }
-    });
-  }
-  else { message.reply("You are not allowed to use this command. Sorry."); }
-}
-function WriteToSpecificServer(message, fullMessage, client) {
-  if(message.author.id == "194972321168097280") {
-    try {
-      var semiMessage = fullMessage.substr("~writeto ".length);
-      var clan_details = semiMessage.split(" ", 1);
-      var startMsg = fullMessage.indexOf('[');
-      var finishMsg = fullMessage.indexOf(']');
-      var messageToGuild = fullMessage.substr(startMsg + 1, finishMsg - startMsg - 1);
-      Database.GetRegisteredClansFromDB(function(isError, Clans) {
-        if(!isError) {
-          for(var i in Clans) {
-            try {
-              if(Clans[i].clan_id === clan_details[0] || Clans[i].clan_name === clan_details[0]) {
-                if(Clans[i].enable_announcements === "true") {
-                  var guild = client.guilds.get(Clans[i].guild_id);
-                  var default_channel = Misc.getDefaultChannel(guild).id;
-                  if(Clans[i].announcement_channel !== "null") { default_channel = Clans[i].announcement_channel; }
-                  const embed = new Discord.RichEmbed()
-                  .setColor(0x0099FF)
-                  .setAuthor(`${ message.author.username }#${ message.author.discriminator } says:`)
-                  .setDescription(messageToGuild)
-                  .setFooter("I can't see replies to this", Config.defaultLogoURL)
-                  .setTimestamp()
-                  console.log(default_channel);
-                  client.guilds.get(Clans[i].guild_id).channels.get(default_channel).send({embed});
-                  message.reply(`Your message has Successfully been sent to: ${ guild.name }`);
-                }
-                else { message.reply("Message was not sent as they have their announcements channel disabled."); }
-              }
-            }
-            catch (err) { console.log(`Error: Failed to send custom written message to ${ Clans[i].guild_id }`); console.log(err); }
-          }
-        }
-        else { message.reply("Error grabbing all clans info."); }
-      });
-    }
-    catch (err) { Log.SaveLog("Error", `Error: Failed to send custom written message to ${ clan_id }`); }
-  }
-  else { message.reply("You are not allowed to use this command. Sorry."); }
-}
 
 //Rankings
 function Rankings(type, message) {
@@ -241,7 +139,7 @@ function Rankings(type, message) {
               //Get all clan data from playerInfo using server_clan_ids
               var allClanIds = Data.server_clan_ids.split(",");
               Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayRanking(message, type, leaderboards, playerData); } }
+                if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, playerData); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             } else { message.reply("No clan set, to set one use: `~Set clan`"); }
@@ -256,7 +154,7 @@ function Rankings(type, message) {
               //Get all clan data from playerInfo using clan_id
               var allClanIds = Data.server_clan_ids.split(",");
               Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayRanking(message, type, leaderboards, undefined); } }
+                if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, undefined); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             } else { message.reply("No clan set, to set one use: `~Set clan`"); }
@@ -267,7 +165,7 @@ function Rankings(type, message) {
     else { message.reply("Sorry! An error occurred, Please try again..."); }
   });
 }
-function DisplayRanking(message, type, leaderboards, playerData) {
+function DisplayRankings(message, type, leaderboards, playerData) {
   //PvP
   try {
     if(type === "infamy") {
@@ -275,7 +173,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.infamy - a.infamy; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.infamy.push(Misc.AddCommas(top[i].infamy));
         leaderboard.resets.push(top[i].infamyResets);
       }
@@ -284,7 +182,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.infamy.push("", Misc.AddCommas(playerStats.infamy));
           leaderboard.resets.push("", playerStats.infamyResets);
         }
@@ -307,7 +205,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.valor - a.valor; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.valor.push(Misc.AddCommas(top[i].valor));
         leaderboard.resets.push(top[i].valorResets);
       }
@@ -316,7 +214,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.valor.push("", Misc.AddCommas(playerStats.valor));
           leaderboard.resets.push("", playerStats.valorResets);
         }
@@ -339,7 +237,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.glory - a.glory; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.glory.push(Misc.AddCommas(top[i].glory));
       }
 
@@ -347,7 +245,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.glory.push("", Misc.AddCommas(playerStats.glory));
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -368,7 +266,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.ibKills - a.ibKills; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.ibKills.push(Misc.AddCommas(top[i].ibKills));
         leaderboard.ibWins.push(Misc.AddCommas(top[i].ibWins));
       }
@@ -377,7 +275,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.ibKills.push("", Misc.AddCommas(playerStats.ibKills));
           leaderboard.ibWins.push("", Misc.AddCommas(playerStats.ibWins));
         }
@@ -402,7 +300,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.lastWishCompletions - a.lastWishCompletions; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.completions.push(Misc.AddCommas(top[i].lastWishCompletions));
       }
 
@@ -410,7 +308,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.completions.push("", Misc.AddCommas(playerStats.lastWishCompletions));
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -431,7 +329,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.scourgeCompletions - a.scourgeCompletions; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.completions.push(Misc.AddCommas(top[i].scourgeCompletions));
       }
 
@@ -439,7 +337,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.completions.push("", Misc.AddCommas(playerStats.scourgeCompletions));
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -460,7 +358,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.sorrowsCompletions - a.sorrowsCompletions; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.completions.push(Misc.AddCommas(top[i].sorrowsCompletions));
       }
 
@@ -468,7 +366,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.completions.push("", Misc.AddCommas(playerStats.sorrowsCompletions));
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -489,7 +387,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.gardenCompletions - a.gardenCompletions; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.completions.push(Misc.AddCommas(top[i].gardenCompletions));
       }
 
@@ -497,7 +395,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.completions.push("", Misc.AddCommas(playerStats.gardenCompletions));
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -523,7 +421,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
           var itemToFind = message.content.substr("~ITEM ".length);
           if(message.content.substr("~ITEM ".length).toUpperCase() === "JOTUNN") { itemToFind = "JÖTUNN" }
           if(message.content.substr("~ITEM ".length).toUpperCase() === "ALWAYS ON TIME") { itemToFind = "ALWAYS ON TIME (SPARROW)" }
-          if(items[j].toUpperCase() === itemToFind.toUpperCase()) { leaderboard.names.push(leaderboards[i].displayName); }
+          if(items[j].toUpperCase() === itemToFind.toUpperCase()) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); }
         }
       }
       if(leaderboard.names.length === 0) {
@@ -564,7 +462,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         var titles = leaderboards[i].titles.split(",");
         for(j in titles) {
           var titleToFind = message.content.substr("~TITLE ".length);
-          if(titles[j].toUpperCase() === titleToFind.toUpperCase()) { leaderboard.names.push(leaderboards[i].displayName); }
+          if(titles[j].toUpperCase() === titleToFind.toUpperCase()) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); }
         }
       }
       if(leaderboard.names.length === 0) {
@@ -607,7 +505,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.seasonRank - a.seasonRank; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.rank.push(Misc.AddCommas(top[i].seasonRank));
       }
 
@@ -615,7 +513,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.rank.push("", Misc.AddCommas(playerStats.seasonRank));
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -636,7 +534,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.sundialCompletions - a.sundialCompletions; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.completions.push(Misc.AddCommas(top[i].sundialCompletions));
       }
 
@@ -644,7 +542,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.completions.push("", Misc.AddCommas(playerStats.sundialCompletions));
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -660,6 +558,35 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       .setTimestamp()
       message.channel.send({embed});
     }
+    else if(type === "fractaline") {
+      var leaderboard = { "names": [], "donations": [] };
+      leaderboards.sort(function(a, b) { return b.fractalineDonated - a.fractalineDonated; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.donations.push(Misc.AddCommas(top[i].fractalineDonated * 100));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.donations.push("", Misc.AddCommas(playerStats.fractalineDonated * 100));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Fractaline Donations")
+      .addField("Name", leaderboard.names, true)
+      .addField("Fractaline", leaderboard.donations, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
 
     //Others
     else if(type === "triumphScore") {
@@ -667,7 +594,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.triumphScore - a.triumphScore; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.score.push(Misc.AddCommas(top[i].triumphScore));
       }
 
@@ -675,7 +602,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.score.push("", Misc.AddCommas(playerStats.triumphScore));
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -696,7 +623,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return b.timePlayed - a.timePlayed; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.time.push(`${ Misc.AddCommas(Math.round(top[i].timePlayed/60)) } Hrs`);
       }
 
@@ -704,7 +631,7 @@ function DisplayRanking(message, type, leaderboards, playerData) {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
           leaderboard.time.push("", `${ Misc.AddCommas(Math.round(playerStats.timePlayed/60)) } Hrs`);
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -751,7 +678,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     leaderboards.sort(function(a, b) { return b.ibKills - a.ibKills; });
     top = leaderboards.slice(0, 10);
     for(var i in top) {
-      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
       leaderboard.ibKills.push(Misc.AddCommas(top[i].ibKills));
       leaderboard.ibWins.push(Misc.AddCommas(top[i].ibWins));
     }
@@ -760,7 +687,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
       if(playerData !== null) {
         var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
         var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.ibKills.push("", Misc.AddCommas(playerStats.ibKills));
         leaderboard.ibWins.push("", Misc.AddCommas(playerStats.ibWins));
       }
@@ -783,7 +710,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     leaderboards.sort(function(a, b) { return b.seasonRank - a.seasonRank; });
     top = leaderboards.slice(0, 10);
     for(var i in top) {
-      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
       leaderboard.rank.push(Misc.AddCommas(top[i].seasonRank));
     }
 
@@ -791,7 +718,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
       if(playerData !== null) {
         var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
         var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.rank.push("", Misc.AddCommas(playerStats.seasonRank));
       }
       else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -812,7 +739,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     leaderboards.sort(function(a, b) { return b.triumphScore - a.triumphScore; });
     top = leaderboards.slice(0, 10);
     for(var i in top) {
-      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
       leaderboard.score.push(Misc.AddCommas(top[i].triumphScore));
     }
 
@@ -820,7 +747,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
       if(playerData !== null) {
         var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
         var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.score.push("", Misc.AddCommas(playerStats.triumphScore));
       }
       else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -841,7 +768,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     leaderboards.sort(function(a, b) { return b.timePlayed - a.timePlayed; });
     top = leaderboards.slice(0, 10);
     for(var i in top) {
-      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName }`);
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
       leaderboard.time.push(`${ Misc.AddCommas(Math.round(top[i].timePlayed/60)) } Hrs`);
     }
 
@@ -849,7 +776,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
       if(playerData !== null) {
         var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
         var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName }`);
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
         leaderboard.time.push("", `${ Misc.AddCommas(Math.round(playerStats.timePlayed/60)) } Hrs`);
       }
       else { leaderboard.names.push("", `~Register to see your rank`); }
@@ -866,20 +793,105 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     message.channel.send({embed});
   }
 }
+function DisplayClanRankings(type, message) {
+  Database.GetRegisteredClansFromDB(async function(isError, Data) {
+    if(!isError) {
+      //Get all clans.
+      totalTrackedClans = [];
+      connectedClan = null;
+      for(var i in Data) {
+        if(Data[i].guild_id === message.guild.id) { connectedClan = Data[i]; }
+        var clan_id = Data[i].clan_id;
+        var clan_name = Data[i].clan_name;
+        var totalServerIds = Data[i].server_clan_ids.split(",");
+        for(var j in totalServerIds) {
+          if(!totalTrackedClans.find(e => e === totalServerIds[j])) {
+            if(totalServerIds[j] === clan_id) { totalTrackedClans.push({ "clan_id": totalServerIds[j], "clan_name": clan_name }); }
+            else {
+              if(!Data.find(e => e.clan_id === totalServerIds[j])) { totalTrackedClans.push({ "clan_id": totalServerIds[j], "clan_name": null }); }
+              else { var clanData = Data.find(e => e.clan_id === totalServerIds[j]); totalTrackedClans.push({ "clan_id": totalServerIds[j], "clan_name": clanData.clan_name }); }
+            }
+          }
+        }
+      }
+      //Then get data for all those clans.
+      Database.GetGlobalLeaderboards(async function(isError, isFound, leaderboards) {
+        if(!isError) {
+          var clanLeaderboards = [];
+          for(var i in totalTrackedClans) {
+            var totalFractaline = 0;
+            for(var j in leaderboards) {
+              if(leaderboards[j].clan_id === totalTrackedClans[i].clan_id) {
+                totalFractaline = totalFractaline + leaderboards[j].fractalineDonated;
+              }
+            }
+            clanLeaderboards.push({ "clan_id": totalTrackedClans[i].clan_id, "clan_name": totalTrackedClans[i].clan_name, "fractalineDonated": totalFractaline });
+          }
+          //Data is collected, now send to clan rankings.
+          ClanRankings(message, type, clanLeaderboards, totalTrackedClans, connectedClan)
+        }
+        else { message.reply("Sorry! An error occurred, Please try again..."); }
+      });
+    }
+  });
+}
+async function ClanRankings(message, type, leaderboards, clanData, connectedClan) {
+  if(type === "fractaline") {
+    var leaderboard = { "names": [], "fractalineDonated": [] };
+    leaderboards.sort(function(a, b) { return b.fractalineDonated - a.fractalineDonated; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      if(top[i].clan_name === null) {
+        var clanInfo = await GetClanName(top[i].clan_id);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ clanInfo.clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+        leaderboard.fractalineDonated.push(Misc.AddCommas(top[i].fractalineDonated * 100));
+      }
+      else {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+        leaderboard.fractalineDonated.push(Misc.AddCommas(top[i].fractalineDonated * 100));
+      }
+    }
+
+    try {
+      if(connectedClan !== null) {
+        var clanStats = leaderboards.find(e => e.clan_id === connectedClan.clan_id);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.clan_id === connectedClan.clan_id));
+        leaderboard.names.push("", `${ rank+1 }: ${ connectedClan.clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+        leaderboard.fractalineDonated.push("", Misc.AddCommas(clanStats.fractalineDonated * 100));
+      }
+      else { leaderboard.names.push("", `~Register to see your clans rank`); }
+    }
+    catch(err) { }
+
+    //Get a global amount of fractaline donated.
+    var totalFractalineDonated = 0;
+    for(var i in leaderboards) { totalFractalineDonated = totalFractalineDonated + leaderboards[i].fractalineDonated; }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Clans for Fractaline Donations")
+    .setDescription(`Total fractaline donated from the Marvin community: ${ Misc.AddCommas(totalFractalineDonated * 100) }`)
+    .addField("Name", leaderboard.names, true)
+    .addField("Fractaline Donated", leaderboard.fractalineDonated, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+}
 function GlobalDryStreak(message, item) {
   if(item === "1000 VOICES") {
     Database.GetGlobalDryStreak(item, function(isError, isFound, leaderboards) {
       if(!isError) {
         Database.GetFromBroadcasts(item, function(isError, isFound, data) {
           var globalLeaderboard = [];
-          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName } ✗`, "completions": Misc.AddCommas(leaderboards[i].lastWishCompletions) }); }
+          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].lastWishCompletions) }); }
           for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
           globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
           globalLeaderboard = globalLeaderboard.slice(0, 10);
 
           var leaderboard = { "names": [], "completions": [] };
           for(var i in globalLeaderboard) {
-            leaderboard.names.push(globalLeaderboard[i].displayName);
+            leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
             leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
           }
 
@@ -902,14 +914,14 @@ function GlobalDryStreak(message, item) {
       if(!isError) {
         Database.GetFromBroadcasts(item, function(isError, isFound, data) {
           var globalLeaderboard = [];
-          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName } ✗`, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
+          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
           for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
           globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
           globalLeaderboard = globalLeaderboard.slice(0, 10);
 
           var leaderboard = { "names": [], "completions": [] };
           for(var i in globalLeaderboard) {
-            leaderboard.names.push(globalLeaderboard[i].displayName);
+            leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
             leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
           }
 
@@ -932,14 +944,14 @@ function GlobalDryStreak(message, item) {
       if(!isError) {
         Database.GetFromBroadcasts(item, function(isError, isFound, data) {
           var globalLeaderboard = [];
-          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName } ✗`, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
+          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
           for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
           globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
           globalLeaderboard = globalLeaderboard.slice(0, 10);
 
           var leaderboard = { "names": [], "completions": [] };
           for(var i in globalLeaderboard) {
-            leaderboard.names.push(globalLeaderboard[i].displayName);
+            leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
             leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
           }
 
@@ -962,14 +974,14 @@ function GlobalDryStreak(message, item) {
       if(!isError) {
         Database.GetFromBroadcasts(item, function(isError, isFound, data) {
           var globalLeaderboard = [];
-          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName } ✗`, "completions": Misc.AddCommas(leaderboards[i].sorrowsCompletions) }); }
+          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].sorrowsCompletions) }); }
           for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
           globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
           globalLeaderboard = globalLeaderboard.slice(0, 10);
 
           var leaderboard = { "names": [], "completions": [] };
           for(var i in globalLeaderboard) {
-            leaderboard.names.push(globalLeaderboard[i].displayName);
+            leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
             leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
           }
 
@@ -1036,10 +1048,10 @@ function DisplayDryStreak(message, item, leaderboards, playerData, allClanIds) {
   Database.GetFromClanBroadcasts(allClanIds, item, function(isError, isFound, data) {
     var globalLeaderboard = [];
     for(var i in leaderboards) {
-      if(item.toUpperCase() === "1000 VOICES") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].lastWishCompletions) }); }
-      else if(item.toUpperCase() === "ANARCHY") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
-      else if(item.toUpperCase() === "ALWAYS ON TIME") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
-      else if(item.toUpperCase() === "TARRABAH") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].sorrowsCompletions) }); }
+      if(item.toUpperCase() === "1000 VOICES") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].lastWishCompletions) }); }
+      else if(item.toUpperCase() === "ANARCHY") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
+      else if(item.toUpperCase() === "ALWAYS ON TIME") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
+      else if(item.toUpperCase() === "TARRABAH") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].sorrowsCompletions) }); }
     }
     for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
     globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
@@ -1047,7 +1059,7 @@ function DisplayDryStreak(message, item, leaderboards, playerData, allClanIds) {
 
     var leaderboard = { "names": [], "completions": [] };
     for(var i in globalTopLeaderboard) {
-      leaderboard.names.push(globalTopLeaderboard[i].displayName);
+      leaderboard.names.push(globalTopLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
       leaderboard.completions.push(Misc.AddCommas(globalTopLeaderboard[i].completions));
     }
 
@@ -1103,7 +1115,7 @@ function Profile(message) {
 function DisplayProfile(message, leaderboards, playerData) {
   try {
     var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-    var name = playerStats.displayName;
+    var name = playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x });
     var timePlayed = playerStats.timePlayed;
     var infamy = playerStats.infamy;
     var valor = playerStats.valor;
@@ -1140,6 +1152,14 @@ function DisplayProfile(message, leaderboards, playerData) {
 }
 
 //Others
+async function GetClanName(clan_id) {
+  const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
+  const request = await fetch(`https://www.bungie.net/Platform/GroupV2/${ clan_id }/`, headers);
+  const response = await request.json();
+  if(request.ok && response.ErrorCode && response.ErrorCode !== 1) { console.log(`Couldn't find ${ clan_id } due to ${ response }`); return { "clan_id": null, "clan_name": null } }
+  else if(request.ok) { return { "clan_id": response.Response.detail.groupId, "clan_name": response.Response.detail.name } }
+  else { console.log(`Couldn't find ${ clan_id } due to ${ response }`); return { "clan_id": null, "clan_name": null } }
+}
 function GetTrackedItems(message) {
   const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Bastion";
   const pvpItems = "Luna Howl, Not Forgotten, Redrix Broadsword, Redrix Claymore, Mountain Top, Recluse, Revoker, Randys Throwing Knife, Komodo-4FR";
