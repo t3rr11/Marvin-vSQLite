@@ -11,7 +11,7 @@ const Database = require("./Database");
 //Exports
 module.exports = {
   Help, BroadcastsHelp, Status, Request,
-  GetClansTracked, GetTrackedClans, GlobalRankings, Rankings, GlobalDryStreak, GetTrackedItems, DryStreak,
+  GetClansTracked, GlobalRankings, Rankings, GlobalDryStreak, GetTrackedItems, DryStreak,
   Profile, GetTrackedTitles, ForceFullScan, ToggleWhitelist, RenewLeadership, TransferLeadership,
   DisplayClanRankings
 };
@@ -70,32 +70,6 @@ function Request(client, message) {
   .setTimestamp()
   client.guilds.get('664237007261925404').channels.get('664238376219836416').send({embed});
   message.reply("Your request has been sent, Thank your for your valuable feedback! Feel free to join the discord if you'd like to keep up to date about the status of this request. https://guardianstats.com/JoinMarvin");
-}
-function GetClansTracked(message) {
-  Database.GetRegisteredClansFromDB(function(isError, Data) {
-    if(!isError) {
-      var filteredClans = []; for(var i in Data) { if(!filteredClans.find(e => e.clan_id == Data[i].clan_id)) { filteredClans.push(Data[i].clan_name); } }
-      let uniqueClans = [...new Set(filteredClans)];
-      var first = uniqueClans.slice(0, 31);
-      var second = uniqueClans.slice(31, 61);
-      var third = uniqueClans.slice(61, 91);
-      var fourth = uniqueClans.slice(91, 121);
-      var fifth = uniqueClans.slice(121, uniqueClans.length);
-      if(fifth.length === 0) { fifth = ['.']; }
-      const embed = new Discord.RichEmbed()
-      .setColor(0x0099FF)
-      .setAuthor(`Clans Tracked - ${ uniqueClans.length }`)
-      .addField("Clans", first, true)
-      .addField("Clans", second, true)
-      .addField("Clans", third, true)
-      .addField("Clans", fourth, true)
-      .addField("Clans", fifth, true)
-      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-      .setTimestamp()
-      message.channel.send({embed});
-    }
-    else { message.reply("Sorry! An error occurred, Please try again..."); }
-  });
 }
 function GetTrackedClans(message) {
   Database.GetClanDetails(message.guild.id, false, async function(isError, isFound, data) {

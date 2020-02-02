@@ -87,7 +87,7 @@ function formatTime(TimeinSeconds) {
 }
 
 function DeleteMessages(message, amount) {
-  if(message.author == "<@194972321168097280>"){
+  if(message.author.id === "194972321168097280"){
     message.channel.fetchMessages({limit: amount}).then(collected => { collected.forEach(msg => {
       if(msg.id == "527052089575342080") { console.log('Cannot Delete This Message! ' + msg.id); }
       else { msg.delete(); }

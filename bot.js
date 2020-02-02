@@ -232,27 +232,23 @@ client.on("message", async message => {
   if(command.startsWith('~') && !command.startsWith('~~')) {
     try {
       if(message.guild) {
-        if(command.startsWith("~ADD CLAN")) { ManageClans.AddClan(message, command.substr("~ADD CLAN ".length)); }
-        else if(command.startsWith("~REMOVE CLAN")) { ManageClans.RemoveClan(message, command.substr("~REMOVE CLAN ".length)); }
-        else if(command.startsWith("~ITEM ")) { DiscordCommands.Rankings("item", message); }
-        else if(command.startsWith("~TITLE ")) { DiscordCommands.Rankings("title", message); }
-        else if(command.startsWith("~TRANSFER ")) { DiscordCommands.TransferLeadership(message); }
-        else if(command === "~SET CLAN") { ManageClans.RegisterClan(message); }
-        else if(command === "~DELETE CLAN") { ManageClans.UserDeleteClan(message); }
-        else if(command === "~TRACKED CLANS") { DiscordCommands.GetTrackedClans(message); }
-        else if(command === "~REAUTH") { DiscordCommands.RenewLeadership(message); }
-
-        //Broadcasts
-        else if(command.startsWith("~SET BROADCASTS ")) { Broadcasts.SetupBroadcasts(message); }
-        else if(command.startsWith("~FILTER ")) { Broadcasts.AddToBlacklist(message, default_command.substr("~FILTER ".length)); }
-        else if(command.startsWith("~WHITELIST ")) { Broadcasts.AddToWhitelist(message, default_command.substr("~WHITELIST ".length)); }
-        else if(command === "~BROADCASTS HELP") { DiscordCommands.BroadcastsHelp(message); }
-        else if(command === "~REMOVE BROADCASTS") { Broadcasts.RemoveBroadcasts(message); }
-        else if(command === "~SET BROADCASTS") { message.reply("Please set the broadcasts channel by tagging it in the message. E.g: `~Set Broadcasts #general`"); }
-        else if(command === "~TOGGLE WHITELIST") { DiscordCommands.ToggleWhitelist(message); }
+        if(command.startsWith("~REGISTER ")) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)); } else { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
+        else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }
+        else if(command.startsWith("~DEL ")) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); }
+        else if(command.startsWith("~SET SCANSPEED ")) { var input = command.substr("~SET SCANSPEED ".length); ChangeScanSpeed(message, input); }
+        else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
+        else if(command === "~DONATE" || command === "~SPONSOR" || command === "~SUPPORTING") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
+        else if(command === "~STATUS") { DiscordCommands.Status(Users, Players, ClanScans, ClansTracked, StartupTime, client, message); }
+        else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message); }
+        else if(command === "~PROFILE") { DiscordCommands.Profile(message); }
+        else if(command === "~FORCE RESCAN") { DiscordCommands.ForceFullScan(message); }
+        else if(command === "~SCANSPEED") { GetScanSpeed(message); }
+        else if(command === "~TEST") { if(message.author.id === "194972321168097280") { message.reply("We saw and we did nothing."); } else { message.reply("Test what? I do not understand."); } }
 
         //Rankings
         else if(command.startsWith("~DRYSTREAK ")) { DiscordCommands.DryStreak(message, command.substr("~DRYSTREAK ".length)) }
+        else if(command.startsWith("~ITEM ")) { DiscordCommands.Rankings("item", message); }
+        else if(command.startsWith("~TITLE ")) { DiscordCommands.Rankings("title", message); }
         else if(command === "~INFAMY") { DiscordCommands.Rankings("infamy", message); }
         else if(command === "~VALOR") { DiscordCommands.Rankings("valor", message); }
         else if(command === "~GLORY") { DiscordCommands.Rankings("glory", message); }
@@ -266,28 +262,24 @@ client.on("message", async message => {
         else if(command === "~TRIUMPH SCORE" || command === "~TRIUMPHSCORE") { DiscordCommands.Rankings("triumphScore", message); }
         else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME") { DiscordCommands.Rankings("totalTime", message);  }
         else if(command === "~SEASON RANKS" || command === "~SEASONRANKS" || command === "~SEASON RANK" || command === "~SEASONRANK") { DiscordCommands.Rankings("seasonRank", message); }
-
-        //Clan Rankings
-        else if(command === "~CLANRANK FRACTALINE") {  DiscordCommands.DisplayClanRankings("fractaline", message);  }
-
-        //Commands
-        else if(command.startsWith("~REGISTER ")) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)); } else { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
-        else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }
-        else if(command.startsWith("~WRITE ")) { DiscordCommands.WriteToServer(message, default_command, client); }
-        else if(command.startsWith("~WRITEALL ")) { DiscordCommands.WriteToAllServers(message, default_command, client); }
-        else if(command.startsWith("~WRITETO ")) { DiscordCommands.WriteToSpecificServer(message, default_command, client); }
-        else if(command.startsWith("~DEL ")) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); }
-        else if(command.startsWith("~SET SCANSPEED ")) { var input = command.substr("~SET SCANSPEED ".length); ChangeScanSpeed(message, input); }
         else if(command === "~ITEMS") { DiscordCommands.GetTrackedItems(message); }
         else if(command === "~TITLES") { DiscordCommands.GetTrackedTitles(message); }
-        else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
-        else if(command === "~DONATE" || command === "~SPONSOR" || command === "~SUPPORTING") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
-        else if(command === "~STATUS") { DiscordCommands.Status(Users, Players, ClanScans, ClansTracked, StartupTime, client, message); }
-        else if(command === "~CLANS") { DiscordCommands.GetClansTracked(message); }
-        else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message); }
-        else if(command === "~PROFILE") { DiscordCommands.Profile(message); }
-        else if(command === "~FORCE RESCAN") { DiscordCommands.ForceFullScan(message); }
-        else if(command === "~SCANSPEED") { GetScanSpeed(message); }
+
+        //Clan Management
+        else if(command.startsWith("~SET BROADCASTS ")) { Broadcasts.SetupBroadcasts(message); }
+        else if(command.startsWith("~FILTER ")) { Broadcasts.AddToBlacklist(message, default_command.substr("~FILTER ".length)); }
+        else if(command.startsWith("~WHITELIST ")) { Broadcasts.AddToWhitelist(message, default_command.substr("~WHITELIST ".length)); }
+        else if(command.startsWith("~ADD CLAN")) { ManageClans.AddClan(message, command.substr("~ADD CLAN ".length)); }
+        else if(command.startsWith("~REMOVE CLAN")) { ManageClans.RemoveClan(message, command.substr("~REMOVE CLAN ".length)); }
+        else if(command.startsWith("~TRANSFER ")) { DiscordCommands.TransferLeadership(message); }
+        else if(command === "~BROADCASTS HELP") { DiscordCommands.BroadcastsHelp(message); }
+        else if(command === "~REMOVE BROADCASTS") { Broadcasts.RemoveBroadcasts(message); }
+        else if(command === "~SET BROADCASTS") { message.reply("Please set the broadcasts channel by tagging it in the message. E.g: `~Set Broadcasts #general`"); }
+        else if(command === "~TOGGLE WHITELIST") { DiscordCommands.ToggleWhitelist(message); }
+        else if(command === "~SET CLAN") { ManageClans.RegisterClan(message); }
+        else if(command === "~DELETE CLAN") { ManageClans.UserDeleteClan(message); }
+        else if(command === "~TRACKED CLANS" || command === "CLANS TRACKED") { DiscordCommands.GetTrackedClans(message); }
+        else if(command === "~REAUTH") { DiscordCommands.RenewLeadership(message); }
 
         //Globals
         else if(command.startsWith("~GLOBAL DRYSTREAK ")) { DiscordCommands.GlobalDryStreak(message, command.substr("~GLOBAL DRYSTREAK ".length)) }
@@ -296,25 +288,21 @@ client.on("message", async message => {
         else if(command === "~GLOBAL CLAN TIME" || command === "~GLOBAL TIME PLAYED" || command === "~GLOBAL TOTAL TIME" || command === "~GLOBAL TOTALTIME") { DiscordCommands.GlobalRankings("totalTime", message); }
         else if(command === "~GLOBAL TRIUMPH SCORE" || command === "~GLOBAL TRIUMPHSCORE") { DiscordCommands.GlobalRankings("triumphScore", message); }
 
-        else if(command === "~TEST") {
-          if(message.author.id === "194972321168097280") {
-            message.reply("We saw and we did nothing.");
-          }
-          else { message.reply("Test what? I do not understand."); }
-        }
+        //Clan Global Rankings
+        else if(command === "~CLANRANK FRACTALINE") {  DiscordCommands.DisplayClanRankings("fractaline", message);  }
 
         //Other
         else { message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete(2000) }).catch(); }
 
         try { Log.SaveLog("Command", 'User: ' + message.member.user.tag + ', Command: ' + command); }
-        catch (err) { try { Log.SaveLog("Error", 'Tried to log command in: ' + message.guild.name + ', Command: ' + command); } catch (err) {  } }
+        catch (err) { try { Log.SaveError('Tried to log command in: ' + message.guild.name + ', Command: ' + command); } catch (err) {  } }
       }
       else { message.reply("Using this bots features can only be used in a server. Sorry about that!"); }
     }
     catch (err) {
       try { message.reply("Missing permissions."); }
-      catch (err) { console.log("Failed to send permissions message as well", err); }
-      console.log("Failed: " + command, err);
+      catch (err) { Log.SaveError("Failed to send permissions message due to missing permissions... Duh."); }
+      Log.SaveError("Failed to send message due to missing permissions."); 
     }
   }
 });
