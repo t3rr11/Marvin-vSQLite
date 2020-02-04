@@ -99,7 +99,7 @@ function AddClan(message, clan_id) {
                   message.channel.send({embed});
                 }
               }
-              else { message.reply("Only discord administrators or the one who linked this server can remove the clan from the server."); }
+              else { message.reply("Only discord administrators or the one who linked this server can add or remove clans from the server. Get them to use: `~add clan` for you."); }
             }
             else { RegisterClan(message); }
           }
