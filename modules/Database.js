@@ -135,7 +135,7 @@ function GetClanDetailsViaAuthor(data, callback) {
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting clan details: ${ error }`); callback(true); }
-    else { if(rows.length > 0) { callback(false, true, rows[0]); } else { callback(false, false); } }
+    else { if(rows.length > 0) { callback(false, true, rows); } else { callback(false, false); } }
   });
 }
 function GetPlayerDetails(AccountInfo, callback) {

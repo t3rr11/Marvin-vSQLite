@@ -115,7 +115,10 @@ async function GetClanMemberData(playerInfo, retried) {
     else if(request.ok) {
       //Data returned successfully
       var playerData = response.Response;
-      if(playerData.profileRecords.data) { return { playerInfo, playerData, private: false, failed: false }; }
+      if(playerData.profile.data.dateLastPlayed !== "0001-01-01T00:00:00Z") {
+        if(playerData.profileRecords.data) { return { playerInfo, playerData, private: false, failed: false }; }
+        else { return { playerInfo, playerData, private: true, failed: false };  }
+      }
       else { return { playerInfo, playerData, private: true, failed: false };  }
     }
     else {
