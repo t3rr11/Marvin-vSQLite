@@ -24,9 +24,9 @@ function Help(message) {
   .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`")
   .addField("Raids", "`~LW`, `~SoTP`, `~CoS`, `~GoS`")
   .addField("Items / Titles", "`~Items`, `~Titles`, `~Item Example`, `~Title Example`")
-  .addField("Seasonal", "`~Season Rank`, `~Sundial`, `~Fractaline`")
-  .addField("Clan Rankings", "`~Clanrank Fractaline`")
-  .addField("Globals", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreak 1000 Voices`, `~Global Drystreak Anarchy`")
+  .addField("Seasonal", "`~Season Rank`, `~Sundial`, `~Fractaline`, `~resonance`")
+  .addField("Clan Rankings", "`~Clanrank Fractaline`, `~Clanrank Resonance`")
+  .addField("Globals", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreak 1000 Voices`, `~Global Drystreak Anarchy`, `~Global Fractaline`, `~Global Resonance`")
   .addField("Others", "`~Donate`, `~Broadcasts Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`, `~Delete Clan`, `~Drystreak 1000 Voices`, `~Drystreak Anarchy`")
   .addField("Request", "If you see something that isn't there that you'd like me to track request it like this: `~request I would like to see Marvin track season ranks!`")
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
@@ -538,7 +538,7 @@ function DisplayRankings(message, type, leaderboards, playerData) {
       top = leaderboards.slice(0, 10);
       for(var i in top) {
         leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-        leaderboard.donations.push(Misc.AddCommas(top[i].fractalineDonated * 100));
+        leaderboard.donations.push(Misc.AddCommas(top[i].fractalineDonated));
       }
 
       try {
@@ -546,7 +546,7 @@ function DisplayRankings(message, type, leaderboards, playerData) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
           leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.donations.push("", Misc.AddCommas(playerStats.fractalineDonated * 100));
+          leaderboard.donations.push("", Misc.AddCommas(playerStats.fractalineDonated));
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -557,6 +557,35 @@ function DisplayRankings(message, type, leaderboards, playerData) {
       .setAuthor("Top 10 Fractaline Donations")
       .addField("Name", leaderboard.names, true)
       .addField("Fractaline", leaderboard.donations, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "resonance") {
+      var leaderboard = { "names": [], "resonance": [] };
+      leaderboards.sort(function(a, b) { return b.resonance - a.resonance; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.resonance.push(Misc.AddCommas((top[i].resonance * 100) + 200));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.resonance.push("", Misc.AddCommas((playerStats.resonance * 100) + 200));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Resonance Power")
+      .addField("Name", leaderboard.names, true)
+      .addField("Resonance", leaderboard.resonance, true)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp()
       message.channel.send({embed});
@@ -708,6 +737,64 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     .setTimestamp()
     message.channel.send({embed});
   }
+  else if(type === "fractaline") {
+    var leaderboard = { "names": [], "rank": [] };
+    leaderboards.sort(function(a, b) { return b.fractalineDonated - a.fractalineDonated; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.rank.push(Misc.AddCommas(top[i].fractalineDonated));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.rank.push("", Misc.AddCommas(playerStats.fractalineDonated));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Most Fractaline Donated")
+    .addField("Name", leaderboard.names, true)
+    .addField("Rank", leaderboard.rank, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "resonance") {
+    var leaderboard = { "names": [], "rank": [] };
+    leaderboards.sort(function(a, b) { return b.resonance - a.resonance; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.rank.push(Misc.AddCommas(top[i].resonance * 100 + 200));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.rank.push("", Misc.AddCommas(playerStats.resonance * 100 + 200));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Most Resonant Players")
+    .addField("Name", leaderboard.names, true)
+    .addField("Rank", leaderboard.rank, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
   else if(type === "triumphScore") {
     var leaderboard = { "names": [], "score": [] };
     leaderboards.sort(function(a, b) { return b.triumphScore - a.triumphScore; });
@@ -793,13 +880,17 @@ function DisplayClanRankings(type, message) {
         if(!isError) {
           var clanLeaderboards = [];
           for(var i in totalTrackedClans) {
+            if(!clanLeaderboards.find(e => e.clan_id === totalTrackedClans[i].clan_id)) {
             var totalFractaline = 0;
-            for(var j in leaderboards) {
-              if(leaderboards[j].clan_id === totalTrackedClans[i].clan_id) {
-                totalFractaline = totalFractaline + leaderboards[j].fractalineDonated;
+            var totalResonance = 0;
+              for(var j in leaderboards) {
+                if(leaderboards[j].clanId === totalTrackedClans[i].clan_id) {
+                  totalFractaline = totalFractaline + leaderboards[j].fractalineDonated;
+                  totalResonance = totalResonance + leaderboards[j].resonance;
+                }
               }
+              clanLeaderboards.push({ "clan_id": totalTrackedClans[i].clan_id, "clan_name": totalTrackedClans[i].clan_name, "fractalineDonated": totalFractaline, "resonance": totalResonance });
             }
-            clanLeaderboards.push({ "clan_id": totalTrackedClans[i].clan_id, "clan_name": totalTrackedClans[i].clan_name, "fractalineDonated": totalFractaline });
           }
           //Data is collected, now send to clan rankings.
           ClanRankings(message, type, clanLeaderboards, totalTrackedClans, connectedClan)
@@ -818,11 +909,11 @@ async function ClanRankings(message, type, leaderboards, clanData, connectedClan
       if(top[i].clan_name === null) {
         var clanInfo = await GetClanName(top[i].clan_id);
         leaderboard.names.push(`${parseInt(i)+1}: ${ clanInfo.clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
-        leaderboard.fractalineDonated.push(Misc.AddCommas(top[i].fractalineDonated * 100));
+        leaderboard.fractalineDonated.push(Misc.AddCommas(top[i].fractalineDonated));
       }
       else {
         leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
-        leaderboard.fractalineDonated.push(Misc.AddCommas(top[i].fractalineDonated * 100));
+        leaderboard.fractalineDonated.push(Misc.AddCommas(top[i].fractalineDonated));
       }
     }
 
@@ -831,7 +922,7 @@ async function ClanRankings(message, type, leaderboards, clanData, connectedClan
         var clanStats = leaderboards.find(e => e.clan_id === connectedClan.clan_id);
         var rank = leaderboards.indexOf(leaderboards.find(e => e.clan_id === connectedClan.clan_id));
         leaderboard.names.push("", `${ rank+1 }: ${ connectedClan.clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
-        leaderboard.fractalineDonated.push("", Misc.AddCommas(clanStats.fractalineDonated * 100));
+        leaderboard.fractalineDonated.push("", Misc.AddCommas(clanStats.fractalineDonated));
       }
       else { leaderboard.names.push("", `~Register to see your clans rank`); }
     }
@@ -844,9 +935,44 @@ async function ClanRankings(message, type, leaderboards, clanData, connectedClan
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Clans for Fractaline Donations")
-    .setDescription(`Total fractaline donated from the Marvin community: ${ Misc.AddCommas(totalFractalineDonated * 100) }`)
+    .setDescription(`Total fractaline donated from the Marvin community: ${ Misc.AddCommas(totalFractalineDonated) }`)
     .addField("Name", leaderboard.names, true)
     .addField("Fractaline Donated", leaderboard.fractalineDonated, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "resonance") {
+    var leaderboard = { "names": [], "resonance": [] };
+    leaderboards.sort(function(a, b) { return b.resonance - a.resonance; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      if(top[i].clan_name === null) {
+        var clanInfo = await GetClanName(top[i].clan_id);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ clanInfo.clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+        leaderboard.resonance.push(Misc.AddCommas(top[i].resonance * 100 + 200));
+      }
+      else {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+        leaderboard.resonance.push(Misc.AddCommas(top[i].resonance * 100 + 200));
+      }
+    }
+
+    try {
+      if(connectedClan !== null) {
+        var clanStats = leaderboards.find(e => e.clan_id === connectedClan.clan_id);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.clan_id === connectedClan.clan_id));
+        leaderboard.names.push("", `${ rank+1 }: ${ connectedClan.clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+        leaderboard.resonance.push("", Misc.AddCommas(clanStats.resonance * 100 + 200));
+      }
+      else { leaderboard.names.push("", `~Register to see your clans rank`); }
+    }
+    catch(err) { }
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Most Resonant Clans")
+    .addField("Name", leaderboard.names, true)
+    .addField("Resonance", leaderboard.resonance, true)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});

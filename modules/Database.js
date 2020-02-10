@@ -299,18 +299,34 @@ function RemoveClan(guild_id, clan_id, callback) {
   var sql = "SELECT * FROM clans WHERE guild_id = ?";
   var inserts = [guild_id];
   sql = db.format(sql, inserts);
-  db.query(sql, function(error, rows, fields) {
+  db.query(sql, async function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error removing clan: ${ clan_id } from guild: ${ guild_id }, Error: ${ error }`); callback(true); }
     else {
       var server_clan_ids = rows[0].server_clan_ids.split(",");
       server_clan_ids.splice(server_clan_ids.indexOf(clan_id), 1);
-      var sqlu = `UPDATE clans SET server_clan_ids= "${ server_clan_ids }" WHERE guild_id= ?`;
-      var inserts = [guild_id];
-      sqlu = db.format(sqlu, inserts);
-      db.query(sqlu, function(error, rows, fields) {
-        if(!!error) { Log.SaveError(`Error deleting clan guild: ${ guild_id }, Error: ${ error }`); callback(true); }
-        else { callback(false); }
-      });
+      if(server_clan_ids.length > 0) {
+        //If there was more than 1 clan, just remove the clan no need to delete the others.
+        var sqlu = null;
+        const clanDetails = await GetClanName(server_clan_ids[0]);
+        if(rows[0].clan_id === clan_id) { sqlu = `UPDATE clans SET clan_id= "${ server_clan_ids[0] }", clan_name="${ clanDetails.clan_name }", server_clan_ids= "${ server_clan_ids }" WHERE guild_id= ?`; }
+        else { sqlu = `UPDATE clans SET server_clan_ids= "${ server_clan_ids }" WHERE guild_id= ?`; }
+        var inserts = [guild_id];
+        sqlu = db.format(sqlu, inserts);
+        db.query(sqlu, function(error, rows, fields) {
+          if(!!error) { Log.SaveError(`Error removing clan from guild: ${ guild_id }, Error: ${ error }`); callback(true); }
+          else { callback(false); }
+        });
+      }
+      else {
+        //If it was the only clan, delete the clan from database.
+        var sqlk = `DELETE FROM clans WHERE guild_id = ?`;
+        var inserts = [guild_id];
+        sqlk = db.format(sqlk, inserts);
+        db.query(sqlk, function(error, rows, fields) {
+          if(!!error) { Log.SaveError(`Error deleting guild: ${ guild_id }, Error: ${ error }`); callback(true); }
+          else { callback(false); }
+        });
+      }
     }
   });
 }
@@ -377,7 +393,7 @@ function UpdateClanMembers(ClanMembers, clanId) {
   });
 }
 function UpdatePlayerDetails(Data, callback) {
-  var sql = `UPDATE playerInfo SET clanId = ?, displayName = ?, timePlayed = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }", infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, fractalineDonated = ?, wellsCompleted = ?, epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, lastPlayed = ?, firstLoad = ? WHERE membershipId = ?`;
+  var sql = `UPDATE playerInfo SET clanId = ?, displayName = ?, timePlayed = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }", infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, fractalineDonated = ?, resonance = ?, wellsCompleted = ?, epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, lastPlayed = ?, firstLoad = ? WHERE membershipId = ?`;
   var inserts = [
     Data.AccountInfo.clanId,
     Misc.cleanString(Data.AccountInfo.displayName),
@@ -394,6 +410,7 @@ function UpdatePlayerDetails(Data, callback) {
     Data.Seasonal.seasonRank,
     Data.Seasonal.sundial,
     Data.Seasonal.fractalineDonated,
+    Data.Seasonal.resonance,
     Data.Others.wellsRankings,
     Data.Others.epRankings,
     Data.Others.menageire,
@@ -549,6 +566,14 @@ function EnableTracking(guild_id, callback) {
 }
 
 //Non database functions
+async function GetClanName(clan_id) {
+  const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
+  const request = await fetch(`https://www.bungie.net/Platform/GroupV2/${ clan_id }/`, headers);
+  const response = await request.json();
+  if(request.ok && response.ErrorCode && response.ErrorCode !== 1) { console.log(`Couldn't find ${ clan_id } due to ${ response }`); return { "clan_id": null, "clan_name": null } }
+  else if(request.ok) { return { "clan_id": response.Response.detail.groupId, "clan_name": response.Response.detail.name } }
+  else { console.log(`Couldn't find ${ clan_id } due to ${ response }`); return { "clan_id": null, "clan_name": null } }
+}
 async function GetClanMembersFromAPI(clan_id) {
   const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
   const request = await fetch(`https://www.bungie.net/Platform/GroupV2/${ clan_id }/Members/?currentPage=1`, headers);

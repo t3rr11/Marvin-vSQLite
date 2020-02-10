@@ -24,6 +24,11 @@ async function CheckClanMembers(guild_id, client) {
           var ClanMembers = [];
           if(CurrentClanMembers === "SystemDisabled") { }
           else if(CurrentClanMembers === "Error") { Log.SaveErrorCounter("unknown"); }
+          else if(CurrentClanMembers.includes("ClanNotFound - ")) {
+            var clanId = CurrentClanMembers.substr("ClanNotFound - ".length);
+            Database.RemoveClan(guild_id, clanId, function(isError) { if(!isError) { Log.SaveLog("Info", `${ clanId } no longer exists and has been deleted or removed from the database.`); } });
+            Log.SaveErrorCounter("ClanNotFound");
+          }
           else if(CurrentClanMembers === "DestinyShardRelayProxyTimeout") { Log.SaveErrorCounter("DestinyShardRelayProxyTimeout"); }
           else {
             for(var j in CurrentClanMembers) {
@@ -87,9 +92,6 @@ async function CheckClanMembers(guild_id, client) {
     } else { Log.SaveError("Failed to get clan details"); }
     resolve(true);
   }));
-  //id++;
-  //if(clan_id.length === 6) { console.log(`Finished scanning clan: ${ clan_id }  (${ id })`); }
-  //else { console.log(`Finished scanning clan: ${ clan_id } (${ id })`); }
 }
 async function GetClanMembers(clan_id) {
   const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
@@ -98,6 +100,7 @@ async function GetClanMembers(clan_id) {
   if(request.ok && response.ErrorCode && response.ErrorCode === 1) { return response.Response.results; }
   else if(response.ErrorCode === 5) { return "SystemDisabled"; }
   else if(response.ErrorCode === 1652) { return "DestinyShardRelayProxyTimeout"; }
+  else if(response.ErrorCode === 686) { return `ClanNotFound - ${ clan_id }`; }
   else {
     if(response.ErrorCode) { Log.SaveError(`Failed to get clan members for ${ clan_id }: ${ response.ErrorCode }`); return "Error"; }
     else { Log.SaveError(`Failed to get clan members for ${ clan_id }: ${ JSON.stringify(response) }`); return "Error"; }
@@ -356,7 +359,8 @@ function GetSeasonal(response) {
   var characterIds = response.playerData.profile.data.characterIds;
   var season8Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["1628407317"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["3184735011"].level; season8Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
   var season9Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["3256821400"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["2140885848"].level; season9Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
-  var fractalineDonated = response.playerData.profileRecords.data.records["3393252660"].intervalObjectives[3].progress;
+  var fractalineDonated = 0; try { var fractalineDonated = response.playerData.characterProgressions.data[characterIds[0]].progressions["2480822985"].level; } catch (err) { }
+  var resonance = response.playerData.profileRecords.data.records["4205106950"].objectives[0].progress;
 
   //Sundial
   var sundialCompletions = response.playerData.profileRecords.data.records["3801239892"].objectives[0].progress;
@@ -364,7 +368,8 @@ function GetSeasonal(response) {
   return {
     "seasonRank": season9Rank,
     "sundial": sundialCompletions,
-    "fractalineDonated": fractalineDonated
+    "fractalineDonated": fractalineDonated,
+    "resonance": resonance
   }
 }
 function GetOthers(response) {

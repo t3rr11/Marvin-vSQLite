@@ -243,7 +243,14 @@ client.on("message", async message => {
         else if(command === "~PROFILE") { DiscordCommands.Profile(message); }
         else if(command === "~FORCE RESCAN") { DiscordCommands.ForceFullScan(message); }
         else if(command === "~SCANSPEED") { GetScanSpeed(message); }
-        else if(command === "~TEST") { if(message.author.id === "194972321168097280") { message.reply("We saw and we did nothing."); } else { message.reply("Test what? I do not understand."); } }
+        else if(command === "~TEST") {
+          if(message.author.id === "194972321168097280") {
+            //message.reply("We saw and we did nothing.");
+          }
+          else {
+            message.reply("Test what? I do not understand.");
+          }
+        }
 
         //Rankings
         else if(command.startsWith("~DRYSTREAK ")) { DiscordCommands.DryStreak(message, command.substr("~DRYSTREAK ".length)) }
@@ -259,6 +266,7 @@ client.on("message", async message => {
         else if(command === "~GOS" || command === "~GARDEN") { DiscordCommands.Rankings("garden", message); }
         else if(command === "~SUNDIAL") { DiscordCommands.Rankings("sundial", message); }
         else if(command === "~FRACTALINE") { DiscordCommands.Rankings("fractaline", message); }
+        else if(command === "~RESONANCE") { DiscordCommands.Rankings("resonance", message); }
         else if(command === "~TRIUMPH SCORE" || command === "~TRIUMPHSCORE") { DiscordCommands.Rankings("triumphScore", message); }
         else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME" || command === "~TIME") { DiscordCommands.Rankings("totalTime", message);  }
         else if(command === "~SEASON RANKS" || command === "~SEASONRANKS" || command === "~SEASON RANK" || command === "~SEASONRANK") { DiscordCommands.Rankings("seasonRank", message); }
@@ -285,11 +293,14 @@ client.on("message", async message => {
         else if(command.startsWith("~GLOBAL DRYSTREAK ")) { DiscordCommands.GlobalDryStreak(message, command.substr("~GLOBAL DRYSTREAK ".length)) }
         else if(command === "~GLOBAL IRON BANNER") { DiscordCommands.GlobalRankings("ironBanner", message); }
         else if(command === "~GLOBAL SEASON RANK") { DiscordCommands.GlobalRankings("seasonRank", message); }
+        else if(command === "~GLOBAL FRACTALINE") { DiscordCommands.GlobalRankings("fractaline", message); }
+        else if(command === "~GLOBAL RESONANCE") { DiscordCommands.GlobalRankings("resonance", message); }
         else if(command === "~GLOBAL CLAN TIME" || command === "~GLOBAL TIME PLAYED" || command === "~GLOBAL TOTAL TIME" || command === "~GLOBAL TOTALTIME") { DiscordCommands.GlobalRankings("totalTime", message); }
         else if(command === "~GLOBAL TRIUMPH SCORE" || command === "~GLOBAL TRIUMPHSCORE") { DiscordCommands.GlobalRankings("triumphScore", message); }
 
         //Clan Global Rankings
         else if(command === "~CLANRANK FRACTALINE") {  DiscordCommands.DisplayClanRankings("fractaline", message);  }
+        else if(command === "~CLANRANK RESONANCE") {  DiscordCommands.DisplayClanRankings("resonance", message);  }
 
         //Other
         else { message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete(2000) }).catch(); }
