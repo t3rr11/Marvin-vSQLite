@@ -217,12 +217,26 @@ function GetRankings(response) {
   }
 }
 function GetRaids(response) {
+  var leviCompletions = response.playerData.profileRecords.data.records["3420353827"].objectives[0].progress;
+  var eowCompletions = response.playerData.profileRecords.data.records["2602370549"].objectives[0].progress;
+  var sosCompletions = response.playerData.profileRecords.data.records["1742345588"].objectives[0].progress;
+
+  var leviPresCompletions = response.playerData.profileRecords.data.records["940998165"].objectives[0].progress;
+  var eowPresCompletions = response.playerData.profileRecords.data.records["3861076347"].objectives[0].progress;
+  var sosPresCompletions = response.playerData.profileRecords.data.records["2923250426"].objectives[0].progress;
+
   var lastWishCompletions = response.playerData.profileRecords.data.records["2195455623"].objectives[0].progress;
   var scourgeCompletions = response.playerData.profileRecords.data.records["4060320345"].objectives[0].progress;
   var sorrowsCompletions = response.playerData.profileRecords.data.records["1558682421"].objectives[0].progress;
   var gardenCompletions = response.playerData.profileRecords.data.records["1120290476"].objectives[0].progress;
 
+  //For some reason leviCompetions also count prestige completions, they need to be removed;
+  leviCompletions = leviCompletions - leviPresCompletions;
+
   return {
+    "levi": { "normal": leviCompletions, "prestige": leviPresCompletions },
+    "eow": { "normal": eowCompletions, "prestige": eowPresCompletions },
+    "sos": { "normal": sosCompletions, "prestige": sosPresCompletions },
     "lastWish": lastWishCompletions,
     "scourge": scourgeCompletions,
     "sorrows": sorrowsCompletions,

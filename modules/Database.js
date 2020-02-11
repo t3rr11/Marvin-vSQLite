@@ -393,7 +393,15 @@ function UpdateClanMembers(ClanMembers, clanId) {
   });
 }
 function UpdatePlayerDetails(Data, callback) {
-  var sql = `UPDATE playerInfo SET clanId = ?, displayName = ?, timePlayed = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }", infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, fractalineDonated = ?, resonance = ?, wellsCompleted = ?, epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, lastPlayed = ?, firstLoad = ? WHERE membershipId = ?`;
+  var sql = `
+  UPDATE playerInfo
+  SET
+    clanId = ?, displayName = ?, timePlayed = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }",
+    infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, fractalineDonated = ?, resonance = ?, wellsCompleted = ?,
+    epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, leviCompletions = ?, leviPresCompletions = ?, eowCompletions = ?, eowPresCompletions = ?, sosCompletions = ?,
+    sosPresCompletions = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?,
+    lastPlayed = ?, firstLoad = "false"
+  WHERE membershipId = ?`;
   var inserts = [
     Data.AccountInfo.clanId,
     Misc.cleanString(Data.AccountInfo.displayName),
@@ -416,12 +424,17 @@ function UpdatePlayerDetails(Data, callback) {
     Data.Others.menageire,
     Data.Others.runes,
     Data.AccountInfo.joinDate,
+    Data.Raids.levi.normal,
+    Data.Raids.levi.prestige,
+    Data.Raids.eow.normal,
+    Data.Raids.eow.prestige,
+    Data.Raids.sos.normal,
+    Data.Raids.sos.prestige,
     Data.Raids.lastWish,
     Data.Raids.scourge,
     Data.Raids.sorrows,
     Data.Raids.garden,
     Data.AccountInfo.lastPlayed,
-    'false',
     Data.AccountInfo.membershipId
   ];
   sql = db.format(sql, inserts);

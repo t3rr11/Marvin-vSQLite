@@ -22,7 +22,7 @@ function Help(message) {
   .setColor(0x0099FF)
   .setAuthor("Hey there! I am Marvin. Here is a list of my commands! The globals are only of tracked clans. Not whole population.")
   .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`")
-  .addField("Raids", "`~LW`, `~SoTP`, `~CoS`, `~GoS`")
+  .addField("Raids", "`~LEVI`, `~pLEVI`, `~EOW`, `~pEOW`, `~SOS`, `~pSOS`, `~LW`, `~SoTP`, `~CoS`, `~GoS`")
   .addField("Items / Titles", "`~Items`, `~Titles`, `~Item Example`, `~Title Example`")
   .addField("Seasonal", "`~Season Rank`, `~Sundial`, `~Fractaline`, `~resonance`")
   .addField("Clan Rankings", "`~Clanrank Fractaline`, `~Clanrank Resonance`")
@@ -269,6 +269,182 @@ function DisplayRankings(message, type, leaderboards, playerData) {
     }
 
     //Raids
+    else if(type === "levi") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards.sort(function(a, b) { return b.leviCompletions - a.leviCompletions; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(top[i].leviCompletions));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.completions.push("", Misc.AddCommas(playerStats.leviCompletions));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Normal: Leviathan")
+      .setDescription("These results are different from Raid Report as these are from a different endpoint that tracks things differently. Only applies for the this raid.")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "leviPres") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards.sort(function(a, b) { return b.leviPresCompletions - a.leviPresCompletions; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(top[i].leviPresCompletions));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.completions.push("", Misc.AddCommas(playerStats.leviPresCompletions));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Prestige: Leviathan")
+      .setDescription("These results are different from Raid Report as these are from a different endpoint that tracks things differently. Only applies for the this raid.")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "eow") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards.sort(function(a, b) { return b.eowCompletions - a.eowCompletions; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(top[i].eowCompletions));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.completions.push("", Misc.AddCommas(playerStats.eowCompletions));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Normal: Eater of Worlds")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "eowPres") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards.sort(function(a, b) { return b.eowPresCompletions - a.eowPresCompletions; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(top[i].eowPresCompletions));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.completions.push("", Misc.AddCommas(playerStats.eowPresCompletions));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Prestige: Eater of Worlds")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "sos") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards.sort(function(a, b) { return b.sosCompletions - a.sosCompletions; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(top[i].sosCompletions));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.completions.push("", Misc.AddCommas(playerStats.sosCompletions));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Normal: Spire of Stars")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "sosPres") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards.sort(function(a, b) { return b.sosPresCompletions - a.sosPresCompletions; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(top[i].sosPresCompletions));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.completions.push("", Misc.AddCommas(playerStats.sosPresCompletions));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Prestige: Spire of Stars")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
     else if(type === "lastWish") {
       var leaderboard = { "names": [], "completions": [] };
       leaderboards.sort(function(a, b) { return b.lastWishCompletions - a.lastWishCompletions; });

@@ -260,6 +260,12 @@ client.on("message", async message => {
         else if(command === "~VALOR") { DiscordCommands.Rankings("valor", message); }
         else if(command === "~GLORY") { DiscordCommands.Rankings("glory", message); }
         else if(command === "~IRON BANNER") { DiscordCommands.Rankings("ironBanner", message); }
+        else if(command === "~LEVIATHAN" || command === "~LEVI") { DiscordCommands.Rankings("levi", message); }
+        else if(command === "~PRESTIGELEVIATHAN" || command === "~PRESTIGELEVI" || command === "~PLEVI") { DiscordCommands.Rankings("leviPres", message); }
+        else if(command === "~EATEROFWORLDS" || command === "~EOW") { DiscordCommands.Rankings("eow", message); }
+        else if(command === "~PRESTIGEEATEROFWORLDS" || command === "~PRESTIGEEOW" || command === "~PEOW") { DiscordCommands.Rankings("eowPres", message); }
+        else if(command === "~SPIREOFSTARS" || command === "~SOS") { DiscordCommands.Rankings("sos", message); }
+        else if(command === "~PRESTIGESPIRE" || command === "~PRESTIGESOS" || command === "~PSOS") { DiscordCommands.Rankings("sosPres", message); }
         else if(command === "~LW" || command === "~LAST WISH") { DiscordCommands.Rankings("lastWish", message); }
         else if(command === "~SOTP" || command === "~SCOURGE") { DiscordCommands.Rankings("scourge", message); }
         else if(command === "~COS" || command === "~CROWN") { DiscordCommands.Rankings("sorrows", message); }
