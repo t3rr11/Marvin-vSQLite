@@ -30,6 +30,9 @@ async function CheckClanMembers(guild_id, client) {
             Log.SaveErrorCounter("ClanNotFound");
           }
           else if(CurrentClanMembers === "DestinyShardRelayProxyTimeout") { Log.SaveErrorCounter("DestinyShardRelayProxyTimeout"); }
+          else if(CurrentClanMembers === "DestinyShardRelayClientTimeout") { Log.SaveErrorCounter("DestinyShardRelayClientTimeout"); }
+          else if(CurrentClanMembers === "DestinyUnexpectedError") { Log.SaveErrorCounter("DestinyUnexpectedError"); }
+          else if(CurrentClanMembers === "DestinyInternalError") { Log.SaveErrorCounter("DestinyInternalError"); }
           else {
             for(var j in CurrentClanMembers) {
               ClanMembers.push({
@@ -99,8 +102,11 @@ async function GetClanMembers(clan_id) {
   const response = await request.json();
   if(request.ok && response.ErrorCode && response.ErrorCode === 1) { return response.Response.results; }
   else if(response.ErrorCode === 5) { return "SystemDisabled"; }
-  else if(response.ErrorCode === 1652) { return "DestinyShardRelayProxyTimeout"; }
   else if(response.ErrorCode === 686) { return `ClanNotFound - ${ clan_id }`; }
+  else if(response.ErrorCode === 1618) { return "DestinyUnexpectedError"; }
+  else if(response.ErrorCode === 1626) { return "DestinyInternalError"; }
+  else if(response.ErrorCode === 1652) { return "DestinyShardRelayProxyTimeout"; }
+  else if(response.ErrorCode === 1651) { return "DestinyShardRelayClientTimeout"; }
   else {
     if(response.ErrorCode) { Log.SaveError(`Failed to get clan members for ${ clan_id }: ${ response.ErrorCode }`); return "Error"; }
     else { Log.SaveError(`Failed to get clan members for ${ clan_id }: ${ JSON.stringify(response) }`); return "Error"; }
@@ -287,6 +293,7 @@ function GetItems(response) {
   var devilsRuinState = response.playerData.profileCollectibles.data.collectibles["2190071629"].state;
   var bastionState = response.playerData.profileCollectibles.data.collectibles["3207791447"].state;
   var alwaysOnTimeState = response.playerData.profileCollectibles.data.collectibles["1903459810"].state;
+  var luxuriousToast = response.playerData.profileCollectibles.data.collectibles["1866399776"].state;
 
   if(GetItemState(voicesState).notAcquired == false){ items.push("1000 Voices"); }
   if(GetItemState(lunaState).notAcquired == false){ items.push("Luna Howl"); }
@@ -328,6 +335,7 @@ function GetItems(response) {
   if(GetItemState(leviBreathState).notAcquired == false){ items.push("Leviathans Breath"); }
   if(GetItemState(devilsRuinState).notAcquired == false){ items.push("Devils Ruin"); }
   if(GetItemState(bastionState).notAcquired == false){ items.push("Bastion"); }
+  if(GetItemState(luxuriousToast).notAcquired == false){ items.push("Luxurious Toast"); }
 
   return {
     "items": items

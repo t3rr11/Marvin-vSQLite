@@ -51,10 +51,10 @@ function Status(Users, Players, ClanScans, ClanTracked, StartupTime, client, mes
   .setAuthor("Status")
   .setDescription("This is the status report, Hopefully everything is in working order!")
   .addField("Users", `${ Misc.AddCommas(client.users.size) }`, true)
-  .addField("Servers", `${ client.guilds.size }`, true)
+  .addField("Servers", `${ Misc.AddCommas(client.guilds.size) }`, true)
   .addField("Uptime", `${ totalTime }`, true)
-  .addField("Players Tracked", `${ Players.length }`, true)
-  .addField("Clans Tracked: ", `${ ClanTracked }`, true)
+  .addField("Players Tracked", `${ Misc.AddCommas(Players.length) }`, true)
+  .addField("Clans Tracked: ", `${ Misc.AddCommas(ClanTracked) }`, true)
   .addField("Clan Scans", `${ Misc.AddCommas(ClanScans) }`, true)
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
@@ -1275,7 +1275,37 @@ function GlobalDryStreak(message, item) {
       else { message.reply("Sorry! An error occurred, Please try again..."); }
     });
   }
-  else { message.reply("The only global drystreak leaderboards are: `1000 Voices`, `Anarchy`, `Always on Time`, `Tarrabah`, If you have any others you'd like to see, request them using `~request`"); }
+  else if(item === "LUXURIOUS TOAST") {
+    Database.GetGlobalDryStreak(item, function(isError, isFound, leaderboards) {
+      if(!isError) {
+        Database.GetFromBroadcasts(item, function(isError, isFound, data) {
+          var globalLeaderboard = [];
+          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].sosCompletions + leaderboards[i].sosPresCompletions) }); }
+          for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
+          globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
+          globalLeaderboard = globalLeaderboard.slice(0, 10);
+
+          var leaderboard = { "names": [], "completions": [] };
+          for(var i in globalLeaderboard) {
+            leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
+            leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
+          }
+
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setAuthor("Top 10 Unluckiest People - Luxurious Toast")
+          .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
+          .addField("Name", leaderboard.names, true)
+          .addField("Completions", leaderboard.completions, true)
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        });
+      }
+      else { message.reply("Sorry! An error occurred, Please try again..."); }
+    });
+  }
+  else { message.reply("The only global drystreak leaderboards are: `1000 Voices`, `Anarchy`, `Always on Time`, `Tarrabah`, `Luxurious Toast`, If you have any others you'd like to see, request them using `~request`"); }
 }
 function DryStreak(message, item) {
   Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {
@@ -1310,7 +1340,13 @@ function DryStreak(message, item) {
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
-            else { message.reply("The only drystreak leaderboards are: `1000 Voices`, `Anarchy`, `Tarrabah`, If you have any others you'd like to see, request them using `~request`"); }
+            else if(item.toUpperCase() == "LUXURIOUS TOAST") {
+              Database.GetClanDryStreaks(allClanIds, "Luxurious Toast", function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayDryStreak(message, "Luxurious Toast", leaderboards, playerData, allClanIds); } }
+                else { message.reply("Sorry! An error occurred, Please try again..."); }
+              });
+            }
+            else { message.reply("The only drystreak leaderboards are: `1000 Voices`, `Anarchy`, `Always on Time`, `Tarrabah`, `Luxurious Toast`, If you have any others you'd like to see, request them using `~request`"); }
           }
           else { message.reply("No clan set, to set one use: `~Set clan`"); }
         }
@@ -1328,6 +1364,7 @@ function DisplayDryStreak(message, item, leaderboards, playerData, allClanIds) {
       else if(item.toUpperCase() === "ANARCHY") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
       else if(item.toUpperCase() === "ALWAYS ON TIME") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
       else if(item.toUpperCase() === "TARRABAH") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].sorrowsCompletions) }); }
+      else if(item.toUpperCase() === "LUXURIOUS TOAST") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].sosCompletions + leaderboards[i].sosPresCompletions) }); }
     }
     for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
     globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });

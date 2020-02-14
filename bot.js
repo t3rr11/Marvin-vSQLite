@@ -309,6 +309,7 @@ client.on("message", async message => {
         else if(command === "~CLANRANK RESONANCE") {  DiscordCommands.DisplayClanRankings("resonance", message);  }
 
         //Other
+        else if(command.startsWith("~PLAY")) { } // Ignore this command
         else { message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete(2000) }).catch(); }
 
         try { Log.SaveLog("Command", 'User: ' + message.member.user.tag + ', Command: ' + command); }
