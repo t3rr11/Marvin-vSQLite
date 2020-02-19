@@ -7,7 +7,7 @@ const fetch = require("node-fetch");
 //Exports
 module.exports = {
   AddNewBroadcast, AddNewClan, CheckClanMembers, CheckNewBroadcast,
-  GetClans, GetGuilds, GetPlayers, GetUsers, GetClanDetails, GetPlayerDetails,
+  GetClans, GetGuilds, GetPlayers, GetUsers, GetClan, GetPlayerDetails,
   RemoveClan, UpdateClanFirstScan, UpdateClanForcedScan, UpdateClanDetails, UpdatePlayerDetails
 };
 
@@ -121,7 +121,7 @@ function GetUsers(callback) {
   });
   return users;
 }
-function GetClanDetails(clan_id, callback) {
+function GetClan(clan_id, callback) {
   db.query(`SELECT * FROM clans WHERE clan_id="${ clan_id }"`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting clan details: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows[0]); } else { callback(false, false); } }

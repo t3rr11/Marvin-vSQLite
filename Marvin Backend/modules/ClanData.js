@@ -47,7 +47,7 @@ async function CheckClanMembers(trackedClan) {
   }
 
   //Next is onto processing each players information. First we get the clan to determine some variables then process player data.
-  await new Promise(resolve => Database.GetClanDetails(trackedClan.clan_id, async function(isError, isFound, data) {
+  await new Promise(resolve => Database.GetClan(trackedClan.clan_id, async function(isError, isFound, data) {
     if(!isError) {
       if(isFound) {
         //Determine whether this is the first time the clan has been scanned or not, or if a forced scan was put in place.
@@ -76,7 +76,7 @@ async function CheckClanMembers(trackedClan) {
         if(data.forcedScan === "true") { Database.UpdateClanForcedScan(trackedClan.clan_id); }
 
         //Finally update all other clan details, including last scan time and online player count.
-        Database.UpdateClanDetails(ClanDetails, trackedClan.clan_id, MembersToScan.length);
+        if(!ClanDetails.error) { Database.UpdateClanDetails(ClanDetails.detail, trackedClan.clan_id, MembersToScan.length); }
       }
       else {
         if(trackedClan.clan_id.length === 6 || trackedClan.clan_id.length === 7) { Database.AddNewClan(trackedClan.clan_id); }
@@ -460,7 +460,7 @@ async function GetClanDetails(clan_id) {
   const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
   const request = await fetch(`https://www.bungie.net/Platform/GroupV2/${ clan_id }/`, headers);
   const response = await request.json();
-  if(request.ok && response.ErrorCode && response.ErrorCode !== 1) { console.log(`Couldn't find ${ clan_id } due to ${ response }`); return { "clan_id": null, "clan_name": null } }
-  else if(request.ok) { return response.Response.detail }
-  else { console.log(`Couldn't find ${ clan_id } due to ${ response }`); return { "clan_id": null, "clan_name": null } }
+  if(request.ok && response.ErrorCode && response.ErrorCode !== 1) { console.log(`Couldn't find ${ clan_id } due to ${ JSON.stringify(response) }`); return { "error": true, "reason": response } }
+  else if(request.ok) { return { "error": false, "detail": response.Response.detail } }
+  else { console.log(`Couldn't find ${ clan_id } due to ${ JSON.stringify(response) }`); return { "error": true, "reason": response } }
 }
