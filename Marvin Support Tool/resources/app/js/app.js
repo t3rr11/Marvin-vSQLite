@@ -41,7 +41,7 @@ async function LoadCurrentLog() {
   var frontendLog = await GetCurrentFrontendLog();
   var backendLog = await GetCurrentBackendLog();
 
-  if(previous_frontend_log.length <= frontendLog.length) {
+  if(previous_frontend_log.length < frontendLog.length) {
     //Load frontend log
     document.getElementById('browserLeft').innerHTML =
     '<div class="table-row" id="mainTableRow">' +
@@ -70,11 +70,12 @@ async function LoadCurrentLog() {
           '<div class="date">' + dateTime + '</div>' +
         '</div>';
       }
+      previous_frontend_log = frontendLog;
+      //Scroll to bottom
+      var divLeft = document.getElementById('browser-table-left'); divLeft.scrollTop = divLeft.scrollHeight;
     }
-    //Scroll to bottom
-    var divLeft = document.getElementById('browserLeft'); divLeft.scrollTop = divLeft.scrollHeight;
   }
-  if(previous_backend_log.length <= backendLog.length) {
+  if(previous_backend_log.length < backendLog.length) {
     //Load backend log
     document.getElementById('browserRight').innerHTML =
     '<div class="table-row" id="mainTableRow">' +
@@ -103,9 +104,10 @@ async function LoadCurrentLog() {
           '<div class="date">' + dateTime + '</div>' +
         '</div>';
       }
+      previous_backend_log = backendLog;
+      //Scroll to bottom
+      var divRight = document.getElementById('browser-table-right'); divRight.scrollTop = divRight.scrollHeight;
     }
-    //Scroll to bottom
-    var divRight = document.getElementById('browserRight'); divRight.scrollTop = divRight.scrollHeight;
   }
 }
 async function LoadErrors() {
