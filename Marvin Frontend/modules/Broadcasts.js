@@ -127,7 +127,6 @@ async function SendBroadcast(client, broadcast) {
     else { message = `${ broadcast.displayName } has obtained ${ broadcast.broadcast } in ${ broadcast.count } ${ broadcast.count > 1 ? "raids!" : "raid!" }` }
   }
   else if(broadcast.type === "title") { message = `${ broadcast.displayName } has obtained the ${ broadcast.broadcast } title!` }
-  Log.SaveLog("Clans", `[${ broadcast.clanId }]: ${ message }`);
   Database.GetGuilds(function(isError, Guilds) {
     if(!isError) {
       for(var i in Guilds) {

@@ -451,6 +451,12 @@ function SendBroadcast(data, type, broadcast, count) {
   if(Config.enableBroadcasts) {
     Database.AddNewBroadcast(data, Config.currentSeason, type, broadcast, count, new Date().getTime(), function(isError) {
       if(isError) { console.log("There was an error saving broadcast to awaiting_broadcasts."); }
+      else {
+        var message = null;
+        if(type === "item") { if(count === -1) { message = `${ data.AccountInfo.displayName } has obtained ${ broadcast }`; } else { message = `${ data.AccountInfo.displayName } has obtained ${ broadcast } in ${ count } ${ count > 1 ? "raids!" : "raid!" }` } }
+        else if(type === "title") { message = `${ data.AccountInfo.displayName } has obtained the ${ broadcast } title!` }
+        Log.SaveLog("Clans", `[${ data.AccountInfo.clanId }]: ${ message }`);
+      }
     });
   }
 }
