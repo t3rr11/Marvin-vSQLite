@@ -1,0 +1,19 @@
+{
+  "name": "Marvin-Tool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --disable-http-cache"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^4.0.5",
+    "electron-packager": "^14.2.0"
+  },
+  "dependencies": {
+    "electron-debug": "^3.0.1",
+    "electron-reload": "^1.4.0"
+  }
+}

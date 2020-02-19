@@ -1,11 +1,13 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/app
-/data/status.json
-/.pnp
-.pnp.js
+/Marvin Backend/node_modules
+/Marvin Frontend/node_modules
+/Marvin Support Tool/resources/app/node_modules
+
+#logs
+/Marvin Backend/data/logs
+/Marvin Frontend/data/logs
 
 # testing
 /coverage
