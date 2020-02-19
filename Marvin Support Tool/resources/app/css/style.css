@@ -66,20 +66,23 @@ div { margin: 0px; padding:0px; }
   white-space: normal;
   background-color: #f7f7f7;
   display: grid;
-  grid-template-rows: 50% 50%;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  grid-template-rows: 50vh 50vh;
+  height: -webkit-fill-available;
+  overflow: hidden;
 }
 #browser > #browserLeft {
-  float: left;
+  height: 100%;
 }
 #browser > #browserRight {
   border-top: 1px darkgray solid;
-  float: right;
+  height: 100%;
 }
 #sidebar > #rawBtn { color:white; position:absolute; top:0; right:0; width:65px; height:25px; z-index: 10; }
-#browser-table {
+#browser-table-left {
+  overflow-y: scroll;
+  height: calc(100% - 22px);
+}
+#browser-table-right {
   overflow-y: scroll;
   height: calc(100% - 22px);
 }
