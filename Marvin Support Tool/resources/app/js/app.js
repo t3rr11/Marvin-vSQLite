@@ -32,6 +32,8 @@ function ForceUpdate() {
   if(backend_status.includes("????")) { backend_status = backend_status.slice(0, backend_status.length-4); } else { backend_status = backend_status + "?"; }
   if(frontend_status.includes("????")) { frontend_status = frontend_status.slice(0, frontend_status.length-4); } else { frontend_status = frontend_status + "?"; }
   if(errorsFile.includes("????")) { errorsFile = errorsFile.slice(0, errorsFile.length-4); } else { errorsFile = errorsFile + "?"; }
+  previous_backend_log = "";
+  previous_frontend_log = "";
   LoadErrors();
   LoadStatus();
   LoadCurrentLog();
