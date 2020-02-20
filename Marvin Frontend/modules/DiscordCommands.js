@@ -1038,7 +1038,7 @@ function DisplayClanRankings(type, message) {
               for(var j in leaderboards) {
                 if(leaderboards[j].clanId === clans[i].clan_id) {
                   totalFractaline = totalFractaline + leaderboards[j].fractalineDonated;
-                  totalResonance = totalResonance + leaderboards[j].resonance;
+                  totalResonance = totalResonance + (leaderboards[j].resonance+2);
                 }
               }
               clanLeaderboards.push({ "clan_id": clans[i].clan_id, "clan_name": clans[i].clan_name, "fractalineDonated": totalFractaline, "resonance": totalResonance });
@@ -1115,7 +1115,7 @@ async function ClanRankings(message, type, leaderboards, clans) {
     top = leaderboards.slice(0, 10);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
-      leaderboard.data.push(Misc.AddCommas(top[i].resonance * 100 + 200));
+      leaderboard.data.push(Misc.AddCommas(top[i].resonance * 100));
     }
 
     //Get guild clan rankings
@@ -1141,7 +1141,7 @@ async function ClanRankings(message, type, leaderboards, clans) {
             tempData.sort(function(a, b) { return b.data - a.data; });
             for(var i in tempData) {
               leaderboard.names.push(tempData[i].name);
-              leaderboard.data.push(Misc.AddCommas(tempData[i].data));
+              leaderboard.data.push(Misc.AddCommas(tempData[i].data * 100));
             }
           }
           else { leaderboard.names.push("", `~Addclan to see your clans rank`); }
