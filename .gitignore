@@ -3,11 +3,13 @@
 # dependencies
 /Marvin Backend/node_modules
 /Marvin Frontend/node_modules
+/Marvin Express/node_modules
 /Marvin Support Tool/resources/app/node_modules
 
 #logs
 /Marvin Backend/data/logs
 /Marvin Frontend/data/logs
+/Marvin Express/data/logs
 
 # testing
 /coverage
