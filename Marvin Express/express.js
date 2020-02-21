@@ -17,12 +17,26 @@ app.use(bodyParser.json({ extended: true }));
 module.exports = { app };
 
 //Posts
-app.post("/API/GetGuildsFromDiscordID", async function(req, res) { await expressAPIRequest(req, res, `GetGuildsFromDiscordID`, `SELECT * FROM guilds WHERE owner_id="${ req.body.id }" AND owner_avatar="${ req.body.avatar }"`); });
-app.post("/API/GetClans", async function(req, res) { await expressAPIRequest(req, res, `GetClans`, `SELECT * FROM clans`); });
-app.post("/API/GetClan", async function(req, res) { await expressAPIRequest(req, res, `GetClan`, `SELECT * FROM clans WHERE clan_id="${ req.body.clan_id }"`); });
+app.post("/API/GetGuildsFromDiscordID", async function(req, res) { await expressPOSTRequest(req, res, `GetGuildsFromDiscordID`, `SELECT * FROM guilds WHERE owner_id="${ req.body.id }" AND owner_avatar="${ req.body.avatar }"`); });
+app.post("/API/GetClan", async function(req, res) { await expressPOSTRequest(req, res, `GetClan`, `SELECT * FROM clans WHERE clan_id="${ req.body.clan_id }"`); });
+
+//Gets
+app.get("/API/GetClans", async function(req, res) { await expressGETRequest(req, res, `GetClans`, `SELECT * FROM clans`); });
+app.get("/API/GetCurrentStatus", async function(req, res) { await expressGETRequest(req, res, `GetCurrentStatus`, `SELECT * FROM status ORDER BY id DESC LIMIT 1`); });
+app.get("/API/GetDailyStatus", async function(req, res) { await expressGETRequest(req, res, `GetDailyStatus`, `SELECT * FROM status LIMIT ${ 1 * 10 * 24 }`); });
+app.get("/API/GetWeeklyStatus", async function(req, res) { await expressGETRequest(req, res, `GetWeeklyStatus`, `SELECT * FROM ( SELECT @row := @row +1 AS rownum, users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, date FROM ( SELECT @row :=0) r, status ) ranked WHERE rownum % 144 = 1`); });
+app.get("/API/GetMonthlyStatus", async function(req, res) { await expressGETRequest(req, res, `GetMonthlyStatus`, `SELECT * FROM ( SELECT @row := @row +1 AS rownum, users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, date FROM ( SELECT @row :=0) r, status ) ranked WHERE rownum % 1008 = 1`); });
+app.get("/API/GetYearlyStatus", async function(req, res) { await expressGETRequest(req, res, `GetYearlyStatus`, `SELECT * FROM ( SELECT @row := @row +1 AS rownum, users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, date FROM ( SELECT @row :=0) r, status ) ranked WHERE rownum % 4320 = 1`); });
 
 //Request Processing
-async function expressAPIRequest(req, res, name, sql) {
+async function expressPOSTRequest(req, res, name, sql) {
+  Log.SaveLog("Request", `Express Request to: ${ name }`);
+  db.query(sql, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
+    else { if(rows.length > 0) { res.status(200).send({ error: null, data: rows }) } else { res.status(200).send({ error: "No data found" }) } }
+  });
+}
+async function expressGETRequest(req, res, name, sql) {
   Log.SaveLog("Request", `Express Request to: ${ name }`);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
