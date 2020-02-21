@@ -4,6 +4,7 @@ const { db } = require("./modules/Database");
 const Config = require("./data/config.json");
 const Misc = require("./js/misc.js");
 const Log = require("./js/log.js");
+const fs = require('fs');
 const cors = require("cors")
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -16,18 +17,63 @@ app.use(bodyParser.json({ extended: true }));
 module.exports = { app };
 
 //Posts
-app.post("/API/GetGuildsFromDiscordID", async function(req, res) { await apiRequest(req, res, `GetGuildsFromDiscordID`, `SELECT * FROM guilds WHERE owner_id="${ req.body.id }" AND owner_avatar="${ req.body.avatar }"`); });
-app.post("/API/GetClans", async function(req, res) { await apiRequest(req, res, `GetClans`, `SELECT * FROM clans`); });
-app.post("/API/GetClan", async function(req, res) { await apiRequest(req, res, `GetClan`, `SELECT * FROM clans WHERE clan_id="${ req.body.clan_id }"`); });
+app.post("/API/GetGuildsFromDiscordID", async function(req, res) { await expressAPIRequest(req, res, `GetGuildsFromDiscordID`, `SELECT * FROM guilds WHERE owner_id="${ req.body.id }" AND owner_avatar="${ req.body.avatar }"`); });
+app.post("/API/GetClans", async function(req, res) { await expressAPIRequest(req, res, `GetClans`, `SELECT * FROM clans`); });
+app.post("/API/GetClan", async function(req, res) { await expressAPIRequest(req, res, `GetClan`, `SELECT * FROM clans WHERE clan_id="${ req.body.clan_id }"`); });
 
 //Request Processing
-async function apiRequest(req, res, name, sql) {
-  Log.SaveLog("Request", `Request to: ${ name }`);
+async function expressAPIRequest(req, res, name, sql) {
+  Log.SaveLog("Request", `Express Request to: ${ name }`);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
     else { if(rows.length > 0) { res.status(200).send({ error: null, data: rows }) } else { res.status(200).send({ error: "No data found" }) } }
   });
 }
+async function apiRequest(sql, callback) {
+  db.query(sql, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error: ${ error }`); callback(true); }
+    else { if(rows.length > 0) { callback(false, true, rows); } else { callback(false, false); } }
+  });
+}
+
+//Logging
+async function logStatus() {
+  //Get all data together
+  var backend_status = JSON.parse(fs.readFileSync('../Marvin Backend/data/backend_status.json').toString());
+  var frontend_status = JSON.parse(fs.readFileSync('../Marvin Frontend/data/frontend_status.json').toString());
+  var Users = frontend_status.users;
+  var Servers = frontend_status.servers;
+  var T_Users = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM users`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
+  var Players = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM playerInfo`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
+  var T_Players = await new Promise(resolve => apiRequest(`SELECT member_count FROM clans`, (isError, isFound, Data) => { var count = 0; for(var i in Data) { count = count + Data[i].member_count } resolve(count); }) );
+  var O_Players = await new Promise(resolve => apiRequest(`SELECT online_players FROM clans`, (isError, isFound, Data) => { var count = 0; for(var i in Data) { count = count + Data[i].online_players } resolve(count); }) );
+  var Clans = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM clans`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
+  var T_Clans = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM clans WHERE isTracking="true"`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
+  var Guilds = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM guilds`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
+  var T_Guilds = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM guilds WHERE isTracking="true"`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
+
+  //Now that all data is obtained, save log every 10 minutes.
+  var sql = `INSERT INTO status (users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, date) VALUES(?,?,?,?,?,?,?,?,?,?,"${ new Date().getTime() }")`
+  var inserts = [Users, T_Users, Players, T_Players, O_Players, Clans, T_Clans, Guilds, T_Guilds, Servers];
+  sql = db.format(sql, inserts);
+  db.query(sql, function(error, rows, fields) {
+    if(error) { console.log(`Failed to log status: ${ error }`); }
+    else { console.log(`Logged Status: ${ new Date() }`); }
+  });
+}
+
+//Interval for 10 minute logging.
+var logged = false;
+setInterval(function() {
+  var numbers = [0,1,2,3,4,5,6]
+  if(numbers.includes(new Date().getMinutes() / 10)) {
+    if(logged === false) {
+      logged = true;
+      logStatus();
+    }
+  }
+  else { if(logged) { logged = false; } }
+}, 1000);
 
 //This stuff is for the WiFi module. Leave alone.
 app.get("/api", async function(req, res) {
