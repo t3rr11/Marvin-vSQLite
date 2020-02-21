@@ -14,16 +14,30 @@ module.exports = {
 };
 
 //MySQL Connection
-var db = MySQL.createConnection({
+var db;
+var db_config = {
   host: 'localhost',
   user: 'root',
   password: '',
   database: 'marvin'
-});
+};
 
-//Connect to MySQL
-db.connect(function(error) { if(!!error) { console.log(Misc.GetReadableDateTime() + ' - ' + 'Error connecting to MySQL'); } else { console.log(Misc.GetReadableDateTime() + ' - ' + 'Connected to MySQL'); } });
+function handleDisconnect() {
+  db = MySQL.createConnection(db_config);
+  db.connect(function(err) {
+    if(err) {
+      console.log('Error when connecting to db: ', err);
+      setTimeout(handleDisconnect, 2000);
+    }
+  });
+  db.on('error', function(err) {
+    console.log('Database Error: ', err);
+    if(err.code === 'PROTOCOL_CONNECTION_LOST') { handleDisconnect(); }
+    else { throw err; }
+  });
+}
 
+handleDisconnect();
 //MySQL Functions
 
 //Gets
