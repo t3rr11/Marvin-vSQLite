@@ -30,14 +30,14 @@ app.get("/API/GetYearlyStatus", async function(req, res) { await expressGETReque
 
 //Request Processing
 async function expressPOSTRequest(req, res, name, sql) {
-  Log.SaveLog("Request", `Express Request to: ${ name }`);
+  Log.SaveLog("Request", `POST Request to: ${ name }`);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
     else { if(rows.length > 0) { res.status(200).send({ error: null, data: rows }) } else { res.status(200).send({ error: "No data found" }) } }
   });
 }
 async function expressGETRequest(req, res, name, sql) {
-  Log.SaveLog("Request", `Express Request to: ${ name }`);
+  Log.SaveLog("Request", `GET Request to: ${ name }`);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
     else { if(rows.length > 0) { res.status(200).send({ error: null, data: rows }) } else { res.status(200).send({ error: "No data found" }) } }
