@@ -23,10 +23,9 @@ app.post("/API/GetClan", async function(req, res) { await expressPOSTRequest(req
 //Gets
 app.get("/API/GetClans", async function(req, res) { await expressGETRequest(req, res, `GetClans`, `SELECT * FROM clans`); });
 app.get("/API/GetCurrentStatus", async function(req, res) { await expressGETRequest(req, res, `GetCurrentStatus`, `SELECT * FROM status ORDER BY id DESC LIMIT 1`); });
-app.get("/API/GetDailyStatus", async function(req, res) { await expressGETRequest(req, res, `GetDailyStatus`, `SELECT * FROM status LIMIT ${ 1 * 10 * 24 }`); });
-app.get("/API/GetWeeklyStatus", async function(req, res) { await expressGETRequest(req, res, `GetWeeklyStatus`, `SELECT * FROM ( SELECT @row := @row +1 AS rownum, users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, date FROM ( SELECT @row :=0) r, status ) ranked WHERE rownum % 144 = 1`); });
-app.get("/API/GetMonthlyStatus", async function(req, res) { await expressGETRequest(req, res, `GetMonthlyStatus`, `SELECT * FROM ( SELECT @row := @row +1 AS rownum, users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, date FROM ( SELECT @row :=0) r, status ) ranked WHERE rownum % 1008 = 1`); });
-app.get("/API/GetYearlyStatus", async function(req, res) { await expressGETRequest(req, res, `GetYearlyStatus`, `SELECT * FROM ( SELECT @row := @row +1 AS rownum, users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, date FROM ( SELECT @row :=0) r, status ) ranked WHERE rownum % 4320 = 1`); });
+app.get("/API/GetDailyStatus", async function(req, res) { await expressGETRequest(req, res, `GetDailyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 86400000 } AND date <= ${ new Date().getTime() }`); });
+app.get("/API/GetWeeklyStatus", async function(req, res) { await expressGETRequest(req, res, `GetWeeklyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 604800000 } AND date <= ${ new Date().getTime() }`); });
+app.get("/API/GetMonthlyStatus", async function(req, res) { await expressGETRequest(req, res, `GetMonthlyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 2592000000 } AND date <= ${ new Date().getTime() }`); });
 
 //Request Processing
 async function expressPOSTRequest(req, res, name, sql) {

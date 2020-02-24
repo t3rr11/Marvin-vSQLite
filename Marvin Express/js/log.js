@@ -11,7 +11,7 @@ var ShardErrors = 0;
 var OtherErrors = 0;
 
 //Exports
-module.exports = { SaveLog, SaveError, SaveDiscordLog };
+module.exports = { SaveLog, SaveError };
 
 //Functions
 function SaveLog(type, log) {
@@ -20,8 +20,8 @@ function SaveLog(type, log) {
     var dateTime = Misc.GetReadableDateTime();
     var dataToSave = [{'DateTime': dateTime, 'Type': type, 'Log': log}];
     TotalLogData.push(dataToSave[0]);
-    fs.writeFile('./data/logs/frontend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
-    fs.writeFile('../../../var/www/html/data/marvin/frontend_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
+    fs.writeFile('./data/logs/express_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
+    fs.writeFile('../../../var/www/html/data/marvin/express_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
   }
 }
 
@@ -31,22 +31,7 @@ function SaveError(log) {
     var dateTime = Misc.GetReadableDateTime();
     var dataToSave = [{'DateTime': dateTime, 'Type': 'Error', 'Log': log}];
     TotalLogData.push(dataToSave[0]);
-    fs.writeFile('./data/logs/frontend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
-    fs.writeFile('../../../var/www/html/data/marvin/frontend_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
+    fs.writeFile('./data/logs/express_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
+    fs.writeFile('../../../var/www/html/data/marvin/express_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
   }
-}
-
-function SaveDiscordLog(Clans, Players, StartupTime, client) {
-  var thisTime = new Date().getTime();
-  var totalTime = thisTime - StartupTime;
-  totalTime = Misc.formatTime(totalTime / 1000);
-  var status = {
-    "users": client.users.size,
-    "servers": client.guilds.size,
-    "clans": Clans.length,
-    "players": Players.length,
-    "uptime": totalTime
-  }
-  fs.writeFile('./data/frontend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });
-  fs.writeFile('../../../var/www/html/data/marvin/frontend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });
 }

@@ -112,7 +112,7 @@ client.on("ready", async () => {
   await CheckForNewlyScannedClans();
 
 	//SetTimeouts
-	setInterval(function() { UpdateActivityList() }, 10000);
+	setInterval(function() { try { UpdateActivityList() } catch (err) { } }, 10000);
 	setInterval(function() { CheckForBroadcasts() }, 10000);
 	setInterval(function() { CheckForNewlyScannedClans() }, 10000);
   setInterval(function() { Log.SaveDiscordLog(Clans, Players, StartupTime, client) }, 10000);

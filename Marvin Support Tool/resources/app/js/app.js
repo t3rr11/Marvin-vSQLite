@@ -45,6 +45,7 @@ async function LoadCurrentLog() {
 
   if(previous_frontend_log.length < frontendLog.length) {
     //Load frontend log
+    var shownFrontendLog = frontendLog.slice(frontendLog.length - 150, frontendLog.length);
     document.getElementById('browserLeft').innerHTML =
     '<div class="table-row" id="mainTableRow">' +
       '<div class="type">Type</div>' +
@@ -53,10 +54,10 @@ async function LoadCurrentLog() {
     '</div>' +
     '<div id="browser-table-left">' +
     '</div>';
-    for(i in frontendLog) {
-      var type = JSON.stringify(frontendLog[i].Type).split('"').join('');
-      var log = JSON.stringify(frontendLog[i].Log).split('"').join('');
-      var dateTime = JSON.stringify(frontendLog[i].DateTime).split('"').join('');
+    for(i in shownFrontendLog) {
+      var type = JSON.stringify(shownFrontendLog[i].Type).split('"').join('');
+      var log = JSON.stringify(shownFrontendLog[i].Log).split('"').join('');
+      var dateTime = JSON.stringify(shownFrontendLog[i].DateTime).split('"').join('');
       if(type == 'Info'){ var color = 'black' }
       if(type == 'Command'){ var color = 'cornflowerblue' }
       if(type == 'Server'){ var color = 'blueviolet' }
@@ -79,6 +80,7 @@ async function LoadCurrentLog() {
   }
   if(previous_backend_log.length < backendLog.length) {
     //Load backend log
+    var shownBackendLog = backendLog.slice(backendLog.length - 150, backendLog.length);
     document.getElementById('browserRight').innerHTML =
     '<div class="table-row" id="mainTableRow">' +
       '<div class="type">Type</div>' +
@@ -87,10 +89,10 @@ async function LoadCurrentLog() {
     '</div>' +
     '<div id="browser-table-right">' +
     '</div>';
-    for(i in backendLog) {
-      var type = JSON.stringify(backendLog[i].Type).split('"').join('');
-      var log = JSON.stringify(backendLog[i].Log).split('"').join('');
-      var dateTime = JSON.stringify(backendLog[i].DateTime).split('"').join('');
+    for(i in shownBackendLog) {
+      var type = JSON.stringify(shownBackendLog[i].Type).split('"').join('');
+      var log = JSON.stringify(shownBackendLog[i].Log).split('"').join('');
+      var dateTime = JSON.stringify(shownBackendLog[i].DateTime).split('"').join('');
       if(type == 'Info'){ var color = 'black' }
       if(type == 'Command'){ var color = 'cornflowerblue' }
       if(type == 'Server'){ var color = 'blueviolet' }

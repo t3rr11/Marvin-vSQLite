@@ -418,7 +418,7 @@ function DeleteGuild(guild_id, callback) {
   });
 }
 function ReAuthClan(message, callback) {
-  var sql = "UPDATE guild SET owner_id = ?, owner_avatar = ? WHERE owner_id = ?";
+  var sql = "UPDATE guilds SET owner_id = ?, owner_avatar = ? WHERE owner_id = ?";
   var inserts = [message.author.id, message.author.avatar, message.author.id];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
@@ -427,7 +427,7 @@ function ReAuthClan(message, callback) {
   });
 }
 function TransferClan(message, guild_id, callback) {
-  var sql = "UPDATE guild SET owner_id = ?, owner_avatar = ? WHERE guild_id = ?";
+  var sql = "UPDATE guilds SET owner_id = ?, owner_avatar = ? WHERE guild_id = ?";
   var inserts = [message.mentions.users.first().id, message.mentions.users.first().avatar, guild_id];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
@@ -436,27 +436,58 @@ function TransferClan(message, guild_id, callback) {
   });
 }
 function DisableTracking(guild_id) {
-  var sql = "UPDATE guild SET isTracking = ? WHERE guild_id = ?";
-  var inserts = ["false", guild_id];
-  sql = db.format(sql, inserts);
-  db.query(sql, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error trying to disable tracking for guild: ${ guild_id }, Error: ${ error }`); }
+  db.query(`SELECT * FROM guilds WHERE guild_id="${ guild_id }"`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error trying to find guild to disable tracking for: ${ guild_id }, Error: ${ error }`); }
+    else {
+      var clans = rows[0].clans.split(",");
+      db.query(`UPDATE guilds SET isTracking="false" WHERE guild_id="${ guild_id }"`, function(error, rows, fields) {
+        if(!!error) { Log.SaveError(`Error trying to disable tracking for guild: ${ guild_id }, Error: ${ error }`); }
+        else {
+          for(var i in clans) {
+            db.query(`SELECT * FROM guilds WHERE clans LIKE "%${ clans[i] }%"`, function(error, rows, fields) {
+              if(!!error) { Log.SaveError(`Failed to find clan: ${ clans[i] }, Error: ${ error }`); }
+              else {
+                if(rows.length === 1) {
+                  db.query(`UPDATE clans SET isTracking="false" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
+                    if(!!error) { Log.SaveError(`Failed to disable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
+                    else { Log.SaveLog(`Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`); }
+                  });
+                }
+              }
+            });
+          }
+        }
+      });
+    }
   });
 }
 function EnableTracking(guild_id, callback) {
-  var sql = "SELECT * FROM guild WHERE guild_id = ?";
-  var inserts = [guild_id];
-  sql = db.format(sql, inserts);
-  db.query(sql, function(error, rows, fields) {
+  db.query(`SELECT * FROM guilds WHERE guild_id="${ guild_id }"`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error trying to find clan to re-enable tracking for guild: ${ guild_id }, Error: ${ error }`); callback(true); }
     else {
       if(rows.length > 0) {
-        var sql = "UPDATE guild SET isTracking = ? WHERE guild_id = ?";
-        var inserts = ["true", guild_id];
-        sql = db.format(sql, inserts);
-        db.query(sql, function(error, rows, fields) {
+        var guildInfo = rows[0];
+        db.query(`UPDATE guilds SET isTracking="true" WHERE guild_id="${ guild_id }"`, function(error, rows, fields) {
           if(!!error) { Log.SaveError(`Error trying to re-enable tracking for guild: ${ guild_id }, Error: ${ error }`); callback(true); }
-          else { callback(false, true); }
+          else {
+            var clans = guildInfo.clans.split(",");
+            for(var i in clans) {
+              db.query(`SELECT * FROM clans WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
+                if(!!error) { Log.SaveError(`Failed to get info for clan: ${ clans[i] }, Error: ${ error }`); }
+                else {
+                  if(rows.length > 0) {
+                    if(rows[0].isTracking === "false") {
+                      db.query(`UPDATE clans SET isTracking="true" forcedScan="true" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
+                        if(!!error) { Log.SaveError(`Failed to enable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
+                        else { Log.SaveLog(`Re-Enabled tracking for ${ clans[i] } as it has returned to being tracked!`); }
+                      });
+                    }
+                  }
+                }
+              });
+            }
+            callback(false, true);
+          }
         });
       }
       else {
