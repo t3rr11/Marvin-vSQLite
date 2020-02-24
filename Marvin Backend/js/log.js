@@ -21,7 +21,7 @@ function SaveLog(type, log) {
     var dataToSave = [{'DateTime': dateTime, 'Type': type, 'Log': log}];
     TotalLogData.push(dataToSave[0]);
     fs.writeFile('./data/logs/backend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
-    fs.writeFile('../../../var/www/html/data/marvin/backend_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
+    fs.writeFile('../../../var/www/guardianstats.com/data/marvin/backend_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
   }
 }
 
@@ -32,7 +32,7 @@ function SaveError(log) {
     var dataToSave = [{'DateTime': dateTime, 'Type': 'Error', 'Log': log}];
     TotalLogData.push(dataToSave[0]);
     fs.writeFile('./data/logs/backend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
-    fs.writeFile('../../../var/www/html/data/marvin/backend_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
+    fs.writeFile('../../../var/www/guardianstats.com/data/marvin/backend_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
   }
 }
 
@@ -50,7 +50,7 @@ function SaveBackendStatus(ClanScans, ScanLength, LastScanTime, StartupTime, Pro
     "apiDisabled": APIDisabled
   }
   fs.writeFile('./data/backend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });
-  fs.writeFile('../../../var/www/html/data/marvin/backend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });
+  fs.writeFile('../../../var/www/guardianstats.com/data/marvin/backend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });
 }
 
 function SaveErrorCounter(type) {
@@ -63,5 +63,5 @@ function SaveErrorCounter(type) {
     "otherErrors": OtherErrors
   }
   fs.writeFile('./data/errors.json', JSON.stringify(errors), (err) => { if (err) console.error(err) });
-  fs.writeFile('../../../var/www/html/data/marvin/errors.json', JSON.stringify(errors), (err) => { if (err) console.error(err) });
+  fs.writeFile('../../../var/www/guardianstats.com/data/marvin/errors.json', JSON.stringify(errors), (err) => { if (err) console.error(err) });
 }

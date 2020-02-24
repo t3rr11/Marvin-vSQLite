@@ -21,7 +21,7 @@ function SaveLog(type, log) {
     var dataToSave = [{'DateTime': dateTime, 'Type': type, 'Log': log}];
     TotalLogData.push(dataToSave[0]);
     fs.writeFile('./data/logs/express_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
-    fs.writeFile('../../../var/www/html/data/marvin/express_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
+    fs.writeFile('../../../var/www/guardianstats.com/data/marvin/express_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
   }
 }
 
@@ -32,6 +32,6 @@ function SaveError(log) {
     var dataToSave = [{'DateTime': dateTime, 'Type': 'Error', 'Log': log}];
     TotalLogData.push(dataToSave[0]);
     fs.writeFile('./data/logs/express_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
-    fs.writeFile('../../../var/www/html/data/marvin/express_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
+    fs.writeFile('../../../var/www/guardianstats.com/data/marvin/express_log.json', JSON.stringify(TotalLogData), (err) => { if (err) console.error(err) });
   }
 }

@@ -17,15 +17,15 @@ app.use(bodyParser.json({ extended: true }));
 module.exports = { app };
 
 //Posts
-app.post("/API/GetGuildsFromDiscordID", async function(req, res) { await expressPOSTRequest(req, res, `GetGuildsFromDiscordID`, `SELECT * FROM guilds WHERE owner_id="${ req.body.id }" AND owner_avatar="${ req.body.avatar }"`); });
-app.post("/API/GetClan", async function(req, res) { await expressPOSTRequest(req, res, `GetClan`, `SELECT * FROM clans WHERE clan_id="${ req.body.clan_id }"`); });
+app.post("/GetGuildsFromDiscordID", async function(req, res) { await expressPOSTRequest(req, res, `GetGuildsFromDiscordID`, `SELECT * FROM guilds WHERE owner_id="${ req.body.id }" AND owner_avatar="${ req.body.avatar }"`); });
+app.post("/GetClan", async function(req, res) { await expressPOSTRequest(req, res, `GetClan`, `SELECT * FROM clans WHERE clan_id="${ req.body.clan_id }"`); });
 
 //Gets
-app.get("/API/GetClans", async function(req, res) { await expressGETRequest(req, res, `GetClans`, `SELECT * FROM clans`); });
-app.get("/API/GetCurrentStatus", async function(req, res) { await expressGETRequest(req, res, `GetCurrentStatus`, `SELECT * FROM status ORDER BY id DESC LIMIT 1`); });
-app.get("/API/GetDailyStatus", async function(req, res) { await expressGETRequest(req, res, `GetDailyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 86400000 } AND date <= ${ new Date().getTime() }`); });
-app.get("/API/GetWeeklyStatus", async function(req, res) { await expressGETRequest(req, res, `GetWeeklyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 604800000 } AND date <= ${ new Date().getTime() }`); });
-app.get("/API/GetMonthlyStatus", async function(req, res) { await expressGETRequest(req, res, `GetMonthlyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 2592000000 } AND date <= ${ new Date().getTime() }`); });
+app.get("/GetClans", async function(req, res) { await expressGETRequest(req, res, `GetClans`, `SELECT * FROM clans`); });
+app.get("/GetCurrentStatus", async function(req, res) { await expressGETRequest(req, res, `GetCurrentStatus`, `SELECT * FROM status ORDER BY id DESC LIMIT 1`); });
+app.get("/GetDailyStatus", async function(req, res) { await expressGETRequest(req, res, `GetDailyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 86400000 } AND date <= ${ new Date().getTime() }`); });
+app.get("/GetWeeklyStatus", async function(req, res) { await expressGETRequest(req, res, `GetWeeklyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 604800000 } AND date <= ${ new Date().getTime() }`); });
+app.get("/GetMonthlyStatus", async function(req, res) { await expressGETRequest(req, res, `GetMonthlyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 2592000000 } AND date <= ${ new Date().getTime() }`); });
 
 //Request Processing
 async function expressPOSTRequest(req, res, name, sql) {
