@@ -174,8 +174,8 @@ async function SendFinishedLoadingAnnouncement(client, Clan) {
           if(clans[j] === Clan.clan_id) {
             const thisDate = new Date();
             const embed = new Discord.RichEmbed().setColor(0xFFE000).setAuthor("Clan Broadcast").setDescription(`${ Clan.clan_name } has finished loading for the first time. You are free to use commands now! For help use: ~help.`).setFooter(Config.defaultFooter, Config.defaultLogoURL).setTimestamp();
-            try { Misc.getDefaultChannel(client.guilds.get(Guilds[i].guild_id)).send({embed}); }
-            catch(err) { console.log(`Failed to broadcast to ${ Guilds[i].guild_id } because of ${ err }`); }
+            try { Misc.getDefaultChannel(client.guilds.get(Guilds[i].guild_id)).send({embed}); Log.SaveLog("Clans", `Informed ${ Guilds[i].guild_id } that the clan ${ Clan.clan_id } has finished loading.`); }
+            catch(err) { Log.SaveError(`Failed to inform ${ Guilds[i].guild_id } that the clan ${ Clan.clan_id } has finished loading. Error: ${ err }`); }
           }
         }
       }
