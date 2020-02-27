@@ -157,7 +157,7 @@ client.on("message", async message => {
 
   //Commands
   if(message.author.bot) return;
-  if(command.startsWith('~') && !command.startsWith('~PLAY') && !command.startsWith('~PRUNE') && !command.startsWith('~PURGE')) {
+  if(command.startsWith('~') && !command.startsWith('~PLAY') && !command.startsWith('~PRUNE') && !command.startsWith('~PURGE') && !command.startsWith('~q') && !command.startsWith('~~')) {
     try {
       if(message.guild) {
         if(command.startsWith("~REGISTER ")) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)); } else { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
