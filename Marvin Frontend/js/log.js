@@ -36,15 +36,13 @@ function SaveError(log) {
   }
 }
 
-function SaveDiscordLog(Clans, Players, StartupTime, client) {
+function SaveDiscordLog(StartupTime, client) {
   var thisTime = new Date().getTime();
   var totalTime = thisTime - StartupTime;
   totalTime = Misc.formatTime(totalTime / 1000);
   var status = {
     "users": client.users.size,
     "servers": client.guilds.size,
-    "clans": Clans.length,
-    "players": Players.length,
     "uptime": totalTime
   }
   fs.writeFile('./data/frontend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });

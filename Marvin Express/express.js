@@ -64,10 +64,11 @@ async function logStatus() {
   var T_Clans = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM clans WHERE isTracking="true"`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
   var Guilds = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM guilds`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
   var T_Guilds = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM guilds WHERE isTracking="true"`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
+  var Broadcasts = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM broadcasts`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
 
   //Now that all data is obtained, save log every 10 minutes.
-  var sql = `INSERT INTO status (users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, date) VALUES(?,?,?,?,?,?,?,?,?,?,"${ new Date().getTime() }")`
-  var inserts = [Users, T_Users, Players, T_Players, O_Players, Clans, T_Clans, Guilds, T_Guilds, Servers];
+  var sql = `INSERT INTO status (users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, broadcasts, date) VALUES(?,?,?,?,?,?,?,?,?,?,?,"${ new Date().getTime() }")`
+  var inserts = [Users, T_Users, Players, T_Players, O_Players, Clans, T_Clans, Guilds, T_Guilds, Servers, Broadcasts];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
     if(error) { console.log(`Failed to log status: ${ error }`); }

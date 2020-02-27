@@ -450,7 +450,7 @@ function DisableTracking(guild_id) {
                 if(rows.length === 1) {
                   db.query(`UPDATE clans SET isTracking="false" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
                     if(!!error) { Log.SaveError(`Failed to disable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
-                    else { Log.SaveLog(`Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`); }
+                    else { Log.SaveLog("Clans", `Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`); }
                   });
                 }
               }
@@ -479,7 +479,7 @@ function EnableTracking(guild_id, callback) {
                     if(rows[0].isTracking === "false") {
                       db.query(`UPDATE clans SET isTracking="true" forcedScan="true" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
                         if(!!error) { Log.SaveError(`Failed to enable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
-                        else { Log.SaveLog(`Re-Enabled tracking for ${ clans[i] } as it has returned to being tracked!`); }
+                        else { Log.SaveLog("Clans", `Re-Enabled tracking for ${ clans[i] } as it has returned to being tracked!`); }
                       });
                     }
                   }

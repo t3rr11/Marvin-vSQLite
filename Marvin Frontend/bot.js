@@ -14,11 +14,8 @@ let ManageClans = require(__dirname + '/modules/ManageClans.js');
 let Broadcasts = require(__dirname + '/modules/Broadcasts.js');
 
 //Data
-var Clans = [];
+var ClansLength = [];
 var NewClans = [];
-var Guilds = [];
-var Players = [];
-var Users = [];
 var StartupTime = new Date().getTime();
 var CommandsInput = 0;
 var LastScanTime = null;
@@ -32,10 +29,9 @@ function UpdateActivityList() {
   else {
     var ActivityList = [];
     ActivityList.push(`Serving ${client.users.size} users`);
-    ActivityList.push('Tracking ' + Players.length + ' players!');
-    ActivityList.push('Tracking ' + Clans.length + ' clans!');
+    ActivityList.push('Tracking ' + ClansLength + ' clans!');
     ActivityList.push(`Use ~HELP for Support`);
-    ActivityList.push(`Consider ~Supporting`);
+    ActivityList.push(`Consider Donating? ~Donate`);
     var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
     client.user.setActivity(activity);
   }
@@ -51,11 +47,18 @@ async function CheckMaintenance() {
     else { if(APIDisabled === true) { Log.SaveError("The Bungie API is back online!"); APIDisabled = false; } }
   }
 }
-async function CheckForNewlyScannedClans() {
-  await new Promise(resolve => Database.GetClans((isError, Data) => { Clans = Data; resolve(true); }) );
-  await new Promise(resolve => Database.GetGuilds((isError, Data) => { Guilds = Data; resolve(true); }) );
-  await new Promise(resolve => Database.GetPlayers((isError, Data) => { Players = Data; resolve(true); }) );
-  await new Promise(resolve => Database.GetUsers((isError, Data) => { Users = Data; resolve(true); }) );
+async function UpdateClans() {
+  CheckMaintenance();
+  CheckForBroadcasts();
+  UpdateActivityList();
+  Log.SaveDiscordLog(StartupTime, client);
+  await new Promise(resolve => Database.GetClans((isError, Clans) => {
+    ClansLength = Clans.length;
+    CheckForNewlyScannedClans(Clans);
+    resolve(true);
+  }));
+}
+function CheckForNewlyScannedClans(Clans) {
   for(var i in Clans) {
     if(Clans[i].firstScan === "true") {
       if(!NewClans.find(e => e === Clans[i].clan_id)) {
@@ -71,6 +74,19 @@ async function CheckForNewlyScannedClans() {
       }
     }
   }
+}
+function CheckForBroadcasts() {
+  Database.GetNewBroadcasts(async function (isError, isFound, broadcasts) {
+    for(var i in broadcasts) {
+      await new Promise(resolve =>
+        Database.CheckNewBroadcast(broadcasts[i].membershipId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
+          if(!isFound) { Broadcasts.SendBroadcast(client, broadcasts[i]); }
+          else { Database.RemoveAwaitingBroadcast(broadcasts[i]); }
+          resolve(true);
+        })
+      );
+    }
+  });
 }
 function CheckTimeout(message) {
   if(TimedOutUsers.includes(message.author.id)) { message.reply("You've been timed out. This lasts 5 minutes from your last " + Config.prefix + "request command. This is to protect from spam, sorry!"); return false; }
@@ -91,36 +107,18 @@ function SetScanSpeed(message, input) {
   fs.writeFile('../Marvin Backend/data/config.json', JSON.stringify(backend_config), (err) => { if (err) console.error(err) });
   message.channel.send(`ScanSpeed is now scanning at a rate of ${ input } clans per second. With a slow down rate of ${ Math.round(input * 0.8) } and a reset of ${ Math.round(input * 0.6) }`);
 }
-function CheckForBroadcasts() {
-  Database.GetNewBroadcasts(async function (isError, isFound, broadcasts) {
-    for(var i in broadcasts) {
-      await new Promise(resolve =>
-        Database.CheckNewBroadcast(broadcasts[i].membershipId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
-          if(!isFound) { Broadcasts.SendBroadcast(client, broadcasts[i]); }
-          else { Database.RemoveAwaitingBroadcast(broadcasts[i]); }
-          resolve(true);
-        })
-      );
-    }
-  });
-}
 
 //Discord Client Code
 client.on("ready", async () => {
   //Define variables
-  await CheckMaintenance();
-  await CheckForNewlyScannedClans();
+  await UpdateClans();
 
 	//SetTimeouts
-	setInterval(function() { try { UpdateActivityList() } catch (err) { } }, 10000);
-	setInterval(function() { CheckForBroadcasts() }, 10000);
-	setInterval(function() { CheckForNewlyScannedClans() }, 10000);
-  setInterval(function() { Log.SaveDiscordLog(Clans, Players, StartupTime, client) }, 10000);
+	setInterval(function() { UpdateClans() }, 10000);
 
   //Start Up Console Log
   Log.SaveLog("Info", `Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
-  Log.SaveLog("Info", 'Tracking ' + Players.length + ' players!');
-  Log.SaveLog("Info", 'Tracking ' + Clans.length + ' clans!');
+  Log.SaveLog("Info", 'Tracking ' + ClansLength + ' clans!');
 });
 
 client.on("guildCreate", guild => {
@@ -129,9 +127,7 @@ client.on("guildCreate", guild => {
     Log.SaveLog("Server", "Joined a new guild: " + guild.name);
     Database.EnableTracking(guild.id, function(isError, isFound) {
       if(!isError) {
-        if(isFound) {
-          Log.SaveLog("Clans", "Clan Tracking Re-Enabled: " + guild.name);
-        }
+        if(isFound) { Log.SaveLog("Clans", "Clan Tracking Re-Enabled: " + guild.name); }
         else {
           const embed = new Discord.RichEmbed()
           .setColor(0x0099FF)
@@ -161,7 +157,7 @@ client.on("message", async message => {
 
   //Commands
   if(message.author.bot) return;
-  if(command.startsWith('~') && !command.startsWith('~~')) {
+  if(command.startsWith('~') && !command.startsWith('~PLAY') && !command.startsWith('~PRUNE') && !command.startsWith('~PURGE')) {
     try {
       if(message.guild) {
         if(command.startsWith("~REGISTER ")) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)); } else { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
@@ -241,7 +237,6 @@ client.on("message", async message => {
         else if(command === "~CLANRANK RESONANCE") {  DiscordCommands.DisplayClanRankings("resonance", message);  }
 
         //Other
-        else if(command.startsWith("~PLAY")) { } // Ignore this command
         else { message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete(2000) }).catch(); }
 
         try { Log.SaveLog("Command", 'User: ' + message.member.user.tag + ', Command: ' + command); }
