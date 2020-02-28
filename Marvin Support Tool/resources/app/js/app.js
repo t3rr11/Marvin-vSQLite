@@ -45,7 +45,7 @@ async function LoadCurrentLog() {
 
   if(previous_frontend_log.length < frontendLog.length) {
     //Load frontend log
-    var shownFrontendLog = frontendLog.slice(frontendLog.length - 150, frontendLog.length);
+    var shownFrontendLog = frontendLog.slice(frontendLog.length > 150 ? frontendLog.length - 150 : 0, frontendLog.length);
     document.getElementById('browserLeft').innerHTML =
     '<div class="table-row" id="mainTableRow">' +
       '<div class="type">Type</div>' +
@@ -80,7 +80,7 @@ async function LoadCurrentLog() {
   }
   if(previous_backend_log.length < backendLog.length) {
     //Load backend log
-    var shownBackendLog = backendLog.slice(backendLog.length - 150, backendLog.length);
+    var shownBackendLog = backendLog.slice(backendLog.length > 150 ? backendLog.length - 150 : 0, backendLog.length);
     document.getElementById('browserRight').innerHTML =
     '<div class="table-row" id="mainTableRow">' +
       '<div class="type">Type</div>' +
