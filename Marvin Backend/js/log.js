@@ -47,7 +47,7 @@ function SaveBackendStatus(ClanScans, ScanLength, LastScanTime, StartupTime, Pro
     "scans": ClanScans,
     "scanTime": ScanLength,
     "lastScan": Misc.formatTime((new Date().getTime() - LastScanTime) / 1000),
-    "apiDisabled": APIDisabled
+    "APIDisabled": APIDisabled
   }
   fs.writeFile('./data/backend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });
   fs.writeFile('../../../var/www/guardianstats.com/data/marvin/backend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });

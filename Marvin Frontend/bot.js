@@ -40,12 +40,15 @@ function UpdateActivityList() {
 //New Commands
 async function CheckMaintenance() {
   //Check if api is down for maintenance
-  var backend_status = JSON.parse(fs.readFileSync('../Marvin Backend/data/backend_status.json').toString());
-  if(APIDisabled === null) { APIDisabled = backend_status.APIDisabled; }
-  else {
-    if(backend_status.APIDisabled) { if(APIDisabled === false) { Log.SaveError("The Bungie API is temporarily disabled for maintenance."); APIDisabled = true; } }
-    else { if(APIDisabled === true) { Log.SaveError("The Bungie API is back online!"); APIDisabled = false; } }
+  try {
+    var backend_status = JSON.parse(fs.readFileSync('../Marvin Backend/data/backend_status.json').toString());
+    if(APIDisabled === null) { APIDisabled = backend_status.APIDisabled; }
+    else {
+      if(backend_status.APIDisabled) { if(APIDisabled === false) { Log.SaveError("The Bungie API is temporarily disabled for maintenance."); APIDisabled = true; } }
+      else { if(APIDisabled === true) { Log.SaveError("The Bungie API is back online!"); APIDisabled = false; } }
+    }
   }
+  catch (err) { console.log(Misc.GetReadableDateTime() + " - " + "Failed to check for maintenance as the data was corrupt."); }
 }
 async function UpdateClans() {
   CheckMaintenance();
