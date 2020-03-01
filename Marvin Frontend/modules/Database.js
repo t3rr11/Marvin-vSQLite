@@ -477,7 +477,7 @@ function EnableTracking(guild_id, callback) {
                 else {
                   if(rows.length > 0) {
                     if(rows[0].isTracking === "false") {
-                      db.query(`UPDATE clans SET isTracking="true" forcedScan="true" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
+                      db.query(`UPDATE clans SET isTracking="true", forcedScan="true" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
                         if(!!error) { Log.SaveError(`Failed to enable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
                         else { Log.SaveLog("Clans", `Re-Enabled tracking for ${ clans[i] } as it has returned to being tracked!`); }
                       });
