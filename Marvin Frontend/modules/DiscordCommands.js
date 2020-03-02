@@ -821,8 +821,37 @@ function DisplayRankings(message, type, leaderboards, playerData) {
       .setTimestamp()
       message.channel.send({embed});
     }
+    else if(type === "totalTitles") {
+      var leaderboard = { "names": [], "titles": [] };
+      leaderboards.sort(function(a, b) { return b.titles.split(",").length - a.titles.split(",").length; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.titles.push(`${ top[i].titles.split(",").length }`);
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.titles.push("", `${ playerStats.titles.split(",").length }`);
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Title Collectors")
+      .addField("Name", leaderboard.names, true)
+      .addField("Score", leaderboard.titles, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
   }
-  catch (err) { message.reply("Sorry we broke... Usually happens when there was no data returned. Possibly someone doesn't have the item or title you are looking for."); }
+  catch (err) { console.log(err); message.reply("Sorry we broke... Usually happens when there was no data returned. Possibly someone doesn't have the item or title you are looking for."); }
 }
 function GlobalRankings(type, message) {
   Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {
@@ -1490,7 +1519,7 @@ function GetTrackedTitles(message) {
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked titles!")
-  .setDescription("**Titles** \n" + titles)
+  .setDescription("**Titles** \n" + titles + "\n\n" + "**Extra** \n If you want to see who has the most titles within the tracked clans of this discord use: `~titles total`")
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});

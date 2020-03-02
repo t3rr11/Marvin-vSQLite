@@ -209,6 +209,7 @@ client.on("message", async message => {
         else if(command === "~SEASON RANKS" || command === "~SEASONRANKS" || command === "~SEASON RANK" || command === "~SEASONRANK") { DiscordCommands.Rankings("seasonRank", message); }
         else if(command === "~ITEMS") { DiscordCommands.GetTrackedItems(message); }
         else if(command === "~TITLES") { DiscordCommands.GetTrackedTitles(message); }
+        else if(command === "~TITLES TOTAL" || command === "~THENUMBEROFTITLESTHATIHAVEEARNED") { DiscordCommands.Rankings("totalTitles", message); }
 
         //Clan Management
         else if(command.startsWith("~SET BROADCASTS ")) { Broadcasts.SetupBroadcasts(message); }
