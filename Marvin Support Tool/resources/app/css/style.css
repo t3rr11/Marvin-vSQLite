@@ -24,15 +24,21 @@ div { margin: 0px; padding:0px; }
 }
 #sidebar > #logs {
   width: 100%;
-  background-color: #dadada;
-  color: black;
   font-size: 12px;
   text-align: center;
   overflow-x: hidden;
   overflow-y: auto;
   border-bottom: 1px gray solid;
+  position: relative;
 }
 #sidebar > #logs > p:hover { cursor:pointer; }
+#sidebar > #logs > .darkmodeToggle {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
 #sidebar > #errors {
   float: right;
   padding-top: 5px;
@@ -91,7 +97,14 @@ div { margin: 0px; padding:0px; }
   min-height: 20px;
   grid-template-columns: 100px minmax(300px, auto) 150px;
 }
-#mainTableRow {
+#leftTableRow {
+  display: grid;
+  grid-template-columns: 100px minmax(300px, auto) 150px;
+  font-weight: bold;
+  border-bottom: 1px darkgray solid;
+  background-color: lightgray;
+}
+#rightTableRow {
   display: grid;
   grid-template-columns: 100px minmax(300px, auto) 150px;
   font-weight: bold;
@@ -117,4 +130,17 @@ div { margin: 0px; padding:0px; }
   font-family:sans-serif;
   line-height: 25px;
   padding-left: 5px;
+}
+.dark {
+  background-color: #1a1d22 !important;
+  border-color: #1a1d22 !important;
+  color: #ccc !important;
+}
+.removeBorder {
+  border: 0px !important;
+}
+.lightDark {
+  background-color: #292c33 !important;
+  border-color: #1a1d22 !important;
+  color: #ccc !important;
 }

@@ -26,6 +26,23 @@ function ToggleRawVersion() { if(isRaw == false) { isRaw = true; } else { isRaw 
 function Filter(option) { if(filter[option] == true) { filter[option] = false } else { filter[option] = true; } LoadCurrentLog(); }
 function CheckFilter(option) { return filter[option]; }
 
+function ToggleDarkmode() {
+  if(document.getElementById("darkmodeCheckbox").checked) {
+    try { document.getElementById("sidebar").classList.add("dark"); } catch (err) { }
+    try { document.getElementById("browser").classList.add("lightDark"); } catch (err) { }
+    try { document.getElementById("leftTableRow").classList.add("dark"); } catch (err) { }
+    try { document.getElementById("rightTableRow").classList.add("dark"); } catch (err) { }
+    try { document.getElementById("browserRight").classList.add("removeBorder"); } catch (err) { }
+  }
+  else {
+    try { document.getElementById("sidebar").classList.remove("dark"); } catch (err) { }
+    try { document.getElementById("browser").classList.remove("lightDark"); } catch (err) { }
+    try { document.getElementById("leftTableRow").classList.remove("dark"); } catch (err) { }
+    try { document.getElementById("rightTableRow").classList.remove("dark"); } catch (err) { }
+    try { document.getElementById("browserRight").classList.remove("removeBorder"); } catch (err) { }
+  }
+}
+
 function ForceUpdate() {
   if(backend_log.includes("????")) { backend_log = backend_log.slice(0, backend_log.length-4); } else { backend_log = backend_log + "?"; }
   if(frontend_log.includes("????")) { frontend_log = frontend_log.slice(0, frontend_log.length-4); } else { frontend_log = frontend_log + "?"; }
@@ -47,7 +64,7 @@ async function LoadCurrentLog() {
     //Load frontend log
     var shownFrontendLog = frontendLog.slice(frontendLog.length > 150 ? frontendLog.length - 150 : 0, frontendLog.length);
     document.getElementById('browserLeft').innerHTML =
-    '<div class="table-row" id="mainTableRow">' +
+    '<div class="table-row" id="leftTableRow">' +
       '<div class="type">Type</div>' +
       '<div class="log">Frontend Log</div>' +
       '<div class="date">Date</div>' +
@@ -62,7 +79,7 @@ async function LoadCurrentLog() {
       if(type == 'Command'){ var color = 'cornflowerblue' }
       if(type == 'Server'){ var color = 'blueviolet' }
       if(type == 'Account'){ var color = 'hotpink' }
-      if(type == 'Clans'){ var color = 'hotpink' }
+      if(type == 'Clans'){ var color = 'forestgreen' }
       if(type == 'Warning'){ var color = 'Warning' }
       if(type == 'Error'){ var color = 'Tomato' }
       if(CheckFilter(type) == false) {
@@ -77,12 +94,13 @@ async function LoadCurrentLog() {
       //Scroll to bottom
       var divLeft = document.getElementById('browser-table-left'); divLeft.scrollTop = divLeft.scrollHeight;
     }
+    ToggleDarkmode();
   }
   if(previous_backend_log.length < backendLog.length) {
     //Load backend log
     var shownBackendLog = backendLog.slice(backendLog.length > 150 ? backendLog.length - 150 : 0, backendLog.length);
     document.getElementById('browserRight').innerHTML =
-    '<div class="table-row" id="mainTableRow">' +
+    '<div class="table-row" id="rightTableRow">' +
       '<div class="type">Type</div>' +
       '<div class="log">Backend Log</div>' +
       '<div class="date">Date</div>' +
@@ -94,10 +112,10 @@ async function LoadCurrentLog() {
       var log = JSON.stringify(shownBackendLog[i].Log).split('"').join('');
       var dateTime = JSON.stringify(shownBackendLog[i].DateTime).split('"').join('');
       if(type == 'Info'){ var color = 'black' }
-      if(type == 'Command'){ var color = 'cornflowerblue' }
-      if(type == 'Server'){ var color = 'blueviolet' }
-      if(type == 'Account'){ var color = 'hotpink' }
-      if(type == 'Clans'){ var color = 'hotpink' }
+      if(type == 'Command'){ var color = 'black' }
+      if(type == 'Server'){ var color = 'black' }
+      if(type == 'Account'){ var color = 'black' }
+      if(type == 'Clans'){ var color = 'black' }
       if(type == 'Warning'){ var color = 'Warning' }
       if(type == 'Error'){ var color = 'Tomato' }
       if(CheckFilter(type) == false) {
@@ -112,6 +130,7 @@ async function LoadCurrentLog() {
       //Scroll to bottom
       var divRight = document.getElementById('browser-table-right'); divRight.scrollTop = divRight.scrollHeight;
     }
+    ToggleDarkmode();
   }
 }
 async function LoadErrors() {

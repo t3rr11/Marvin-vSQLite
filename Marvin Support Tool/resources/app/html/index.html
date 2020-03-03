@@ -9,7 +9,13 @@
 	<body>
 		<div class="content">
 			<div id="sidebar">
-				<div id="logs"><p style="margin:2px;padding:5px;" onclick="ForceUpdate();">Click to manual refresh</p></div>
+				<div id="logs">
+					<p style="margin:2px;padding:5px;" onclick="ForceUpdate();">Click to manual refresh</p>
+					<div class="darkmodeToggle">
+						<input id="darkmodeCheckbox" type="checkbox" style="margin:2px;padding:5px;" onchange="ToggleDarkmode();">
+	  				<label for="vehicle1">Toggle Darkmode</label>
+					</div>
+				</div>
 				<div id="errors"></div>
 				<div id="status"></div>
 				<div id="filter">
