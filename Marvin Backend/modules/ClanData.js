@@ -256,7 +256,6 @@ function GetRaids(response) {
 function GetItems(response) {
   var itemList = [
     { "name": "1000 Voices", "collectibleHash": 199171385 },
-    { "name": "Malfeasance", "collectibleHash": 1660030045 },
     { "name": "Luna Howl", "collectibleHash": 3260604718 },
     { "name": "Not Forgotten", "collectibleHash": 3260604717 },
     { "name": "Redrix Broadsword", "collectibleHash": 1111219481 },
