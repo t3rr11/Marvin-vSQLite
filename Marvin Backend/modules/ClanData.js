@@ -204,9 +204,9 @@ function GetAccountInfo(response, clanId) {
 }
 function GetRankings(response) {
   var characterIds = response.playerData.profile.data.characterIds;
-  var infamy = response.playerData.characterProgressions.data[characterIds[0]].progressions["2772425241"].currentProgress;
-  var valor = response.playerData.characterProgressions.data[characterIds[0]].progressions["3882308435"].currentProgress;
-  var glory = response.playerData.characterProgressions.data[characterIds[0]].progressions["2679551909"].currentProgress;
+  var infamy = 0; try { infamy = response.playerData.characterProgressions.data[characterIds[0]].progressions["2772425241"].currentProgress; } catch (err) { }
+  var valor = 0; try { valor = response.playerData.characterProgressions.data[characterIds[0]].progressions["3882308435"].currentProgress; } catch (err) { }
+  var glory = 0; try { glory = response.playerData.characterProgressions.data[characterIds[0]].progressions["2679551909"].currentProgress; } catch (err) { }
   var infamyResets = response.playerData.profileRecords.data.records["3901785488"].objectives[0].progress;
   var valorResets = response.playerData.profileRecords.data.records["2282573299"].objectives[1].progress;
   var totalInfamy = parseInt(infamy) + (parseInt('15000') * parseInt(infamyResets));
@@ -254,130 +254,77 @@ function GetRaids(response) {
   }
 }
 function GetItems(response) {
+  var itemList = [
+    { "name": "1000 Voices", "collectibleHash": 199171385 },
+    { "name": "Malfeasance", "collectibleHash": 1660030045 },
+    { "name": "Luna Howl", "collectibleHash": 3260604718 },
+    { "name": "Not Forgotten", "collectibleHash": 3260604717 },
+    { "name": "Redrix Broadsword", "collectibleHash": 1111219481 },
+    { "name": "Redrix Claymore", "collectibleHash": 4274523516 },
+    { "name": "Breakneck", "collectibleHash": 1666039008 },
+    { "name": "Mountain Top", "collectibleHash": 4047371119 },
+    { "name": "Le Monarque", "collectibleHash": 3573051804 },
+    { "name": "Jötunn", "collectibleHash": 3584311877 },
+    { "name": "Anarchy", "collectibleHash": 2220014607 },
+    { "name": "Thorn", "collectibleHash": 4009683574 },
+    { "name": "Recluse", "collectibleHash": 2335550020 },
+    { "name": "Last Word", "collectibleHash": 3074058273 },
+    { "name": "Izanagis Burden", "collectibleHash": 24541428 },
+    { "name": "Arbalest", "collectibleHash": 2036397919 },
+    { "name": "Hush", "collectibleHash": 1670904512 },
+    { "name": "Wendigo GL3", "collectibleHash": 3830703103 },
+    { "name": "Tarrabah", "collectibleHash": 2329697053 },
+    { "name": "Revoker", "collectibleHash": 3066162258 },
+    { "name": "Lumina", "collectibleHash": 2924632392 },
+    { "name": "Bad Juju", "collectibleHash": 4207100358 },
+    { "name": "Xenophage", "collectibleHash": 1258579677 },
+    { "name": "Divinity", "collectibleHash": 1988948484 },
+    { "name": "Komodo-4FR", "collectibleHash": 4116184726 },
+    { "name": "Python", "collectibleHash": 3972149937 },
+    { "name": "Buzzard", "collectibleHash": 2011258732 },
+    { "name": "Loaded Question", "collectibleHash": 3810740723 },
+    { "name": "Whisper of the Worm", "collectibleHash": 3875807583 },
+    { "name": "Outbreak Perfected", "collectibleHash": 2500286745 },
+    { "name": "Legend of Acrius", "collectibleHash": 199171389 },
+    { "name": "Oxygen SR3", "collectibleHash": 543982652 },
+    { "name": "21% Delirium", "collectibleHash": 1639266456 },
+    { "name": "Edgewise", "collectibleHash": 853534062 },
+    { "name": "Exit Strategy", "collectibleHash": 1510655351 },
+    { "name": "Randys Throwing Knife", "collectibleHash": 1303705556 },
+    { "name": "Wish-Ender", "collectibleHash": 1660030044 },
+    { "name": "Leviathans Breath", "collectibleHash": 3552855013 },
+    { "name": "Devils Ruin", "collectibleHash": 2190071629 },
+    { "name": "Bastion", "collectibleHash": 3207791447 },
+    { "name": "Always on Time (Sparrow)", "collectibleHash": 1903459810 },
+    { "name": "Luxurious Toast", "collectibleHash": 1866399776 }
+  ];
+
   var items = [];
-
-  var voicesState = response.playerData.profileCollectibles.data.collectibles["199171385"].state;
-  var malfeasanceState = response.playerData.profileCollectibles.data.collectibles["1660030045"].state;
-  var lunaState = response.playerData.profileCollectibles.data.collectibles["3260604718"].state;
-  var notForgottenState = response.playerData.profileCollectibles.data.collectibles["3260604717"].state;
-  var broadswordState = response.playerData.profileCollectibles.data.collectibles["1111219481"].state;
-  var claymoreState = response.playerData.profileCollectibles.data.collectibles["4274523516"].state;
-  var breakneckState = response.playerData.profileCollectibles.data.collectibles["1666039008"].state;
-  var mountainTopState = response.playerData.profileCollectibles.data.collectibles["4047371119"].state;
-  var leMonarqueState = response.playerData.profileCollectibles.data.collectibles["3573051804"].state;
-  var jotunnState = response.playerData.profileCollectibles.data.collectibles["3584311877"].state;
-  var anarchyState = response.playerData.profileCollectibles.data.collectibles["2220014607"].state;
-  var thornState = response.playerData.profileCollectibles.data.collectibles["4009683574"].state;
-  var recluseState = response.playerData.profileCollectibles.data.collectibles["2335550020"].state;
-  var lastWordState = response.playerData.profileCollectibles.data.collectibles["3074058273"].state;
-  var izanagiState = response.playerData.profileCollectibles.data.collectibles["24541428"].state;
-  var arbalestState = response.playerData.profileCollectibles.data.collectibles["2036397919"].state;
-  var hushState = response.playerData.profileCollectibles.data.collectibles["1670904512"].state;
-  var wendigoState = response.playerData.profileCollectibles.data.collectibles["3830703103"].state;
-  var tarrabahState = response.playerData.profileCollectibles.data.collectibles["2329697053"].state;
-  var revokerState = response.playerData.profileCollectibles.data.collectibles["3066162258"].state;
-  var luminaState = response.playerData.profileCollectibles.data.collectibles["2924632392"].state;
-  var badjujuState = response.playerData.profileCollectibles.data.collectibles["4207100358"].state;
-  var xenophageState = response.playerData.profileCollectibles.data.collectibles["1258579677"].state;
-  var divinityState = response.playerData.profileCollectibles.data.collectibles["1988948484"].state;
-  var komodo4FRState = response.playerData.profileCollectibles.data.collectibles["4116184726"].state;
-  var pythonState = response.playerData.profileCollectibles.data.collectibles["3972149937"].state;
-  var buzzardState = response.playerData.profileCollectibles.data.collectibles["2011258732"].state;
-  var loadedQuestionState = response.playerData.profileCollectibles.data.collectibles["3810740723"].state;
-  var whisperState = response.playerData.profileCollectibles.data.collectibles["3875807583"].state;
-  var outbreakState = response.playerData.profileCollectibles.data.collectibles["2500286745"].state;
-  var acriusState = response.playerData.profileCollectibles.data.collectibles["199171389"].state;
-  var oxygenState = response.playerData.profileCollectibles.data.collectibles["543982652"].state;
-  var deliriumState = response.playerData.profileCollectibles.data.collectibles["1639266456"].state;
-  var edgewiseState = response.playerData.profileCollectibles.data.collectibles["853534062"].state;
-  var exitStrategyState = response.playerData.profileCollectibles.data.collectibles["1510655351"].state;
-  var randyState = response.playerData.profileCollectibles.data.collectibles["1303705556"].state;
-  var wishEnderState = response.playerData.profileCollectibles.data.collectibles["1660030044"].state;
-  var leviBreathState = response.playerData.profileCollectibles.data.collectibles["3552855013"].state;
-  var devilsRuinState = response.playerData.profileCollectibles.data.collectibles["2190071629"].state;
-  var bastionState = response.playerData.profileCollectibles.data.collectibles["3207791447"].state;
-  var alwaysOnTimeState = response.playerData.profileCollectibles.data.collectibles["1903459810"].state;
-  var luxuriousToast = response.playerData.profileCollectibles.data.collectibles["1866399776"].state;
-
-  if(GetItemState(voicesState).notAcquired == false){ items.push("1000 Voices"); }
-  if(GetItemState(lunaState).notAcquired == false){ items.push("Luna Howl"); }
-  if(GetItemState(notForgottenState).notAcquired == false){ items.push("Not Forgotten"); }
-  if(GetItemState(broadswordState).notAcquired == false){ items.push("Redrix Broadsword"); }
-  if(GetItemState(claymoreState).notAcquired == false){ items.push("Redrix Claymore"); }
-  if(GetItemState(breakneckState).notAcquired == false){ items.push("Breakneck"); }
-  if(GetItemState(mountainTopState).notAcquired == false){ items.push("Mountain Top"); }
-  if(GetItemState(leMonarqueState).notAcquired == false){ items.push("Le Monarque"); }
-  if(GetItemState(anarchyState).notAcquired == false){ items.push("Anarchy"); }
-  if(GetItemState(alwaysOnTimeState).notAcquired == false){ items.push("Always on Time (Sparrow)"); }
-  if(GetItemState(thornState).notAcquired == false){ items.push("Thorn"); }
-  if(GetItemState(jotunnState).notAcquired == false){ items.push("Jötunn"); }
-  if(GetItemState(recluseState).notAcquired == false){ items.push("Recluse"); }
-  if(GetItemState(lastWordState).notAcquired == false){ items.push("Last Word"); }
-  if(GetItemState(izanagiState).notAcquired == false){ items.push("Izanagis Burden"); }
-  if(GetItemState(arbalestState).notAcquired == false){ items.push("Arbalest"); }
-  if(GetItemState(hushState).notAcquired == false){ items.push("Hush"); }
-  if(GetItemState(wendigoState).notAcquired == false){ items.push("Wendigo GL3"); }
-  if(GetItemState(tarrabahState).notAcquired == false){ items.push("Tarrabah"); }
-  if(GetItemState(revokerState).notAcquired == false){ items.push("Revoker"); }
-  if(GetItemState(luminaState).notAcquired == false){ items.push("Lumina"); }
-  if(GetItemState(badjujuState).notAcquired == false){ items.push("Bad Juju"); }
-  if(GetItemState(xenophageState).notAcquired == false){ items.push("Xenophage"); }
-  if(GetItemState(divinityState).notAcquired == false){ items.push("Divinity"); }
-  if(GetItemState(komodo4FRState).notAcquired == false){ items.push("Komodo-4FR"); }
-  if(GetItemState(pythonState).notAcquired == false){ items.push("Python"); }
-  if(GetItemState(buzzardState).notAcquired == false){ items.push("Buzzard"); }
-  if(GetItemState(loadedQuestionState).notAcquired == false){ items.push("Loaded Question"); }
-  if(GetItemState(whisperState).notAcquired == false){ items.push("Whisper of the Worm"); }
-  if(GetItemState(outbreakState).notAcquired == false){ items.push("Outbreak Perfected"); }
-  if(GetItemState(acriusState).notAcquired == false){ items.push("Legend of Acrius"); }
-  if(GetItemState(oxygenState).notAcquired == false){ items.push("Oxygen SR3"); }
-  if(GetItemState(deliriumState).notAcquired == false){ items.push("21% Delirium"); }
-  if(GetItemState(edgewiseState).notAcquired == false){ items.push("Edgewise"); }
-  if(GetItemState(exitStrategyState).notAcquired == false){ items.push("Exit Strategy"); }
-  if(GetItemState(randyState).notAcquired == false){ items.push("Randys Throwing Knife"); }
-  if(GetItemState(wishEnderState).notAcquired == false){ items.push("Wish-Ender"); }
-  if(GetItemState(leviBreathState).notAcquired == false){ items.push("Leviathans Breath"); }
-  if(GetItemState(devilsRuinState).notAcquired == false){ items.push("Devils Ruin"); }
-  if(GetItemState(bastionState).notAcquired == false){ items.push("Bastion"); }
-  if(GetItemState(luxuriousToast).notAcquired == false){ items.push("Luxurious Toast"); }
-
-  return {
-    "items": items
-  };
+  itemList.map((item) => { if(GetItemState(response.playerData.profileCollectibles.data.collectibles[item.collectibleHash].state).notAcquired === false) { items.push(item.name) } });
+  return { "items": items };
 }
+
+
+
 function GetTitles(response) {
+  var titleList = [
+    { "name": "Wayfarer", "recordHash": 2757681677 },
+    { "name": "Dredgen", "recordHash": 3798931976 },
+    { "name": "Unbroken", "recordHash": 3369119720 },
+    { "name": "Chronicler", "recordHash": 1754983323 },
+    { "name": "Cursebreaker", "recordHash": 1693645129 },
+    { "name": "Rivensbane", "recordHash": 2182090828 },
+    { "name": "Blacksmith", "recordHash": 2053985130 },
+    { "name": "Reckoner", "recordHash": 1313291220 },
+    { "name": "MMXIX", "recordHash": 2254764897 },
+    { "name": "Shadow", "recordHash": 1883929036 },
+    { "name": "Undying", "recordHash": 2707428411 },
+    { "name": "Enlightened", "recordHash": 3387213440 },
+    { "name": "Harbinger", "recordHash": 3793754396 },
+    { "name": "Savior", "recordHash": 2460356851 }
+  ];
   var titles = [];
-
-  var wayfarer = response.playerData.profileRecords.data.records["2757681677"].objectives[0].complete;
-  var dredgen = response.playerData.profileRecords.data.records["3798931976"].objectives[0].complete;
-  var unbroken = response.playerData.profileRecords.data.records["3369119720"].objectives[0].complete;
-  var chronicler = response.playerData.profileRecords.data.records["1754983323"].objectives[0].complete;
-  var cursebreaker = response.playerData.profileRecords.data.records["1693645129"].objectives[0].complete;
-  var rivensbane = response.playerData.profileRecords.data.records["2182090828"].objectives[0].complete;
-  var blacksmith = response.playerData.profileRecords.data.records["2053985130"].objectives[0].complete;
-  var reckoner = response.playerData.profileRecords.data.records["1313291220"].objectives[0].complete;
-  var mmxix = response.playerData.profileRecords.data.records["2254764897"].objectives[0].complete;
-  var shadow = response.playerData.profileRecords.data.records["1883929036"].objectives[0].complete;
-  var undying = response.playerData.profileRecords.data.records["2707428411"].objectives[0].complete;
-  var enlightened = response.playerData.profileRecords.data.records["3387213440"].objectives[0].complete;
-  var harbinger = response.playerData.profileRecords.data.records["3793754396"].objectives[0].complete;
-  var savior = response.playerData.profileRecords.data.records["2460356851"].objectives[0].complete;
-
-  if(wayfarer){ titles.push("Wayfarer"); }
-  if(dredgen){ titles.push("Dredgen"); }
-  if(unbroken){ titles.push("Unbroken"); }
-  if(chronicler){ titles.push("Chronicler"); }
-  if(cursebreaker){ titles.push("Cursebreaker"); }
-  if(rivensbane){ titles.push("Rivensbane"); }
-  if(blacksmith){ titles.push("Blacksmith"); }
-  if(reckoner){ titles.push("Reckoner"); }
-  if(mmxix){ titles.push("MMXIX"); }
-  if(shadow){ titles.push("Shadow"); }
-  if(undying){ titles.push("Undying"); }
-  if(enlightened){ titles.push("Enlightened"); }
-  if(harbinger){ titles.push("Harbinger"); }
-  if(savior){ titles.push("Savior"); }
-
+  titleList.map((title) => { if(response.playerData.profileRecords.data.records[title.recordHash].objectives[0].complete) { titles.push(title.name); } })
   return { titles };
 }
 function GetSeasonal(response) {
@@ -385,7 +332,7 @@ function GetSeasonal(response) {
   var characterIds = response.playerData.profile.data.characterIds;
   var season8Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["1628407317"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["3184735011"].level; season8Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
   var season9Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["3256821400"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["2140885848"].level; season9Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
-  var fractalineDonated = 0; try { var fractalineDonated = response.playerData.characterProgressions.data[characterIds[0]].progressions["2480822985"].level; } catch (err) { }
+  var fractalineDonated = 0; try { fractalineDonated = response.playerData.characterProgressions.data[characterIds[0]].progressions["2480822985"].level; } catch (err) { }
   var resonance = response.playerData.profileRecords.data.records["4205106950"].objectives[0].progress;
 
   //Sundial
@@ -402,9 +349,9 @@ function GetOthers(response) {
   var characterIds = response.playerData.profile.data.characterIds;
   var menageire = response.playerData.profileRecords.data.records["1363982253"].objectives[0].progress;
   var runes = response.playerData.profileRecords.data.records["2422246600"].objectives[0].progress;
-  var triumphScore = "0"; try { var triumphScore = response.playerData.profileRecords.data.score; } catch (err) {  }
-  var wellsCompleted = "0"; try { var wellsCompleted = response.playerData.profileRecords.data.records["819775261"].objectives[0].progress; } catch (err) {  }
-  var epsCompleted = "0"; try { var epsCompleted = response.playerData.profileRecords.data.records["3350489579"].objectives[0].progress; } catch (err) {  }
+  var triumphScore = "0"; try { triumphScore = response.playerData.profileRecords.data.score; } catch (err) {  }
+  var wellsCompleted = "0"; try { wellsCompleted = response.playerData.profileRecords.data.records["819775261"].objectives[0].progress; } catch (err) {  }
+  var epsCompleted = "0"; try { epsCompleted = response.playerData.profileRecords.data.records["3350489579"].objectives[0].progress; } catch (err) {  }
 
   return {
     "menageire": menageire,
