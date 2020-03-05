@@ -63,7 +63,7 @@ async function CheckClanMembers(trackedClan) {
               else { } //Failed for another unknown reason. Not logging.
             }
             else if(response.private) { } //This means the user was private, i should really log these accounts somewhere.
-            else { ProcessPlayerData(response, MembersToScan[i].clanId); } //All was successful, now onto processing that players data.
+            else { ProcessPlayerData(response, MembersToScan[i].clanId, data.firstScan, data.forcedScan); } //All was successful, now onto processing that players data.
           });
         }
 
@@ -131,7 +131,7 @@ async function GetClanMemberData(playerInfo, retried) {
   catch (err) { return { playerInfo, private: false, failed: true, reason: `Timed out` }; }
 }
 
-function ProcessPlayerData(response, clanId) {
+function ProcessPlayerData(response, clanId, firstScan, forcedScan) {
   //Rankings
   const AccountInfo = GetAccountInfo(response, clanId);
   const Rankings = GetRankings(response);
@@ -151,8 +151,10 @@ function ProcessPlayerData(response, clanId) {
             if(isError) { var text = `Error in grabbing account information for ${ AccountInfo.displayName } (${ AccountInfo.membershipId })`; console.log(text); Log.SaveError(text); }
             else {
               //Do broadcast checks
-              CheckItems({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Others }, SQLData);
-              CheckTitles({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Others }, SQLData);
+              if(firstScan == "false" && forcedScan == "false") {
+                CheckItems({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Others }, SQLData);
+                CheckTitles({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Others }, SQLData);
+              }
             }
           });
         }
@@ -299,7 +301,11 @@ function GetItems(response) {
   ];
 
   var items = [];
-  itemList.map((item) => { if(GetItemState(response.playerData.profileCollectibles.data.collectibles[item.collectibleHash].state).notAcquired === false) { items.push(item.name) } });
+  for(var i in itemList) {
+    if(GetItemState(response.playerData.profileCollectibles.data.collectibles[itemList[i].collectibleHash].state).notAcquired === false) {
+      items.push(itemList[i].name)
+    }
+  }
   return { "items": items };
 }
 
@@ -323,7 +329,7 @@ function GetTitles(response) {
     { "name": "Savior", "recordHash": 2460356851 }
   ];
   var titles = [];
-  titleList.map((title) => { if(response.playerData.profileRecords.data.records[title.recordHash].objectives[0].complete) { titles.push(title.name); } })
+  for(var i in titleList) { if(response.playerData.profileRecords.data.records[titleList[i].recordHash].objectives[0].complete) { titles.push(titleList[i].name) } }
   return { titles };
 }
 function GetSeasonal(response) {
