@@ -10,7 +10,7 @@ const Database = require("./Database");
 
 //Exports
 module.exports = {
-  Help, BroadcastsHelp, Request,
+  Help, BroadcastsHelp, DrystreaksHelp, Request,
   GlobalRankings, Rankings, GlobalDryStreak, GetTrackedItems, DryStreak, GetTrackedClans,
   Profile, GetTrackedTitles, ForceFullScan, ToggleWhitelist, RenewLeadership, TransferLeadership,
   DisplayClanRankings
@@ -39,6 +39,16 @@ function BroadcastsHelp(message) {
   .setAuthor("Broadcasts Help Menu")
   .setDescription("By default clan broadcasts are disabled, To enable this you can set a broadcasts channel.")
   .addField("Broadcasts Commands", "`~Set Broadcasts #channelName` \n`~Remove Broadcasts` \n`~Filter example` - To add items or titles to blacklist\n `~Toggle Whitelist`\n `~Whitelist example` - To add items or titles to the whitelist.")
+  .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+  .setTimestamp()
+  message.channel.send({embed});
+}
+function DrystreaksHelp(message) {
+  const embed = new Discord.RichEmbed()
+  .setColor(0x0099FF)
+  .setAuthor("Drystreaks Help Menu")
+  .setDescription("Currently these are the only drystreak leaderboards.\nTo use: `~Drystreak Anarchy` or `~Global Drystreak Anarchy`")
+  .addField("Drystreak Commands", "`~1000 Voices` \n`~Anarchy` \n`~Always on Time` \n`~Tarrabah` \n`~Luxurious Toast`")
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});
@@ -1341,7 +1351,7 @@ function GlobalDryStreak(message, item) {
       else { message.reply("Sorry! An error occurred, Please try again..."); }
     });
   }
-  else { message.reply("The only global drystreak leaderboards are: `1000 Voices`, `Anarchy`, `Always on Time`, `Tarrabah`, `Luxurious Toast`, If you have any others you'd like to see, request them using `~request`"); }
+  else { DrystreaksHelp(message) }
 }
 function DryStreak(message, item) {
   Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {
@@ -1382,7 +1392,7 @@ function DryStreak(message, item) {
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
-            else { message.reply("The only drystreak leaderboards are: `1000 Voices`, `Anarchy`, `Always on Time`, `Tarrabah`, `Luxurious Toast`, If you have any others you'd like to see, request them using `~request`"); }
+            else { DrystreaksHelp(message) }
           }
           else { message.reply("No clan set, to set one use: `~Set clan`"); }
         }

@@ -187,6 +187,7 @@ client.on("message", async message => {
         else if(command.startsWith("~DRYSTREAK ")) { DiscordCommands.DryStreak(message, command.substr("~DRYSTREAK ".length)) }
         else if(command.startsWith("~ITEM ")) { DiscordCommands.Rankings("item", message); }
         else if(command.startsWith("~TITLE ")) { DiscordCommands.Rankings("title", message); }
+        else if(command === "~DRYSTREAK" || command === "~DRYSTREAKS") { DiscordCommands.DrystreaksHelp(message); }
         else if(command === "~INFAMY") { DiscordCommands.Rankings("infamy", message); }
         else if(command === "~VALOR") { DiscordCommands.Rankings("valor", message); }
         else if(command === "~GLORY") { DiscordCommands.Rankings("glory", message); }
@@ -229,6 +230,7 @@ client.on("message", async message => {
 
         //Globals
         else if(command.startsWith("~GLOBAL DRYSTREAK ")) { DiscordCommands.GlobalDryStreak(message, command.substr("~GLOBAL DRYSTREAK ".length)) }
+        else if(command === "~GLOBAL DRYSTREAK" || command === "~GLOBAL DRYSTREAKS") { DiscordCommands.DrystreaksHelp(message); }
         else if(command === "~GLOBAL IRON BANNER") { DiscordCommands.GlobalRankings("ironBanner", message); }
         else if(command === "~GLOBAL SEASON RANK") { DiscordCommands.GlobalRankings("seasonRank", message); }
         else if(command === "~GLOBAL FRACTALINE") { DiscordCommands.GlobalRankings("fractaline", message); }
