@@ -299,7 +299,6 @@ function GetItems(response) {
     { "name": "Always on Time (Sparrow)", "collectibleHash": 1903459810 },
     { "name": "Luxurious Toast", "collectibleHash": 1866399776 }
   ];
-
   var items = [];
   for(var i in itemList) {
     if(GetItemState(response.playerData.profileCollectibles.data.collectibles[itemList[i].collectibleHash].state).notAcquired === false) {
@@ -308,9 +307,6 @@ function GetItems(response) {
   }
   return { "items": items };
 }
-
-
-
 function GetTitles(response) {
   var titleList = [
     { "name": "Wayfarer", "recordHash": 2757681677 },

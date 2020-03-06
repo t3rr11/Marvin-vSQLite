@@ -39,7 +39,7 @@ handleDisconnect();
 //MySQL Functions
 
 function AddNewBroadcast(data, season, type, broadcast, count, date, callback) {
-  var sql = "INSERT INTO awaiting_broadcasts (clanId,displayName,membershipId,season,type,broadcast,count,date) VALUES (?,?,?,?,?,?,?,?)";
+  var sql = "INSERT IGNORE INTO awaiting_broadcasts (clanId,displayName,membershipId,season,type,broadcast,count,date) VALUES (?,?,?,?,?,?,?,?)";
   var inserts = [data.AccountInfo.clanId, data.AccountInfo.displayName, data.AccountInfo.membershipId, season, type, broadcast, count, date];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
