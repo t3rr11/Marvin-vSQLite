@@ -1484,10 +1484,6 @@ function DisplayProfile(message, leaderboards, playerData) {
     var valorResets = playerStats.valorResets;
     var seasonRank = playerStats.seasonRank;
     var titles = playerStats.titles.split(",");
-    var lastWishCompletions = playerStats.lastWishCompletions;
-    var scourgeCompletions = playerStats.scourgeCompletions;
-    var sorrowsCompletions = playerStats.sorrowsCompletions;
-    var gardenCompletions = playerStats.gardenCompletions;
     var lastPlayed = playerStats.lastPlayed;
 
     const embed = new Discord.RichEmbed()
@@ -1500,7 +1496,7 @@ function DisplayProfile(message, leaderboards, playerData) {
     .addField("Glory", `${ Misc.AddCommas(glory) }`, true)
     .addField("Infamy", `${ Misc.AddCommas(infamy) }`, true)
     .addField("Triumph Score", `${ Misc.AddCommas(triumphScore) }`, true)
-    .addField("Raids", `${ Misc.AddCommas(lastWishCompletions + scourgeCompletions + sorrowsCompletions + gardenCompletions) }`, true)
+    .addField("Raids", `${ Misc.AddCommas(playerStats.leviCompletions + playerStats.leviPresCompletions + playerStats.eowCompletions + playerStats.eowPresCompletions + playerStats.sosCompletions + playerStats.sosPresCompletions + playerStats.lastWishCompletions + playerStats.scourgeCompletions + playerStats.sorrowsCompletions + playerStats.gardenCompletions) }`, true)
     .addField("Titles", `${ titles.length }`, true)
     .addField("See more at", `https://guardianstats.com`)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
