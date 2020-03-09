@@ -240,7 +240,7 @@ function UpdatePlayerDetails(Data, callback) {
     clanId = ?, displayName = ?, timePlayed = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }",
     infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, fractalineDonated = ?, resonance = ?, wellsCompleted = ?,
     epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, leviCompletions = ?, leviPresCompletions = ?, eowCompletions = ?, eowPresCompletions = ?, sosCompletions = ?,
-    sosPresCompletions = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?,
+    sosPresCompletions = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, shatteredThrone = ?, pitOfHeresy = ?,
     lastPlayed = ?, firstLoad = "false"
   WHERE membershipId = ?`;
   var inserts = [
@@ -275,6 +275,8 @@ function UpdatePlayerDetails(Data, callback) {
     Data.Raids.scourge,
     Data.Raids.sorrows,
     Data.Raids.garden,
+    JSON.stringify(Data.Others.shatteredThrone),
+    JSON.stringify(Data.Others.pitOfHeresy),
     Data.AccountInfo.lastPlayed,
     Data.AccountInfo.membershipId
   ];
