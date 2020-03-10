@@ -53,13 +53,20 @@ async function CheckMaintenance() {
 }
 async function UpdateClans() {
   //Grab discord user count first, Ignore bot advertising discords.
-  Users = 0; for(let g of client.guilds.array()) { if(g.id !== "110373943822540800" || g.id !== "264445053596991498") { Users = Users + (g.members.size - 1) } }
+  Users = 0; for(let g of client.guilds.array()) {
+    if(g.id === "110373943822540800") { }
+    else if(g.id === "264445053596991498") { }
+    else { Users = Users + (g.members.size - 1) }
+  }
 
   //Then continue
   CheckMaintenance();
   CheckForBroadcasts();
   UpdateActivityList();
+
+  //Log status
   Log.SaveDiscordLog(StartupTime, Users, client);
+
   await new Promise(resolve => Database.GetClans((isError, Clans) => {
     ClansLength = Clans.length;
     CheckForNewlyScannedClans(Clans);

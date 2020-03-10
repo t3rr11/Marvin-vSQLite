@@ -335,7 +335,7 @@ function RemoveAwaitingBroadcast(broadcast) {
 
 //Others
 function ForceFullScan(callback) {
-  db.query(`UPDATE clans SET forcedScan="true"`, function(error, rows, fields) {
+  db.query(`UPDATE clans SET forcedScan="true" WHERE isTracking="true"`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error trying to force a rescan, Error: ${ error }`); callback(true); }
     else { callback(false); }
   });
