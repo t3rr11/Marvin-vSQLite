@@ -17,21 +17,126 @@ module.exports = {
 };
 
 //Important
-function Help(message) {
-  const embed = new Discord.RichEmbed()
-  .setColor(0x0099FF)
-  .setAuthor("Hey there! I am Marvin. Here is a list of my commands! The globals are only of tracked clans. Not whole population.")
-  .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`")
-  .addField("Raids", "`~LEVI`, `~pLEVI`, `~EOW`, `~pEOW`, `~SOS`, `~pSOS`, `~LW`, `~SoTP`, `~CoS`, `~GoS`")
-  .addField("Items / Titles", "`~Items`, `~Titles`, `~Item Example`, `~Title Example`")
-  .addField("Seasonal", "`~Season Rank`, `~Sundial`, `~Fractaline`, `~resonance`")
-  .addField("Clan Rankings", "`~Clanrank Fractaline`, `~Clanrank Resonance`")
-  .addField("Globals", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreak 1000 Voices`, `~Global Drystreak Anarchy`, `~Global Fractaline`, `~Global Resonance`")
-  .addField("Others", "`~Donate`, `~Broadcasts Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`, `~Delete Clan`, `~Drystreak 1000 Voices`, `~Drystreak Anarchy`")
-  .addField("Request", "If you see something that isn't there that you'd like me to track request it like this: `~request I would like to see Marvin track season ranks!`")
-  .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-  .setTimestamp()
-  message.channel.send({embed});
+function Help(message, type) {
+  if(type.toUpperCase() === "all") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Hey there! I am Marvin. Here is a list of all my commands!")
+    .setDescription("I have so many commands now i've had to split them up here is a list of my help commands!")
+    .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`")
+    .addField("Raids", "`~LEVI`, `~pLEVI`, `~EOW`, `~pEOW`, `~SOS`, `~pSOS`, `~LW`, `~SoTP`, `~CoS`, `~GoS`")
+    .addField("Items / Titles", "`~Items`, `~Titles`, `~Item Example`, `~Title Example`")
+    .addField("Seasonal", "`~Season Rank`, `~Sundial`, `~Fractaline`, `~resonance`")
+    .addField("Clan Rankings", "`~Clanrank Fractaline`, `~Clanrank Resonance`")
+    .addField("Globals", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreak 1000 Voices`, `~Global Drystreak Anarchy`, `~Global Fractaline`, `~Global Resonance`")
+    .addField("Others", "`~Donate`, `~Broadcasts Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`, `~Delete Clan`, `~Drystreak 1000 Voices`, `~Drystreak Anarchy`")
+    .addField("Request", "If you see something that isn't there that you'd like me to track request it like this: `~request I would like to see Marvin track season ranks!`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "rankings") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Rankings Help Menu")
+    .setDescription("Here is a list of ranking commands! Example: `~Iron Banner`")
+    .addField("Commands", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`, `~Clanrank Fractaline`, `~Clanrank Resonance`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "raids") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Raids Help Menu")
+    .setDescription("Here is a list of raid commands! Example: `~LW`")
+    .addField("Commands", "`~LEVI`, `~pLEVI`, `~EOW`, `~pEOW`, `~SOS`, `~pSOS`, `~LW`, `~SoTP`, `~CoS`, `~GoS`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "items") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Items Help Menu")
+    .setDescription("Here is a list of item commands! Example: `~Item 1000 Voices`")
+    .addField("Commands", "`~Items`, `~Item Example`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "titles") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Titles Help Menu")
+    .setDescription("Here is a list of title commands! Example: `~Title Savior`")
+    .addField("Commands", "`~Titles`, `~Title Example`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "seasonal") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Seasonal Help Menu")
+    .setDescription("Here is a list of seasonal commands! Example: `~Fractaline`")
+    .addField("Commands", "`~Season Rank`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "preseasonal") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Pre-seasonal Help Menu")
+    .setDescription("Here is a list of pre-seasonal commands! Example: `~Fractaline`")
+    .addField("Commands", "`~Sundial`, `~Fractaline`, `~Resonance`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "clan") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Clans Help Menu")
+    .setDescription("Here is a list of clan commands! Example: `~Set Clan`")
+    .addField("Commands", "`~Broadcasts Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`, `~Delete Clan`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "globals") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Globals Help Menu")
+    .setDescription("Here is a list of global commands! Example: `~Global Time Played`")
+    .addField("Commands", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreaks`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "drystreaks") { DrystreaksHelp(message) }
+  else if(type === "others") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Others Help Menu")
+    .setDescription("Here is a list of other commands! Example: `~Donate`")
+    .addField("Commands", "`~Donate`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Hey there! I am Marvin.")
+    .setDescription("I have so many commands now i've had to split them up here is a list of my help commands! Example: `~Help Rankings`")
+    .addField("Categories", "`Rankings`, `Raids`, `Items`, `Titles`, `Seasonal`, `Preseasonal`, `Clan`, `Globals`, `Drystreaks`, `Others`, `All`")
+    .addField("Request", "If you wish to request something or would like to give feedback use the request command like this: `~request I would like to see Marvin track season ranks!`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
 }
 function BroadcastsHelp(message) {
   const embed = new Discord.RichEmbed()
@@ -1441,7 +1546,10 @@ function DisplayDryStreak(message, item, leaderboards, playerData, allClanIds) {
   });
 }
 function Profile(message) {
-  Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {
+  var userId = null;
+  if(message.mentions.users.first()) { userId = message.mentions.users.first().id }
+  else { userId = message.author.id }
+  Database.CheckRegistered(userId, function(isError, isFound, Data) {
     if(!isError) {
       if(isFound) {
         var playerData = Data;
@@ -1466,7 +1574,7 @@ function Profile(message) {
           else { message.reply("Sorry! An error occurred, Please try again..."); }
         });
       }
-      else { message.reply("Please register first to use this command."); }
+      else { if(message.mentions.users.first()) { message.reply("The user mentioned has not registered. So we don't know their destiny account."); } else { message.reply("Please register first to use this command."); } }
     }
     else { message.reply("Sorry! An error occurred, Please try again..."); }
   });
@@ -1498,7 +1606,7 @@ function DisplayProfile(message, leaderboards, playerData) {
     .addField("Triumph Score", `${ Misc.AddCommas(triumphScore) }`, true)
     .addField("Raids", `${ Misc.AddCommas(playerStats.leviCompletions + playerStats.leviPresCompletions + playerStats.eowCompletions + playerStats.eowPresCompletions + playerStats.sosCompletions + playerStats.sosPresCompletions + playerStats.lastWishCompletions + playerStats.scourgeCompletions + playerStats.sorrowsCompletions + playerStats.gardenCompletions) }`, true)
     .addField("Titles", `${ titles.length }`, true)
-    .addField("See more at", `https://guardianstats.com`)
+    .addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});

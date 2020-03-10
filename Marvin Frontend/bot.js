@@ -22,14 +22,15 @@ var LastScanTime = null;
 var ScanLength = null;
 var APIDisabled = null;
 var TimedOutUsers = [];
+var Users = 0;
 
 //Functions
 function UpdateActivityList() {
   if(APIDisabled) { client.user.setActivity("The Bungie API is undergoing maintenance. Commands will work like normal but may not show the latest information due to this."); }
   else {
     var ActivityList = [];
-    ActivityList.push(`Serving ${client.users.size} users`);
-    ActivityList.push('Tracking ' + ClansLength + ' clans!');
+    ActivityList.push(`Serving ${ Users } users`);
+    ActivityList.push(`Tracking ${ ClansLength } clans!`);
     ActivityList.push(`Use ~HELP for Support`);
     ActivityList.push(`Consider Donating? ~Donate`);
     var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
@@ -51,10 +52,14 @@ async function CheckMaintenance() {
   catch (err) { console.log(Misc.GetReadableDateTime() + " - " + "Failed to check for maintenance as the data was corrupt."); }
 }
 async function UpdateClans() {
+  //Grab discord user count first, Ignore bot advertising discords.
+  Users = 0; for(let g of client.guilds.array()) { if(g.id !== "110373943822540800" || g.id !== "264445053596991498") { Users = Users + (g.members.size - 1) } }
+
+  //Then continue
   CheckMaintenance();
   CheckForBroadcasts();
   UpdateActivityList();
-  Log.SaveDiscordLog(StartupTime, client);
+  Log.SaveDiscordLog(StartupTime, Users, client);
   await new Promise(resolve => Database.GetClans((isError, Clans) => {
     ClansLength = Clans.length;
     CheckForNewlyScannedClans(Clans);
@@ -120,8 +125,8 @@ client.on("ready", async () => {
 	setInterval(function() { UpdateClans() }, 10000);
 
   //Start Up Console Log
-  Log.SaveLog("Info", `Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
-  Log.SaveLog("Info", 'Tracking ' + ClansLength + ' clans!');
+  Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
+  Log.SaveLog("Info", `Tracking ${ ClansLength } clans!`);
 });
 
 client.on("guildCreate", guild => {
@@ -160,6 +165,7 @@ client.on("message", async message => {
 
   //Commands
   if(message.author.bot) return;
+  if(message.guild.id === "110373943822540800") return;
   if(command.startsWith('~') && !command.startsWith('~PLAY') && !command.startsWith('~PRUNE') && !command.startsWith('~PURGE') && !command.startsWith('~q') && !command.startsWith('~~')) {
     try {
       if(message.guild) {
@@ -167,9 +173,24 @@ client.on("message", async message => {
         else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }
         else if(command.startsWith("~DEL ")) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); }
         else if(command.startsWith("~SET SCANSPEED ")) { var input = command.substr("~SET SCANSPEED ".length); SetScanSpeed(message, input); }
+        else if(command.startsWith("~PROFILE ")) { DiscordCommands.Profile(message); }
+        else if(command.startsWith("~HELP ")) {
+          if(command === "~HELP ALL") { DiscordCommands.Help(message, "all"); }
+          else if(command === "~HELP RANKINGS") { DiscordCommands.Help(message, "rankings"); }
+          else if(command === "~HELP RAIDS") { DiscordCommands.Help(message, "raids"); }
+          else if(command === "~HELP ITEMS") { DiscordCommands.Help(message, "items"); }
+          else if(command === "~HELP TITLES") { DiscordCommands.Help(message, "titles"); }
+          else if(command === "~HELP SEASONAL") { DiscordCommands.Help(message, "seasonal"); }
+          else if(command === "~HELP PRESEASONAL" || command === "~HELP PRE-SEASONAL") { DiscordCommands.Help(message, "preseasonal"); }
+          else if(command === "~HELP CLANS" || command === "~HELP CLAN") { DiscordCommands.Help(message, "clan"); }
+          else if(command === "~HELP GLOBALS" || command === "~HELP GLOBAL") { DiscordCommands.Help(message, "globals"); }
+          else if(command === "~HELP OTHERS" || command === "~HELP OTHER") { DiscordCommands.Help(message, "others"); }
+          else if(command === "~HELP DRYSTREAKS" || command === "HELP DRYSTREAK") { DiscordCommands.Help(message, "drystreaks"); }
+          else { message.reply("I am unsure of that help command, type `~help` to see them all."); }
+        }
         else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
         else if(command === "~DONATE" || command === "~SPONSOR" || command === "~SUPPORTING") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
-        else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message); }
+        else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message, "none"); }
         else if(command === "~PROFILE") { DiscordCommands.Profile(message); }
         else if(command === "~FORCE RESCAN") { DiscordCommands.ForceFullScan(message); }
         else if(command === "~SCANSPEED") { GetScanSpeed(message); }

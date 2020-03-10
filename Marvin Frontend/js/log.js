@@ -36,12 +36,12 @@ function SaveError(log) {
   }
 }
 
-function SaveDiscordLog(StartupTime, client) {
+function SaveDiscordLog(StartupTime, Users, client) {
   var thisTime = new Date().getTime();
   var totalTime = thisTime - StartupTime;
   totalTime = Misc.formatTime(totalTime / 1000);
   var status = {
-    "users": client.users.size,
+    "users": Users,
     "servers": client.guilds.size,
     "uptime": totalTime
   }
