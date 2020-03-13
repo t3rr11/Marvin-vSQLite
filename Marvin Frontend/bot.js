@@ -181,6 +181,22 @@ client.on("message", async message => {
         else if(command.startsWith("~DEL ")) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); }
         else if(command.startsWith("~SET SCANSPEED ")) { var input = command.substr("~SET SCANSPEED ".length); SetScanSpeed(message, input); }
         else if(command.startsWith("~PROFILE ")) { DiscordCommands.Profile(message); }
+        else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
+        else if(command === "~DONATE" || command === "~SPONSOR" || command === "~SUPPORTING") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
+        else if(command === "~PROFILE") { DiscordCommands.Profile(message); }
+        else if(command === "~FORCE RESCAN") { DiscordCommands.ForceFullScan(message); }
+        else if(command === "~SCANSPEED") { GetScanSpeed(message); }
+        else if(command === "~CHECKAPI") { if(APIDisabled) { message.reply("API is offline."); } else { message.reply("API is online."); } }
+        else if(command === "~TEST") {
+          if(message.author.id === "194972321168097280") {
+            //message.reply("We saw and we did nothing.");
+          }
+          else {
+            message.reply("Test what? I do not understand.");
+          }
+        }
+
+        //Help menu
         else if(command.startsWith("~HELP ")) {
           if(command === "~HELP ALL") { DiscordCommands.Help(message, "all"); }
           else if(command === "~HELP RANKINGS") { DiscordCommands.Help(message, "rankings"); }
@@ -195,21 +211,14 @@ client.on("message", async message => {
           else if(command === "~HELP DRYSTREAKS" || command === "HELP DRYSTREAK") { DiscordCommands.Help(message, "drystreaks"); }
           else { message.reply("I am unsure of that help command, type `~help` to see them all."); }
         }
-        else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
-        else if(command === "~DONATE" || command === "~SPONSOR" || command === "~SUPPORTING") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
         else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message, "none"); }
-        else if(command === "~PROFILE") { DiscordCommands.Profile(message); }
-        else if(command === "~FORCE RESCAN") { DiscordCommands.ForceFullScan(message); }
-        else if(command === "~SCANSPEED") { GetScanSpeed(message); }
-        else if(command === "~CHECKAPI") { if(APIDisabled) { message.reply("API is offline."); } else { message.reply("API is online."); } }
-        else if(command === "~TEST") {
-          if(message.author.id === "194972321168097280") {
-            //message.reply("We saw and we did nothing.");
-          }
-          else {
-            message.reply("Test what? I do not understand.");
-          }
-        }
+        else if(command === "~RANKINGS") { DiscordCommands.Help(message, "rankings"); }
+        else if(command === "~RAIDS") { DiscordCommands.Help(message, "raids"); }
+        else if(command === "~SEASONAL") { DiscordCommands.Help(message, "seasonal"); }
+        else if(command === "~PRESEASONAL") { DiscordCommands.Help(message, "preseasonal"); }
+        else if(command === "~CLANS" || command === "~CLAN") { DiscordCommands.Help(message, "clan"); }
+        else if(command === "~GLOBALS" || command === "~GLOBAL") { DiscordCommands.Help(message, "globals"); }
+        else if(command === "~OTHERS" || command === "~OTHER") { DiscordCommands.Help(message, "others"); }
 
         //Rankings
         else if(command.startsWith("~DRYSTREAK ")) { DiscordCommands.DryStreak(message, command.substr("~DRYSTREAK ".length)) }

@@ -55,26 +55,8 @@ function Help(message, type) {
     .setTimestamp()
     message.channel.send({embed});
   }
-  else if(type === "items") {
-    const embed = new Discord.RichEmbed()
-    .setColor(0x0099FF)
-    .setAuthor("Items Help Menu")
-    .setDescription("Here is a list of item commands! Example: `~Item 1000 Voices`")
-    .addField("Commands", "`~Items`, `~Item Example`")
-    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-    .setTimestamp()
-    message.channel.send({embed});
-  }
-  else if(type === "titles") {
-    const embed = new Discord.RichEmbed()
-    .setColor(0x0099FF)
-    .setAuthor("Titles Help Menu")
-    .setDescription("Here is a list of title commands! Example: `~Title Savior`")
-    .addField("Commands", "`~Titles`, `~Title Example`")
-    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-    .setTimestamp()
-    message.channel.send({embed});
-  }
+  else if(type === "items") { GetTrackedItems(message) }
+  else if(type === "titles") { GetTrackedTitles(message) }
   else if(type === "seasonal") {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
@@ -1623,7 +1605,7 @@ function GetTrackedItems(message) {
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked items!")
-  .setDescription("**PvE** \n" + pveItems + "\n\n**PvP**\n" + pvpItems + "\n\n**Gambit**\n" + gambitItems + "\n\n**Others**\n" + others)
+  .setDescription("To view who owns a specific item use the command like this: `~Item 1000 Voices`\n\n**PvE** \n" + pveItems + "\n\n**PvP**\n" + pvpItems + "\n\n**Gambit**\n" + gambitItems + "\n\n**Others**\n" + others)
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});
@@ -1633,7 +1615,7 @@ function GetTrackedTitles(message) {
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked titles!")
-  .setDescription("**Titles** \n" + titles + "\n\n" + "**Extra** \n If you want to see who has the most titles within the tracked clans of this discord use: `~titles total`")
+  .setDescription("To view who owns a specific title use the command like this: `~Title Savior`\n\n**Titles** \n" + titles + "\n\n" + "**Extra** \n If you want to see who has the most titles within the tracked clans of this discord use: `~titles total`")
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});

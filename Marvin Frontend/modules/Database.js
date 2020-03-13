@@ -136,8 +136,8 @@ function GetNewBroadcasts(callback) {
   });
 }
 function GetSingleClanLeaderboard(clanId, callback) {
-  var sql = "SELECT * FROM playerInfo WHERE clanId = ?";
-  var inserts = [clanId];
+  var sql = "SELECT * FROM playerInfo WHERE clanId = ? AND isPrivate = ?";
+  var inserts = [clanId, "false"];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting clan leaderboards: ${ clanId } Error: ${ error }`); callback(true); }
@@ -152,7 +152,7 @@ function GetClanLeaderboards(clanIds, callback) {
   });
 }
 function GetGlobalLeaderboards(callback) {
-  db.query(`SELECT * FROM playerInfo`, function(error, rows, fields) {
+  db.query(`SELECT * FROM playerInfo WHERE EXISTS (SELECT 1 FROM clans WHERE clans.clan_id = playerInfo.clanId AND clans.isTracking = "true" AND playerInfo.isPrivate = "false")`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting global leaderboards, Error: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
@@ -439,25 +439,27 @@ function DisableTracking(guild_id) {
   db.query(`SELECT * FROM guilds WHERE guild_id="${ guild_id }"`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error trying to find guild to disable tracking for: ${ guild_id }, Error: ${ error }`); }
     else {
-      var clans = rows[0].clans.split(",");
-      db.query(`UPDATE guilds SET isTracking="false" WHERE guild_id="${ guild_id }"`, function(error, rows, fields) {
-        if(!!error) { Log.SaveError(`Error trying to disable tracking for guild: ${ guild_id }, Error: ${ error }`); }
-        else {
-          for(var i in clans) {
-            db.query(`SELECT * FROM guilds WHERE clans LIKE "%${ clans[i] }%"`, function(error, rows, fields) {
-              if(!!error) { Log.SaveError(`Failed to find clan: ${ clans[i] }, Error: ${ error }`); }
-              else {
-                if(rows.length === 1) {
-                  db.query(`UPDATE clans SET isTracking="false" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
-                    if(!!error) { Log.SaveError(`Failed to disable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
-                    else { Log.SaveLog("Clans", `Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`); }
-                  });
+      if(rows.length > 0) {
+        var clans = rows[0].clans.split(",");
+        db.query(`UPDATE guilds SET isTracking="false" WHERE guild_id="${ guild_id }"`, function(error, rows, fields) {
+          if(!!error) { Log.SaveError(`Error trying to disable tracking for guild: ${ guild_id }, Error: ${ error }`); }
+          else {
+            for(var i in clans) {
+              db.query(`SELECT * FROM guilds WHERE clans LIKE "%${ clans[i] }%"`, function(error, rows, fields) {
+                if(!!error) { Log.SaveError(`Failed to find clan: ${ clans[i] }, Error: ${ error }`); }
+                else {
+                  if(rows.length === 1) {
+                    db.query(`UPDATE clans SET isTracking="false" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
+                      if(!!error) { Log.SaveError(`Failed to disable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
+                      else { Log.SaveLog("Clans", `Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`); }
+                    });
+                  }
                 }
-              }
-            });
+              });
+            }
           }
-        }
-      });
+        });
+      }
     }
   });
 }

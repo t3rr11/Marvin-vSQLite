@@ -6,8 +6,8 @@
   "defaultFooter" : "Guardianstats",
   "defaultLogoURL" : "https://guardianstats.com/images/logo.png",
   "enableBroadcasts" : true,
-  "enableLogging": false,
+  "enableLogging": true,
   "enableTracking": true,
   "enableDebug": true,
-  "currentSeason" : 9
+  "currentSeason" : 10
 }

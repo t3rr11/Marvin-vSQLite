@@ -21,8 +21,8 @@ var APIDisabled = false;
 
 async function CheckMaintenance() {
   //Check if api is down for maintenance using my clan id.
-  await ClanData.GetClanMembers("3917089").then(function(error) {
-    if(error === "SystemDisabled") { if(APIDisabled === false) { Log.SaveError("The Bungie API is temporarily disabled for maintenance."); APIDisabled = true; } }
+  await ClanData.GetClanDetails("3917089").then(function(data) {
+    if(data.error && data.reason.ErrorCode === 5) { if(APIDisabled === false) { Log.SaveError("The Bungie API is temporarily disabled for maintenance."); APIDisabled = true; } }
     else { if(APIDisabled === true) { Log.SaveError("The Bungie API is back online!"); APIDisabled = false; } }
   });
 }

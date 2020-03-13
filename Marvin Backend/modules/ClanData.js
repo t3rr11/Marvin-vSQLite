@@ -8,7 +8,7 @@ const Database = require("./Database");
 var id = 0;
 
 //Exports
-module.exports = { CheckClanMembers, GetClanMembers };
+module.exports = { CheckClanMembers, GetClanMembers, GetClanDetails };
 
 //Functions
 flagEnum = (state, value) => !!(state & value);
@@ -62,7 +62,7 @@ async function CheckClanMembers(trackedClan) {
               if(response.reason === "DestinyAccountNotFound") { } //This means the account used to be a bnet account that never transfered over. Recommend kicking these players.
               else { } //Failed for another unknown reason. Not logging.
             }
-            else if(response.private) { } //This means the user was private, i should really log these accounts somewhere.
+            else if(response.private) { Database.SetPrivate(response.playerInfo.membership_Id); } //This means the user was private, i should really log these accounts somewhere.
             else { ProcessPlayerData(response, MembersToScan[i].clanId, data.firstScan, data.forcedScan); } //All was successful, now onto processing that players data.
           });
         }
@@ -210,7 +210,7 @@ function GetRankings(response) {
   var valor = 0; try { valor = response.playerData.characterProgressions.data[characterIds[0]].progressions["3882308435"].currentProgress; } catch (err) { }
   var glory = 0; try { glory = response.playerData.characterProgressions.data[characterIds[0]].progressions["2679551909"].currentProgress; } catch (err) { }
   var infamyResets = response.playerData.profileRecords.data.records["3901785488"].objectives[0].progress;
-  var valorResets = response.playerData.profileRecords.data.records["2282573299"].objectives[1].progress;
+  var valorResets = response.playerData.profileRecords.data.records["1745319359"].objectives[1].progress;
   var totalInfamy = parseInt(infamy) + (parseInt('15000') * parseInt(infamyResets));
   var totalValor = parseInt(valor) + (parseInt('2000') * parseInt(valorResets));
   var ibKills = response.playerData.profileRecords.data.records["2023796284"].intervalObjectives[2].progress;
@@ -297,7 +297,8 @@ function GetItems(response) {
     { "name": "Devils Ruin", "collectibleHash": 2190071629 },
     { "name": "Bastion", "collectibleHash": 3207791447 },
     { "name": "Always on Time (Sparrow)", "collectibleHash": 1903459810 },
-    { "name": "Luxurious Toast", "collectibleHash": 1866399776 }
+    { "name": "Luxurious Toast", "collectibleHash": 1866399776 },
+    { "name": "The Fourth Horseman", "collectibleHash": 2318862156 }
   ];
   var items = [];
   for(var i in itemList) {
@@ -333,17 +334,14 @@ function GetSeasonal(response) {
   var characterIds = response.playerData.profile.data.characterIds;
   var season8Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["1628407317"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["3184735011"].level; season8Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
   var season9Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["3256821400"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["2140885848"].level; season9Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
-  var fractalineDonated = 0; try { fractalineDonated = response.playerData.characterProgressions.data[characterIds[0]].progressions["2480822985"].level; } catch (err) { }
-  var resonance = response.playerData.profileRecords.data.records["4205106950"].objectives[0].progress;
+  var season10Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["2926321498"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["1470619782"].level; season10Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
 
   //Sundial
   var sundialCompletions = response.playerData.profileRecords.data.records["3801239892"].objectives[0].progress;
 
   return {
-    "seasonRank": season9Rank,
-    "sundial": sundialCompletions,
-    "fractalineDonated": fractalineDonated,
-    "resonance": resonance
+    "seasonRank": season10Rank,
+    "sundial": sundialCompletions
   }
 }
 function GetOthers(response) {

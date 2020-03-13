@@ -153,9 +153,13 @@ async function logStatus() {
   var T_Guilds = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM guilds WHERE isTracking="true"`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
   var Broadcasts = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM broadcasts`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
 
+  //Check API status
+  if(backend_status.APIDisabled) { O_Players = 0; }
+  var APIDisabled = backend_status.APIDisabled ? "Disabled" : "Online";
+
   //Now that all data is obtained, save log every 10 minutes.
-  var sql = `INSERT INTO status (users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, broadcasts, date) VALUES(?,?,?,?,?,?,?,?,?,?,?,"${ new Date().getTime() }")`
-  var inserts = [Users, T_Users, Players, T_Players, O_Players, Clans, T_Clans, Guilds, T_Guilds, Servers, Broadcasts];
+  var sql = `INSERT INTO status (users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, broadcasts, api_status, date) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,"${ new Date().getTime() }")`
+  var inserts = [Users, T_Users, Players, T_Players, O_Players, Clans, T_Clans, Guilds, T_Guilds, Servers, Broadcasts, APIDisabled];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
     if(error) { console.log(`Failed to log status: ${ error }`); }

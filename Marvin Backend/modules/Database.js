@@ -6,7 +6,7 @@ const fetch = require("node-fetch");
 
 //Exports
 module.exports = {
-  AddNewBroadcast, AddNewClan, CheckClanMembers, CheckNewBroadcast,
+  AddNewBroadcast, AddNewClan, CheckClanMembers, CheckNewBroadcast, SetPrivate,
   GetClans, GetGuilds, GetPlayers, GetUsers, GetClan, GetPlayerDetails,
   RemoveClan, UpdateClanFirstScan, UpdateClanForcedScan, UpdateClanDetails, UpdatePlayerDetails
 };
@@ -238,10 +238,10 @@ function UpdatePlayerDetails(Data, callback) {
   UPDATE playerInfo
   SET
     clanId = ?, displayName = ?, timePlayed = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }",
-    infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, fractalineDonated = ?, resonance = ?, wellsCompleted = ?,
+    infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, wellsCompleted = ?,
     epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, leviCompletions = ?, leviPresCompletions = ?, eowCompletions = ?, eowPresCompletions = ?, sosCompletions = ?,
     sosPresCompletions = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, shatteredThrone = ?, pitOfHeresy = ?,
-    lastPlayed = ?, firstLoad = "false"
+    lastPlayed = ?, isPrivate = "false", firstLoad = "false"
   WHERE membershipId = ?`;
   var inserts = [
     Data.AccountInfo.clanId,
@@ -258,8 +258,6 @@ function UpdatePlayerDetails(Data, callback) {
     Data.Rankings.ibWins,
     Data.Seasonal.seasonRank,
     Data.Seasonal.sundial,
-    Data.Seasonal.fractalineDonated,
-    Data.Seasonal.resonance,
     Data.Others.wellsRankings,
     Data.Others.epRankings,
     Data.Others.menageire,
@@ -284,6 +282,11 @@ function UpdatePlayerDetails(Data, callback) {
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error updating player from the first scan: (${ Data.AccountInfo.membershipId }), Error: ${ error }`); callback(true); }
     else { callback(false); }
+  });
+}
+function SetPrivate(membershipId) {
+  db.query(`UPDATE playerInfo SET isPrivate="true" WHERE membershipId="${ membershipId }"`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error setting ${ membershipId } to private, Error: ${ error }`); }
   });
 }
 
