@@ -33,6 +33,7 @@ function UpdateActivityList() {
     ActivityList.push(`Tracking ${ ClansLength } clans!`);
     ActivityList.push(`Use ~HELP for Support`);
     ActivityList.push(`Consider Donating? ~Donate`);
+    ActivityList.push(`New command! ~Trials`);
     var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
     client.user.setActivity(activity);
   }
@@ -170,10 +171,13 @@ client.on("message", async message => {
   var default_command = message.content;
   var command = message.content.toUpperCase();
 
+  //Ignored Commands
+  var ignoredCommands = ["~~", "~PLAY", "~PRUNE", "~PURGE", "~Q", "~P", "~FEED", "~PAY", "~GRAB", "~BANK", "~VAULT", "~BAL", "~BUY", "~SELECT", "~SHOOT", "~SHOP", "~OPEN", "~STEAL"];
+
   //Commands
   if(message.author.bot) return;
-  if(message.guild.id === "110373943822540800") return;
-  if(command.startsWith('~') && !command.startsWith('~PLAY') && !command.startsWith('~PRUNE') && !command.startsWith('~PURGE') && !command.startsWith('~q') && !command.startsWith('~~')) {
+  if(message.guild.id === "110373943822540800" || message.guild.id === "264445053596991498") return;
+  if(command.startsWith("~") && ignoredCommands.filter(f => command.startsWith(f)).length === 0) {
     try {
       if(message.guild) {
         if(command.startsWith("~REGISTER ")) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)); } else { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
@@ -207,8 +211,9 @@ client.on("message", async message => {
           else if(command === "~HELP PRESEASONAL" || command === "~HELP PRE-SEASONAL") { DiscordCommands.Help(message, "preseasonal"); }
           else if(command === "~HELP CLANS" || command === "~HELP CLAN") { DiscordCommands.Help(message, "clan"); }
           else if(command === "~HELP GLOBALS" || command === "~HELP GLOBAL") { DiscordCommands.Help(message, "globals"); }
-          else if(command === "~HELP OTHERS" || command === "~HELP OTHER") { DiscordCommands.Help(message, "others"); }
           else if(command === "~HELP DRYSTREAKS" || command === "HELP DRYSTREAK") { DiscordCommands.Help(message, "drystreaks"); }
+          else if(command === "~HELP TRIALS") { DiscordCommands.Help(message, "trials"); }
+          else if(command === "~HELP OTHERS" || command === "~HELP OTHER") { DiscordCommands.Help(message, "others"); }
           else { message.reply("I am unsure of that help command, type `~help` to see them all."); }
         }
         else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message, "none"); }
@@ -218,6 +223,7 @@ client.on("message", async message => {
         else if(command === "~PRESEASONAL") { DiscordCommands.Help(message, "preseasonal"); }
         else if(command === "~CLANS" || command === "~CLAN") { DiscordCommands.Help(message, "clan"); }
         else if(command === "~GLOBALS" || command === "~GLOBAL") { DiscordCommands.Help(message, "globals"); }
+        else if(command === "~TRIALS") { DiscordCommands.Help(message, "trials") }
         else if(command === "~OTHERS" || command === "~OTHER") { DiscordCommands.Help(message, "others"); }
 
         //Rankings
@@ -248,6 +254,56 @@ client.on("message", async message => {
         else if(command === "~ITEMS") { DiscordCommands.GetTrackedItems(message); }
         else if(command === "~TITLES") { DiscordCommands.GetTrackedTitles(message); }
         else if(command === "~TITLES TOTAL" || command === "~THENUMBEROFTITLESTHATIHAVEEARNED") { DiscordCommands.Rankings("totalTitles", message); }
+        else if(command.startsWith("~TRIALS ")) {
+          if(command.startsWith("~TRIALS WEEKLY ")) {
+            if(message.mentions.users.first()) { DiscordCommands.Trials(message, "weekly"); }
+            else {
+              if(command.substr("~TRIALS WEEKLY ".length) === "WINS") { DiscordCommands.TrialsRankings(message, "weekly", "wins") }
+              else if(command.substr("~TRIALS WEEKLY ".length) === "WIN STREAK") { DiscordCommands.TrialsRankings(message, "weekly", "winStreak") }
+              else if(command.substr("~TRIALS WEEKLY ".length) === "FLAWLESS") { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets") }
+              else if(command.substr("~TRIALS WEEKLY ".length) === "FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows") }
+              else if(command.substr("~TRIALS WEEKLY ".length) === "POST WINS") { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins") }
+              else if(command.substr("~TRIALS WEEKLY ".length) === "CARRIES") { DiscordCommands.TrialsRankings(message, "weekly", "carries") }
+              else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+            }
+          }
+          else if(command.startsWith("~TRIALS SEASONAL ")) {
+            if(message.mentions.users.first()) { DiscordCommands.Trials(message, "seasonal"); }
+            else {
+              if(command.substr("~TRIALS SEASONAL ".length) === "WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "wins") }
+              else if(command.substr("~TRIALS SEASONAL ".length) === "WIN STREAK") { DiscordCommands.TrialsRankings(message, "seasonal", "winStreak") }
+              else if(command.substr("~TRIALS SEASONAL ".length) === "FLAWLESS") { DiscordCommands.TrialsRankings(message, "seasonal", "flawlessTickets") }
+              else if(command.substr("~TRIALS SEASONAL ".length) === "FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "seasonal", "finalBlows") }
+              else if(command.substr("~TRIALS SEASONAL ".length) === "POST WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "postFlawlessWins") }
+              else if(command.substr("~TRIALS SEASONAL ".length) === "CARRIES") { DiscordCommands.TrialsRankings(message, "seasonal", "carries") }
+              else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+            }
+          }
+          else if(command.startsWith("~TRIALS OVERALL ")) {
+            if(message.mentions.users.first()) { DiscordCommands.Trials(message, "overall"); }
+            else {
+              if(command.substr("~TRIALS OVERALL ".length) === "WINS") { DiscordCommands.TrialsRankings(message, "overall", "wins") }
+              else if(command.substr("~TRIALS OVERALL ".length) === "FLAWLESS") { DiscordCommands.TrialsRankings(message, "overall", "flawlessTickets") }
+              else if(command.substr("~TRIALS OVERALL ".length) === "FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "overall", "finalBlows") }
+              else if(command.substr("~TRIALS OVERALL ".length) === "POST WINS") { DiscordCommands.TrialsRankings(message, "overall", "postFlawlessWins") }
+              else if(command.substr("~TRIALS OVERALL ".length) === "CARRIES") { DiscordCommands.TrialsRankings(message, "overall", "carries") }
+              else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+            }
+          }
+          else if(command.startsWith("~TRIALS PROFILE ")) {
+            if(command.startsWith("~TRIALS PROFILE WEEKLY")) { DiscordCommands.Trials(message, "weekly") }
+            else if(command.startsWith("~TRIALS PROFILE SEASONAL")) { DiscordCommands.Trials(message, "seasonal") }
+            else if(command.startsWith("~TRIALS PROFILE OVERALL")) { DiscordCommands.Trials(message, "overall") }
+            else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+          }
+          else if(command === "~TRIALS WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "wins"); }
+          else if(command === "~TRIALS FLAWLESS") { DiscordCommands.TrialsRankings(message, "seasonal", "flawlessTickets"); }
+          else if(command === "~TRIALS FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "seasonal", "finalBlows"); }
+          else if(command === "~TRIALS POST WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "postFlawlessWins"); }
+          else if(command === "~TRIALS CARRIES") { DiscordCommands.TrialsRankings(message, "seasonal", "carries"); }
+          else if(command === "~TRIALS PROFILE") { DiscordCommands.Trials(message, "overall") }
+          else { DiscordCommands.Help(message, "trials"); }
+        }
 
         //Clan Management
         else if(command.startsWith("~SET BROADCASTS ")) { Broadcasts.SetupBroadcasts(message); }

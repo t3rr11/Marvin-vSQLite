@@ -11,13 +11,16 @@
 /Marvin Frontend/data/logs
 /Marvin Express/data/logs
 
-# testing
+#others
+/Images
+
+#testing
 /coverage
 
-# production
+#production
 /build
 
-# misc
+#misc
 .DS_Store
 .env.local
 .env.development.local

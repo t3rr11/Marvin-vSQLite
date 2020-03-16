@@ -11,9 +11,9 @@ const Database = require("./Database");
 //Exports
 module.exports = {
   Help, BroadcastsHelp, DrystreaksHelp, Request,
-  GlobalRankings, Rankings, GlobalDryStreak, GetTrackedItems, DryStreak, GetTrackedClans,
+  GlobalRankings, Rankings, TrialsRankings, GlobalDryStreak, GetTrackedItems, DryStreak, GetTrackedClans,
   Profile, GetTrackedTitles, ForceFullScan, ToggleWhitelist, RenewLeadership, TransferLeadership,
-  DisplayClanRankings
+  DisplayClanRankings, Trials
 };
 
 //Important
@@ -98,6 +98,19 @@ function Help(message, type) {
     message.channel.send({embed});
   }
   else if(type === "drystreaks") { DrystreaksHelp(message) }
+  else if(type === "trials") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Trials Help Menu")
+    .setDescription("Here is a list of trials commands! Profile commands can be altered by @ing the person you wish to view: `~Trials Profile @Someone`")
+    .addField("Profile Commands", "`~Trials Profile`, `~Trials Profile Weekly`, `~Trials Profile Seasonal`, `~Trials Profile Overall`")
+    .addField("Seasonal Rankings", "`~Trials Wins`, `~Trials Flawless`, `~Trials Final Blows`, `~Trials Post Wins`, `~Trials Carries`")
+    .addField("Weekly Rankings", "`~Trials Weekly Wins`, `~Trials Weekly Flawless`, `~Trials Weekly Final Blows`, `~Trials Weekly Post Wins`, `~Trials Weekly Carries`")
+    .addField("Overall Rankings", "`~Trials Overall Wins`, `~Trials Overall Flawless`, `~Trials Overall Final Blows`, `~Trials Overall Post Wins`, `~Trials Overall Carries`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
   else if(type === "others") {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
@@ -113,7 +126,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Hey there! I am Marvin.")
     .setDescription("I have so many commands now i've had to split them up here is a list of my help commands! Example: `~Help Rankings`")
-    .addField("Categories", "`Rankings`, `Raids`, `Items`, `Titles`, `Seasonal`, `Preseasonal`, `Clan`, `Globals`, `Drystreaks`, `Others`, `All`")
+    .addField("Categories", "`Rankings`, `Raids`, `Items`, `Titles`, `Seasonal`, `Preseasonal`, `Clan`, `Globals`, `Drystreaks`, `Trials`, `Others`, `All`")
     .addField("Request", "If you wish to request something or would like to give feedback use the request command like this: `~request I would like to see Marvin track season ranks!`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
@@ -950,6 +963,86 @@ function DisplayRankings(message, type, leaderboards, playerData) {
   }
   catch (err) { console.log(err); message.reply("Sorry we broke... Usually happens when there was no data returned. Possibly someone doesn't have the item or title you are looking for."); }
 }
+
+//Trials
+function TrialsRankings(message, type, stat) {
+  Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {
+    if(!isError) {
+      if(isFound) {
+        var playerData = Data;
+        //Give personalised response if user has registered
+        Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
+          if(!isError) {
+            if(isFound) {
+              //Get all clan data from playerInfo using clans
+              var allClanIds = Data.clans.split(",");
+              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayTrialsRankings(message, leaderboards, playerData, type, stat); } }
+                else { message.reply("Sorry! An error occurred, Please try again..."); }
+              });
+            } else { message.reply("No clan set, to set one use: `~Set clan`"); }
+          } else { message.reply("Sorry! An error occurred, Please try again..."); }
+        });
+      }
+      else {
+        //Give results for default server clan as the user has not registered
+        Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
+          if(!isError) {
+            if(isFound) {
+              //Get all clan data from playerInfo using clan_id
+              var allClanIds = Data.clans.split(",");
+              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayTrialsRankings(message, leaderboards, undefined, type, stat); } }
+                else { message.reply("Sorry! An error occurred, Please try again..."); }
+              });
+            } else { message.reply("No clan set, to set one use: `~Set clan`"); }
+          } else { message.reply("Sorry! An error occurred, Please try again..."); }
+        });
+      }
+    }
+    else { message.reply("Sorry! An error occurred, Please try again..."); }
+  });
+}
+function DisplayTrialsRankings(message, leaderboards, playerData, type, stat) {
+  try {
+    var leaderboard = { "names": [], "stat": [] };
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials)[type][stat] - JSON.parse(a.trials)[type][stat]; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.stat.push(Misc.AddCommas(JSON.parse(top[i].trials)[type][stat]));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.stat.push("", Misc.AddCommas(JSON.parse(playerStats.trials)[type][stat]));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    if(stat === "wins"){ stat = "Wins" }
+    else if(stat === "winStreak"){ stat = "Win Streak" }
+    else if(stat === "flawlessTickets"){ stat = "Flawless Tickets" }
+    else if(stat === "finalBlows"){ stat = "Final Blows" }
+    else if(stat === "postFlawlessWins"){ stat = "Post Flawless Wins" }
+    else if(stat === "carries"){ stat = "Carries (With Emblem)" }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor(`Top 10 ${ Misc.capitalize(type) } Trials ${ stat }`)
+    .addField("Name", leaderboard.names, true)
+    .addField(`${ stat }`, leaderboard.stat, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  catch (err) { console.log(err); message.reply("Sorry we broke... Usually happens when there was no data returned. Possibly someone doesn't have the item or title you are looking for."); }
+}
+
 function GlobalRankings(type, message) {
   Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {
     if(!isError) {
@@ -1596,6 +1689,62 @@ function DisplayProfile(message, leaderboards, playerData) {
   catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
 }
 
+function Trials(message, type) {
+  var userId = null;
+  if(message.mentions.users.first()) { userId = message.mentions.users.first().id }
+  else { userId = message.author.id }
+  Database.CheckRegistered(userId, function(isError, isFound, Data) {
+    if(!isError) {
+      if(isFound) {
+        var playerData = Data;
+        //Give personalised response if user has registered
+        Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
+          if(!isError) {
+            if(isFound) {
+              //Get all clan data from playerInfo using clans
+              var allClanIds = Data.clans.split(",");
+              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayTrials(message, leaderboards, playerData, type); } }
+                else { message.reply("Sorry! An error occurred, Please try again..."); }
+              });
+            }
+            else {
+              Database.GetGlobalLeaderboards(function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayTrials(message, leaderboards, playerData, type); } }
+                else { message.reply("Sorry! An error occurred, Please try again..."); }
+              });
+            }
+          }
+          else { message.reply("Sorry! An error occurred, Please try again..."); }
+        });
+      }
+      else { if(message.mentions.users.first()) { message.reply("The user mentioned has not registered. So we don't know their destiny account."); } else { message.reply("Please register first to use this command."); } }
+    }
+    else { message.reply("Sorry! An error occurred, Please try again..."); }
+  });
+}
+function DisplayTrials(message, leaderboards, playerData, type) {
+  try {
+    var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+    var name = playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x });
+    var trials = JSON.parse(playerStats.trials)[type];
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor(`Viewing ${ Misc.capitalize(type) } Trials Statistics for ${ name }`)
+    .addField("Name", `${ name }`, true)
+    .addField("Wins", `${ Misc.AddCommas(Math.round(trials.wins)) }`, true)
+    .addField("Flawless", `${ Misc.AddCommas(Math.round(trials.flawlessTickets)) }`, true)
+    .addField("Final Blows", `${ Misc.AddCommas(Math.round(trials.finalBlows)) }`, true)
+    .addField("Post Flawless Wins", `${ Misc.AddCommas(Math.round(trials.postFlawlessWins)) }`, true)
+    .addField("Carries", `${ Misc.AddCommas(Math.round(trials.carries)) }`, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
+}
+
 //Others
 function GetTrackedItems(message) {
   const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Bastion";
@@ -1611,7 +1760,7 @@ function GetTrackedItems(message) {
   message.channel.send({embed});
 }
 function GetTrackedTitles(message) {
-  const titles = "Wayfarer, Dredgen, Unbroken, Chronicler, Cursebreaker, Rivensbane, Blacksmith, Reckoner, MMXIX, Shadow, Undying, Enlightened, Harbinger, Savior";
+  const titles = "Wayfarer, Dredgen, Unbroken, Chronicler, Cursebreaker, Rivensbane, Blacksmith, Reckoner, MMXIX, Shadow, Undying, Enlightened, Harbinger, Savior, Almighty, Flawless";
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked titles!")

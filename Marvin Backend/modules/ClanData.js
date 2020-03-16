@@ -107,7 +107,7 @@ async function GetClanMembers(clan_id) {
 async function GetClanMemberData(playerInfo, retried) {
   try {
     const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
-    const request = await fetch(`https://bungie.net/Platform/Destiny2/${ playerInfo.membershipType }/Profile/${ playerInfo.membership_Id }/?components=100,200,202,204,800,900`, headers);
+    const request = await fetch(`https://bungie.net/Platform/Destiny2/${ playerInfo.membershipType }/Profile/${ playerInfo.membership_Id }/?components=100,200,202,204,800,900,1100`, headers);
     const response = await request.json();
     if(request.ok && response.ErrorCode && response.ErrorCode !== 1) {
       if(!retried) { GrabClanMemberCharacterData(playerInfo, true); }
@@ -217,6 +217,27 @@ function GetRankings(response) {
   var ibWins = response.playerData.profileRecords.data.records["759958308"].intervalObjectives[2].progress;
   var motesCollected = response.playerData.profileRecords.data.records["1767590660"].intervalObjectives[2].progress;
 
+  //Trials
+  var overall_trialsWins = response.playerData.metrics.data.metrics["1365664208"].objectiveProgress.progress;
+  var overall_flawlessTickets = response.playerData.metrics.data.metrics["1765255052"].objectiveProgress.progress;
+  var overall_finalblows = response.playerData.metrics.data.metrics["2082314848"].objectiveProgress.progress;
+  var overall_postFlawlessWins = response.playerData.metrics.data.metrics["1082901574"].objectiveProgress.progress;
+  var overall_lighthouseCarries = response.playerData.metrics.data.metrics["301249970"].objectiveProgress.progress;
+
+  var weekly_trialsWins = response.playerData.metrics.data.metrics["3046315288"].objectiveProgress.progress;
+  var weekly_trialsWinStreak = response.playerData.metrics.data.metrics["3787323274"].objectiveProgress.progress;
+  var weekly_flawlessTickets = response.playerData.metrics.data.metrics["122451876"].objectiveProgress.progress;
+  var weekly_finalblows = response.playerData.metrics.data.metrics["2091173752"].objectiveProgress.progress;
+  var weekly_postFlawlessWins = response.playerData.metrics.data.metrics["2771330814"].objectiveProgress.progress;
+  var weekly_lighthouseCarries = response.playerData.metrics.data.metrics["1155098170"].objectiveProgress.progress;
+
+  var seasonal_trialsWins = response.playerData.metrics.data.metrics["2367472811"].objectiveProgress.progress;
+  var seasonal_trialsWinStreak = response.playerData.metrics.data.metrics["957196641"].objectiveProgress.progress;
+  var seasonal_flawlessTickets = response.playerData.metrics.data.metrics["1114483243"].objectiveProgress.progress;
+  var seasonal_finalblows = response.playerData.metrics.data.metrics["3481560625"].objectiveProgress.progress;
+  var seasonal_postFlawlessWins = response.playerData.metrics.data.metrics["128083325"].objectiveProgress.progress;
+  var seasonal_lighthouseCarries = response.playerData.metrics.data.metrics["610393611"].objectiveProgress.progress;
+
   return {
     "infamy": totalInfamy,
     "valor": totalValor,
@@ -225,7 +246,32 @@ function GetRankings(response) {
     "valorResets": valorResets,
     "ibKills": ibKills,
     "ibWins": ibWins,
-    "motesCollected": motesCollected
+    "motesCollected": motesCollected,
+    "trials": {
+      "overall": {
+        "wins": overall_trialsWins,
+        "flawlessTickets": overall_flawlessTickets,
+        "finalBlows": overall_finalblows,
+        "postFlawlessWins": overall_postFlawlessWins,
+        "carries": overall_lighthouseCarries
+      },
+      "seasonal": {
+        "wins": seasonal_trialsWins,
+        "winStreak": seasonal_trialsWinStreak,
+        "flawlessTickets": seasonal_flawlessTickets,
+        "finalBlows": seasonal_finalblows,
+        "postFlawlessWins": seasonal_postFlawlessWins,
+        "carries": seasonal_lighthouseCarries
+      },
+      "weekly": {
+        "wins": weekly_trialsWins,
+        "winStreak": weekly_trialsWinStreak,
+        "flawlessTickets": weekly_flawlessTickets,
+        "finalBlows": weekly_finalblows,
+        "postFlawlessWins": weekly_postFlawlessWins,
+        "carries": weekly_lighthouseCarries
+      }
+    }
   }
 }
 function GetRaids(response) {
@@ -323,7 +369,9 @@ function GetTitles(response) {
     { "name": "Undying", "recordHash": 2707428411 },
     { "name": "Enlightened", "recordHash": 3387213440 },
     { "name": "Harbinger", "recordHash": 3793754396 },
-    { "name": "Savior", "recordHash": 2460356851 }
+    { "name": "Savior", "recordHash": 2460356851 },
+    { "name": "Almighty", "recordHash": 2860165064 },
+    { "name": "Flawless", "recordHash": 2945528800 }
   ];
   var titles = [];
   for(var i in titleList) { if(response.playerData.profileRecords.data.records[titleList[i].recordHash].objectives[0].complete) { titles.push(titleList[i].name) } }

@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Long = require('long');
-module.exports = { GetDateString, GetReadableDateTime, GetReadableDate, formatTime, IsJson, AddCommas, DeleteMessages, GetClanID, GetMembershipID, getDefaultChannel, cleanString };
+module.exports = { GetDateString, GetReadableDateTime, GetReadableDate, formatTime, IsJson, AddCommas, DeleteMessages, GetClanID, GetMembershipID, getDefaultChannel, cleanString, capitalize };
 
 function AddCommas(x) { try { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") } catch (err) { return x } }
 function IsJson(str) { try { JSON.parse(str); } catch (e) { return false; } return true; }
@@ -114,3 +114,4 @@ function cleanString(input) {
   for(var i=0; i<input.length; i++) { if (input.charCodeAt(i) <= 127) { output += input.charAt(i); } }
   return output;
 }
+function capitalize(string) { return string.charAt(0).toUpperCase() + string.slice(1); }
