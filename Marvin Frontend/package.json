@@ -18,6 +18,7 @@
   "homepage": "https://github.com/t3rr11/Marvin#readme",
   "dependencies": {
     "cors": "^2.8.5",
+    "dblapi.js": "^2.4.0",
     "discord.js": "^11.5.1",
     "express": "^4.17.1",
     "fs": "0.0.1-security",

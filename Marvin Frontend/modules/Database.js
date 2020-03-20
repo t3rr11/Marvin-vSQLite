@@ -2,11 +2,12 @@ const MySQL = require('mysql');
 const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
 const Config = require('../data/config.json');
+const DBConfig = require('../../Combined/configs/db_config.json');
 const fetch = require("node-fetch");
 
 //Exports
 module.exports = {
-  GetClan, GetClans, GetGuild, GetGuilds, GetPlayers, GetUsers, GetGlobalDryStreak, GetClanDryStreaks, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
+  GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetUsers, GetGlobalDryStreak, GetClanDryStreaks, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
   CheckRegistered, CheckNewBroadcast,
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast,
@@ -15,15 +16,8 @@ module.exports = {
 
 //MySQL Connection
 var db;
-var db_config = {
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'marvin'
-};
-
 function handleDisconnect() {
-  db = MySQL.createConnection(db_config);
+  db = MySQL.createConnection(DBConfig);
   db.connect(function(err) {
     if(err) {
       console.log('Error when connecting to db: ', err);
@@ -71,6 +65,14 @@ function GetGuilds(callback) {
   var buildGuilds = [];
   db.query(`SELECT * FROM guilds WHERE isTracking="true"`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting all registered guilds from server: ${ error }`); callback(true); }
+    else { for(var i in rows) { buildGuilds.push(rows[i]); } callback(false, buildGuilds); }
+  });
+  return buildGuilds;
+}
+function GetAllGuilds(callback) {
+  var buildGuilds = [];
+  db.query(`SELECT * FROM guilds`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error getting all guilds from server: ${ error }`); callback(true); }
     else { for(var i in rows) { buildGuilds.push(rows[i]); } callback(false, buildGuilds); }
   });
   return buildGuilds;

@@ -2,6 +2,7 @@ const MySQL = require('mysql');
 const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
 const Config = require('../data/config.json');
+const DBConfig = require('../../Combined/configs/db_config.json');
 const fetch = require("node-fetch");
 
 //Exports
@@ -13,15 +14,8 @@ module.exports = {
 
 //MySQL Connection
 var db;
-var db_config = {
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'marvin'
-};
-
 function handleDisconnect() {
-  db = MySQL.createConnection(db_config);
+  db = MySQL.createConnection(DBConfig);
   db.connect(function(err) {
     if(err) {
       console.log('Error when connecting to db: ', err);

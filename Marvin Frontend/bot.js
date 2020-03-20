@@ -2,6 +2,8 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 const client = new Discord.Client();
+const DBL = require("dblapi.js");
+const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzMTM1MTM2Njc5OTA2NTA4OCIsImJvdCI6dHJ1ZSwiaWF0IjoxNTg0NDIxMzAxfQ.qZ5CrrQdaC9cIfeuqx7svNTwiSTH_R0JD5H-1CVzrCo', client);
 
 //Modules
 let Config = require(__dirname + "/data/config.json");
@@ -123,6 +125,7 @@ function SetScanSpeed(message, input) {
   fs.writeFile('../Marvin Backend/data/config.json', JSON.stringify(backend_config), (err) => { if (err) console.error(err) });
   message.channel.send(`ScanSpeed is now scanning at a rate of ${ input } clans per second. With a slow down rate of ${ Math.round(input * 0.8) } and a reset of ${ Math.round(input * 0.6) }`);
 }
+function ForceTopGGUpdate(message) { dbl.postStats(client.guilds.size); message.channel.send("Updated stats on Top.GG"); }
 
 //Discord Client Code
 client.on("ready", async () => {
@@ -131,6 +134,7 @@ client.on("ready", async () => {
 
 	//SetTimeouts
 	setInterval(function() { UpdateClans() }, 10000);
+  setInterval(() => { dbl.postStats(client.guilds.size); }, 1800000);
 
   //Start Up Console Log
   Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
@@ -172,7 +176,10 @@ client.on("message", async message => {
   var command = message.content.toUpperCase();
 
   //Ignored Commands
-  var ignoredCommands = ["~~", "~PLAY", "~PRUNE", "~PURGE", "~Q", "~P", "~FEED", "~PAY", "~GRAB", "~BANK", "~VAULT", "~BAL", "~BUY", "~SELECT", "~SHOOT", "~SHOP", "~OPEN", "~STEAL"];
+  var ignoredCommands = [
+    "~~", "~PLAY", "~PRUNE", "~PURGE", "~Q", "~P", "~FEED", "~PAY", "~GRAB", "~BANK", "~VAULT", "~BAL", "~BUY", "~SELECT", "~SHOOT", "~SHOP", "~OPEN", "~STEAL",
+    "~DRUGS", "~EXCH", "~BM", "~SMOKE", "~DOSE"
+  ];
 
   //Commands
   if(message.author.bot) return;
@@ -189,6 +196,8 @@ client.on("message", async message => {
         else if(command === "~DONATE" || command === "~SPONSOR" || command === "~SUPPORTING") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
         else if(command === "~PROFILE") { DiscordCommands.Profile(message); }
         else if(command === "~FORCE RESCAN") { DiscordCommands.ForceFullScan(message); }
+        else if(command === "~FORCE GUILD CHECK") { DiscordCommands.ForceGuildCheck(client, message); }
+        else if(command === "~FORCE TOPGG") { if(message.author.id === "194972321168097280") { ForceTopGGUpdate(message); } }
         else if(command === "~SCANSPEED") { GetScanSpeed(message); }
         else if(command === "~CHECKAPI") { if(APIDisabled) { message.reply("API is offline."); } else { message.reply("API is online."); } }
         else if(command === "~TEST") {
@@ -223,7 +232,7 @@ client.on("message", async message => {
         else if(command === "~PRESEASONAL") { DiscordCommands.Help(message, "preseasonal"); }
         else if(command === "~CLANS" || command === "~CLAN") { DiscordCommands.Help(message, "clan"); }
         else if(command === "~GLOBALS" || command === "~GLOBAL") { DiscordCommands.Help(message, "globals"); }
-        else if(command === "~TRIALS") { DiscordCommands.Help(message, "trials") }
+        else if(command === "~TRIALS" || command === "~GLOBAL TRIALS") { DiscordCommands.Help(message, "trials") }
         else if(command === "~OTHERS" || command === "~OTHER") { DiscordCommands.Help(message, "others"); }
 
         //Rankings
@@ -294,7 +303,7 @@ client.on("message", async message => {
             if(command.startsWith("~TRIALS PROFILE WEEKLY")) { DiscordCommands.Trials(message, "weekly") }
             else if(command.startsWith("~TRIALS PROFILE SEASONAL")) { DiscordCommands.Trials(message, "seasonal") }
             else if(command.startsWith("~TRIALS PROFILE OVERALL")) { DiscordCommands.Trials(message, "overall") }
-            else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+            else { DiscordCommands.Trials(message, "overall"); }
           }
           else if(command === "~TRIALS WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "wins"); }
           else if(command === "~TRIALS FLAWLESS") { DiscordCommands.TrialsRankings(message, "seasonal", "flawlessTickets"); }
@@ -330,6 +339,15 @@ client.on("message", async message => {
         else if(command === "~GLOBAL RESONANCE") { DiscordCommands.GlobalRankings("resonance", message); }
         else if(command === "~GLOBAL CLAN TIME" || command === "~GLOBAL TIME PLAYED" || command === "~GLOBAL TOTAL TIME" || command === "~GLOBAL TOTALTIME") { DiscordCommands.GlobalRankings("totalTime", message); }
         else if(command === "~GLOBAL TRIUMPH SCORE" || command === "~GLOBAL TRIUMPHSCORE") { DiscordCommands.GlobalRankings("triumphScore", message); }
+        else if(command === "~GLOBAL TRIALS SEASONAL WINS" || command === "~GLOBAL TRIALS WINS") { DiscordCommands.GlobalRankings("seasonal_trials_wins", message); }
+        else if(command === "~GLOBAL TRIALS SEASONAL FLAWLESS" || command === "~GLOBAL TRIALS FLAWLESS") { DiscordCommands.GlobalRankings("seasonal_trials_flawless", message); }
+        else if(command === "~GLOBAL TRIALS SEASONAL CARRIES" || command === "~GLOBAL TRIALS CARRIES") { DiscordCommands.GlobalRankings("seasonal_trials_carries", message); }
+        else if(command === "~GLOBAL TRIALS WEEKLY WINS") { DiscordCommands.GlobalRankings("weekly_trials_wins", message); }
+        else if(command === "~GLOBAL TRIALS WEEKLY FLAWLESS") { DiscordCommands.GlobalRankings("weekly_trials_flawless", message); }
+        else if(command === "~GLOBAL TRIALS WEEKLY CARRIES") { DiscordCommands.GlobalRankings("weekly_trials_carries", message); }
+        else if(command === "~GLOBAL TRIALS OVERALL WINS") { DiscordCommands.GlobalRankings("overall_trials_wins", message); }
+        else if(command === "~GLOBAL TRIALS OVERALL FLAWLESS") { DiscordCommands.GlobalRankings("overall_trials_flawless", message); }
+        else if(command === "~GLOBAL TRIALS OVERALL CARRIES") { DiscordCommands.GlobalRankings("overall_trials_carries", message); }
 
         //Clan Global Rankings
         else if(command === "~CLANRANK FRACTALINE") {  DiscordCommands.DisplayClanRankings("fractaline", message);  }

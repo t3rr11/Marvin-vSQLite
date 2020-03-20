@@ -12,7 +12,7 @@ const Database = require("./Database");
 module.exports = {
   Help, BroadcastsHelp, DrystreaksHelp, Request,
   GlobalRankings, Rankings, TrialsRankings, GlobalDryStreak, GetTrackedItems, DryStreak, GetTrackedClans,
-  Profile, GetTrackedTitles, ForceFullScan, ToggleWhitelist, RenewLeadership, TransferLeadership,
+  Profile, GetTrackedTitles, ForceFullScan, ForceGuildCheck, ToggleWhitelist, RenewLeadership, TransferLeadership,
   DisplayClanRankings, Trials
 };
 
@@ -92,7 +92,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Globals Help Menu")
     .setDescription("Here is a list of global commands! Example: `~Global Time Played`")
-    .addField("Commands", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreaks`")
+    .addField("Commands", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreaks`, `~Global Trials`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -107,6 +107,9 @@ function Help(message, type) {
     .addField("Seasonal Rankings", "`~Trials Wins`, `~Trials Flawless`, `~Trials Final Blows`, `~Trials Post Wins`, `~Trials Carries`")
     .addField("Weekly Rankings", "`~Trials Weekly Wins`, `~Trials Weekly Flawless`, `~Trials Weekly Final Blows`, `~Trials Weekly Post Wins`, `~Trials Weekly Carries`")
     .addField("Overall Rankings", "`~Trials Overall Wins`, `~Trials Overall Flawless`, `~Trials Overall Final Blows`, `~Trials Overall Post Wins`, `~Trials Overall Carries`")
+    .addField("Global Wins Rankings", "`~Global Trials Wins`, `~Global Trials Overall Wins`, `~Global Trials Seasonal Wins`, `~Global Trials Weekly Wins`")
+    .addField("Global Flawless Rankings", "`~Global Trials Flawless`, `~Global Trials Overall Flawless`, `~Global Trials Seasonal Flawless`, `~Global Trials Weekly Flawless`")
+    .addField("Global Carries Rankings", "`~Global Trials Carries`, `~Global Trials Overall Carries`, `~Global Trials Seasonal Carries`, `~Global Trials Weekly Carries`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -201,6 +204,20 @@ function ForceFullScan(message) {
       if(!isError) { message.reply("Manually forced a full rescan!"); }
       else { message.reply("Failed to force a full rescan."); }
     });
+  }
+  else { message.reply("You are not allowed to use this command. Sorry."); }
+}
+async function ForceGuildCheck(client, message) {
+  if(message.author.id == "194972321168097280") {
+    await new Promise(resolve => Database.GetAllGuilds((isError, Data) => {
+      for(let g of client.guilds.array()) {
+        if(Data.find(guild => guild.guild_id === g.id)) {
+          Database.EnableTracking(g.id, function(isError, isFound) {
+            if(!isError) { if(isFound) { Log.SaveLog("Clans", "Clan Tracking Re-Enabled: " + g.id); } }
+          });
+        }
+      }
+    }));
   }
   else { message.reply("You are not allowed to use this command. Sorry."); }
 }
@@ -1243,6 +1260,276 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     .setTimestamp()
     message.channel.send({embed});
   }
+  else if(type === "seasonal_trials_wins") {
+    var leaderboard = { "names": [], "wins": [] };
+    leaderboards = leaderboards.filter(e => e.trials !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials).seasonal.wins - JSON.parse(a.trials).seasonal.wins; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.wins.push(Misc.AddCommas(JSON.parse(top[i].trials).seasonal.wins));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.wins.push("", Misc.AddCommas(JSON.parse(playerStats.trials).seasonal.wins));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Seasonal Trials Wins")
+    .addField("Name", leaderboard.names, true)
+    .addField("Wins", leaderboard.wins, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "seasonal_trials_flawless") {
+    var leaderboard = { "names": [], "flawless": [] };
+    leaderboards = leaderboards.filter(e => e.trials !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials).seasonal.flawlessTickets - JSON.parse(a.trials).seasonal.flawlessTickets; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.flawless.push(Misc.AddCommas(JSON.parse(top[i].trials).seasonal.flawlessTickets));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.flawless.push("", Misc.AddCommas(JSON.parse(playerStats.trials).seasonal.flawlessTickets));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Seasonal Trials Flawless Tickets")
+    .addField("Name", leaderboard.names, true)
+    .addField("Flawless Tickets", leaderboard.flawless, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "seasonal_trials_carries") {
+    var leaderboard = { "names": [], "carries": [] };
+    leaderboards = leaderboards.filter(e => e.trials !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials).seasonal.carries - JSON.parse(a.trials).seasonal.carries; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.carries.push(Misc.AddCommas(JSON.parse(top[i].trials).seasonal.carries));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.carries.push("", Misc.AddCommas(JSON.parse(playerStats.trials).seasonal.carries));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Seasonal Trials Carries")
+    .addField("Name", leaderboard.names, true)
+    .addField("Carries", leaderboard.carries, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "weekly_trials_wins") {
+    var leaderboard = { "names": [], "wins": [] };
+    leaderboards = leaderboards.filter(e => e.trials !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials).weekly.wins - JSON.parse(a.trials).weekly.wins; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.wins.push(Misc.AddCommas(JSON.parse(top[i].trials).weekly.wins));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.wins.push("", Misc.AddCommas(JSON.parse(playerStats.trials).weekly.wins));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Weekly Trials Wins")
+    .addField("Name", leaderboard.names, true)
+    .addField("Wins", leaderboard.wins, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "weekly_trials_flawless") {
+    var leaderboard = { "names": [], "flawless": [] };
+    leaderboards = leaderboards.filter(e => e.trials !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials).weekly.flawlessTickets - JSON.parse(a.trials).weekly.flawlessTickets; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.flawless.push(Misc.AddCommas(JSON.parse(top[i].trials).weekly.flawlessTickets));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.flawless.push("", Misc.AddCommas(JSON.parse(playerStats.trials).weekly.flawlessTickets));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Weekly Trials Flawless Tickets")
+    .addField("Name", leaderboard.names, true)
+    .addField("Flawless Tickets", leaderboard.flawless, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "weekly_trials_carries") {
+    var leaderboard = { "names": [], "carries": [] };
+    leaderboards = leaderboards.filter(e => e.trials !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials).weekly.carries - JSON.parse(a.trials).weekly.carries; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.carries.push(Misc.AddCommas(JSON.parse(top[i].trials).weekly.carries));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.carries.push("", Misc.AddCommas(JSON.parse(playerStats.trials).weekly.carries));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Weekly Trials Carries")
+    .addField("Name", leaderboard.names, true)
+    .addField("Carries", leaderboard.carries, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "overall_trials_wins") {
+    var leaderboard = { "names": [], "wins": [] };
+    leaderboards = leaderboards.filter(e => e.trials !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials).overall.wins - JSON.parse(a.trials).overall.wins; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.wins.push(Misc.AddCommas(JSON.parse(top[i].trials).overall.wins));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.wins.push("", Misc.AddCommas(JSON.parse(playerStats.trials).overall.wins));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Overall Trials Wins")
+    .addField("Name", leaderboard.names, true)
+    .addField("Wins", leaderboard.wins, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "overall_trials_flawless") {
+    var leaderboard = { "names": [], "flawless": [] };
+    leaderboards = leaderboards.filter(e => e.trials !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials).overall.flawlessTickets - JSON.parse(a.trials).overall.flawlessTickets; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.flawless.push(Misc.AddCommas(JSON.parse(top[i].trials).overall.flawlessTickets));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.flawless.push("", Misc.AddCommas(JSON.parse(playerStats.trials).overall.flawlessTickets));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Overall Trials Flawless Tickets")
+    .addField("Name", leaderboard.names, true)
+    .addField("Flawless Tickets", leaderboard.flawless, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "overall_trials_carries") {
+    var leaderboard = { "names": [], "carries": [] };
+    leaderboards = leaderboards.filter(e => e.trials !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials).overall.carries - JSON.parse(a.trials).overall.carries; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.carries.push(Misc.AddCommas(JSON.parse(top[i].trials).overall.carries));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.carries.push("", Misc.AddCommas(JSON.parse(playerStats.trials).overall.carries));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Overall Trials Carries")
+    .addField("Name", leaderboard.names, true)
+    .addField("Carries", leaderboard.carries, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
 }
 function DisplayClanRankings(type, message) {
   Database.GetClans(async function(isError, clans) {
@@ -1718,7 +2005,7 @@ function Trials(message, type) {
           else { message.reply("Sorry! An error occurred, Please try again..."); }
         });
       }
-      else { if(message.mentions.users.first()) { message.reply("The user mentioned has not registered. So we don't know their destiny account."); } else { message.reply("Please register first to use this command."); } }
+      else { if(message.mentions.users.first()) { message.reply("The user mentioned has not registered. So we don't know their destiny account. Get them to `~Register example`."); } else { message.reply("Please register first to use this command. Use `~Register example` to register."); } }
     }
     else { message.reply("Sorry! An error occurred, Please try again..."); }
   });
