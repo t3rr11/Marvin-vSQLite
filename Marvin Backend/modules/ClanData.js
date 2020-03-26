@@ -344,7 +344,9 @@ function GetItems(response) {
     { "name": "Bastion", "collectibleHash": 3207791447 },
     { "name": "Always on Time (Sparrow)", "collectibleHash": 1903459810 },
     { "name": "Luxurious Toast", "collectibleHash": 1866399776 },
-    { "name": "The Fourth Horseman", "collectibleHash": 2318862156 }
+    { "name": "The Fourth Horseman", "collectibleHash": 2318862156 },
+    { "name": "Lantern Shell (Trials)", "collectibleHash": 3127711519 },
+    { "name": "Point of the Stag", "collectibleHash": 1135136071 }
   ];
   var items = [];
   for(var i in itemList) {

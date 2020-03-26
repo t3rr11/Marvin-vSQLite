@@ -29,7 +29,7 @@ function Help(message, type) {
     .addField("Seasonal", "`~Season Rank`, `~Sundial`, `~Fractaline`, `~resonance`")
     .addField("Clan Rankings", "`~Clanrank Fractaline`, `~Clanrank Resonance`")
     .addField("Globals", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreak 1000 Voices`, `~Global Drystreak Anarchy`, `~Global Fractaline`, `~Global Resonance`")
-    .addField("Others", "`~Donate`, `~Broadcasts Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`, `~Delete Clan`, `~Drystreak 1000 Voices`, `~Drystreak Anarchy`")
+    .addField("Others", "`~Donate`, `~Broadcasts Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`, `~Delete Clan`, `~Drystreak 1000 Voices`, `~Drystreak Anarchy`, `~Trials`")
     .addField("Request", "If you see something that isn't there that you'd like me to track request it like this: `~request I would like to see Marvin track season ranks!`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
@@ -40,7 +40,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Rankings Help Menu")
     .setDescription("Here is a list of ranking commands! Example: `~Iron Banner`")
-    .addField("Commands", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`, `~Clanrank Fractaline`, `~Clanrank Resonance`")
+    .addField("Commands", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`, `~Season Rank`, `~Clanrank Fractaline`, `~Clanrank Resonance`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -104,9 +104,9 @@ function Help(message, type) {
     .setAuthor("Trials Help Menu")
     .setDescription("Here is a list of trials commands! Profile commands can be altered by @ing the person you wish to view: `~Trials Profile @Someone`")
     .addField("Profile Commands", "`~Trials Profile`, `~Trials Profile Weekly`, `~Trials Profile Seasonal`, `~Trials Profile Overall`")
-    .addField("Seasonal Rankings", "`~Trials Wins`, `~Trials Flawless`, `~Trials Final Blows`, `~Trials Post Wins`, `~Trials Carries`")
-    .addField("Weekly Rankings", "`~Trials Weekly Wins`, `~Trials Weekly Flawless`, `~Trials Weekly Final Blows`, `~Trials Weekly Post Wins`, `~Trials Weekly Carries`")
-    .addField("Overall Rankings", "`~Trials Overall Wins`, `~Trials Overall Flawless`, `~Trials Overall Final Blows`, `~Trials Overall Post Wins`, `~Trials Overall Carries`")
+    .addField("Weekly Rankings", "`~Trials Wins`, `~Trials Flawless`, `~Trials Final Blows`, `~Trials Post Wins`, `~Trials Carries`")
+    .addField("Seasonal Rankings", "`~Trials Wins Seasonal`, `~Trials Flawless Seasonal`, `~Trials Final Blows Seasonal`, `~Trials Post Wins Seasonal`, `~Trials Carries Seasonal`")
+    .addField("Overall Rankings", "`~Trials Wins Overall`, `~Trials Flawless Overall`, `~Trials Final Blows Overall`, `~Trials Post Wins Overall`, `~Trials Carries Overall`")
     .addField("Global Wins Rankings", "`~Global Trials Wins`, `~Global Trials Overall Wins`, `~Global Trials Seasonal Wins`, `~Global Trials Weekly Wins`")
     .addField("Global Flawless Rankings", "`~Global Trials Flawless`, `~Global Trials Overall Flawless`, `~Global Trials Seasonal Flawless`, `~Global Trials Weekly Flawless`")
     .addField("Global Carries Rankings", "`~Global Trials Carries`, `~Global Trials Overall Carries`, `~Global Trials Seasonal Carries`, `~Global Trials Weekly Carries`")
@@ -693,6 +693,10 @@ function DisplayRankings(message, type, leaderboards, playerData) {
           var itemToFind = message.content.substr("~ITEM ".length);
           if(message.content.substr("~ITEM ".length).toUpperCase() === "JOTUNN") { itemToFind = "JÖTUNN" }
           if(message.content.substr("~ITEM ".length).toUpperCase() === "ALWAYS ON TIME") { itemToFind = "ALWAYS ON TIME (SPARROW)" }
+          if(message.content.substr("~ITEM ".length).toUpperCase() === "FOURTH HORSEMAN") { itemToFind = "THE FOURTH HORSEMAN" }
+          if(message.content.substr("~ITEM ".length).toUpperCase() === "THE 4TH HORSEMAN") { itemToFind = "THE FOURTH HORSEMAN" }
+          if(message.content.substr("~ITEM ".length).toUpperCase() === "4TH HORSEMAN") { itemToFind = "THE FOURTH HORSEMAN" }
+          if(message.content.substr("~ITEM ".length).toUpperCase() === "LANTERN SHELL") { itemToFind = "LANTERN SHELL (TRIALS)" }
           if(items[j].toUpperCase() === itemToFind.toUpperCase()) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); }
         }
       }
@@ -2034,8 +2038,8 @@ function DisplayTrials(message, leaderboards, playerData, type) {
 
 //Others
 function GetTrackedItems(message) {
-  const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Bastion";
-  const pvpItems = "Luna Howl, Not Forgotten, Redrix Broadsword, Redrix Claymore, Mountain Top, Recluse, Revoker, Randys Throwing Knife, Komodo-4FR";
+  const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Bastion, Fourth Horseman";
+  const pvpItems = "Luna Howl, Not Forgotten, Redrix Broadsword, Redrix Claymore, Mountain Top, Recluse, Revoker, Randys Throwing Knife, Komodo-4FR, Point of the Stag";
   const gambitItems = "Breakneck, 21% Delirium, Hush, Exit Strategy, Python";
   const others = "Always On Time";
   const embed = new Discord.RichEmbed()

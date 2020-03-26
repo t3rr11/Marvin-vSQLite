@@ -183,10 +183,10 @@ client.on("message", async message => {
 
   //Commands
   if(message.author.bot) return;
-  if(message.guild.id === "110373943822540800" || message.guild.id === "264445053596991498") return;
-  if(command.startsWith("~") && ignoredCommands.filter(f => command.startsWith(f)).length === 0) {
-    try {
-      if(message.guild) {
+  if(message.guild) {
+    if(message.guild.id === "110373943822540800" || message.guild.id === "264445053596991498") return;
+    if(command.startsWith("~") && ignoredCommands.filter(f => command.startsWith(f)).length === 0) {
+      try {
         if(command.startsWith("~REGISTER ")) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)); } else { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
         else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }
         else if(command.startsWith("~DEL ")) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); }
@@ -305,11 +305,42 @@ client.on("message", async message => {
             else if(command.startsWith("~TRIALS PROFILE OVERALL")) { DiscordCommands.Trials(message, "overall") }
             else { DiscordCommands.Trials(message, "overall"); }
           }
-          else if(command === "~TRIALS WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "wins"); }
-          else if(command === "~TRIALS FLAWLESS") { DiscordCommands.TrialsRankings(message, "seasonal", "flawlessTickets"); }
-          else if(command === "~TRIALS FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "seasonal", "finalBlows"); }
-          else if(command === "~TRIALS POST WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "postFlawlessWins"); }
-          else if(command === "~TRIALS CARRIES") { DiscordCommands.TrialsRankings(message, "seasonal", "carries"); }
+          else if(command.startsWith("~TRIALS WINS ")) {
+            if(command.startsWith("~TRIALS WINS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "wins"); }
+            else if(command.startsWith("~TRIALS WINS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "wins"); }
+            else if(command.startsWith("~TRIALS WINS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "wins"); }
+            else { DiscordCommands.TrialsRankings(message, "weekly", "wins"); }
+          }
+          else if(command.startsWith("~TRIALS FLAWLESS ")) {
+            if(command.startsWith("~TRIALS FLAWLESS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets"); }
+            else if(command.startsWith("~TRIALS FLAWLESS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "flawlessTickets"); }
+            else if(command.startsWith("~TRIALS FLAWLESS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "flawlessTickets"); }
+            else { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets"); }
+          }
+          else if(command.startsWith("~TRIALS FINAL BLOWS ")) {
+            if(command.startsWith("~TRIALS FINAL BLOWS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows"); }
+            else if(command.startsWith("~TRIALS FINAL BLOWS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "finalBlows"); }
+            else if(command.startsWith("~TRIALS FINAL BLOWS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "finalBlows"); }
+            else { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows"); }
+          }
+          else if(command.startsWith("~TRIALS POST WINS ")) {
+            if(command.startsWith("~TRIALS POST WINS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins"); }
+            else if(command.startsWith("~TRIALS POST WINS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "postFlawlessWins"); }
+            else if(command.startsWith("~TRIALS POST WINS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "postFlawlessWins"); }
+            else { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins"); }
+          }
+          else if(command.startsWith("~TRIALS CARRIES ")) {
+            if(command.startsWith("~TRIALS CARRIES WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "carries"); }
+            else if(command.startsWith("~TRIALS CARRIES SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "carries"); }
+            else if(command.startsWith("~TRIALS CARRIES OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "carries"); }
+            else { DiscordCommands.TrialsRankings(message, "weekly", "carries"); }
+          }
+          else if(command === "~TRIALS PROFILE") { DiscordCommands.Trials(message, "overall") }
+          else if(command === "~TRIALS WINS") { DiscordCommands.TrialsRankings(message, "weekly", "wins"); }
+          else if(command === "~TRIALS FLAWLESS") { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets"); }
+          else if(command === "~TRIALS FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows"); }
+          else if(command === "~TRIALS POST WINS") { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins"); }
+          else if(command === "~TRIALS CARRIES") { DiscordCommands.TrialsRankings(message, "weekly", "carries"); }
           else if(command === "~TRIALS PROFILE") { DiscordCommands.Trials(message, "overall") }
           else { DiscordCommands.Help(message, "trials"); }
         }
@@ -359,15 +390,15 @@ client.on("message", async message => {
         try { Log.SaveLog("Command", 'User: ' + message.member.user.tag + ', Command: ' + command); }
         catch (err) { try { Log.SaveError('Tried to log command in: ' + message.guild.name + ', Command: ' + command); } catch (err) {  } }
       }
-      else { message.reply("Using this bots features can only be used in a server. Sorry about that!"); }
-    }
-    catch (err) {
-      console.log(err);
-      try { message.reply("Missing permissions."); }
-      catch (err) { Log.SaveError("Failed to send permissions message due to missing permissions... Duh."); }
-      Log.SaveError("Failed to send message due to missing permissions.");
+      catch (err) {
+        console.log(err);
+        try { message.reply("Missing permissions."); }
+        catch (err) { Log.SaveError("Failed to send permissions message due to missing permissions... Duh."); }
+        Log.SaveError("Failed to send message due to missing permissions.");
+      }
     }
   }
+  else { message.reply("This bots features can only be used in a server. Sorry about that!"); }
 });
 
 client.on('error', async error => { console.log(error.message); });
