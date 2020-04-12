@@ -69,7 +69,7 @@ async function StartUp() {
       LastScanTime = new Date().getTime();
       Database.GetGuilds(function(isError, Data) {
         if(!isError) {
-          ScanLength = Misc.formatTime((new Date().getTime() - startTime) / 1000); //Get timing of last scan. This is for tracking purposes.
+          ScanLength = new Date().getTime() - startTime; //Get timing of last scan. This is for tracking purposes.
           trackedClans = []; //These are all the clans that need to be scanned.
           allTrackedClans = []; //This is all the tracked clans, The difference is this is to log how many clans there are, rather than what clans to scan, this prevents duplication scanning.
 

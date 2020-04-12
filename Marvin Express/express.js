@@ -19,6 +19,7 @@ module.exports = { app };
 //Posts
 app.post("/GetGuildsFromDiscordID", async function(req, res) { await expressPOSTRequest(req, res, `GetGuildsFromDiscordID`, `SELECT * FROM guilds WHERE owner_id="${ req.body.id }" AND owner_avatar="${ req.body.avatar }"`); });
 app.post("/GetClan", async function(req, res) { await expressPOSTRequest(req, res, `GetClan`, `SELECT * FROM clans WHERE clan_id="${ req.body.clan_id }"`); });
+app.post("/CheckIfPatreon", async function(req, res) { await expressPOSTRequest(req, res, `CheckIfPatreon`, `SELECT * FROM status_tags WHERE membershipId="${ req.body.membershipId }"`); });
 
 //Gets
 app.get("/GetClans", async function(req, res) { await expressGETRequest(req, res, `GetClans`, `SELECT * FROM clans`); });
@@ -27,6 +28,12 @@ app.get("/GetDailyStatus", async function(req, res) { await expressGETRequest(re
 app.get("/GetWeeklyStatus", async function(req, res) { await expressGETRequest(req, res, `GetWeeklyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 604800000 } AND date <= ${ new Date().getTime() }`); });
 app.get("/GetMonthlyStatus", async function(req, res) { await expressGETRequest(req, res, `GetMonthlyStatus`, `SELECT * FROM status WHERE date > ${ new Date().getTime() - 2592000000 } AND date <= ${ new Date().getTime() }`); });
 app.get("/GetClanRankings", async function(req, res) { await expressGETClanRankings(req, res, `GetClanRankings`); });
+
+//JSON Gets
+app.get("/GetFrontLog", async function(req, res) { await expressGETJSON(req, res, `GetFrontendLog`, `https://guardianstats.com/data/marvin/frontend_log.json`) });
+app.get("/GetBackLog", async function(req, res) { await expressGETJSON(req, res, `GetBackLog`, `https://guardianstats.com/data/marvin/backend_log.json`) });
+app.get("/GetFrontStatus", async function(req, res) { await expressGETJSON(req, res, `GetFrontStatus`, `https://guardianstats.com/data/marvin/frontend_status.json`) });
+app.get("/GetBackStatus", async function(req, res) { await expressGETJSON(req, res, `GetBackStatus`, `https://guardianstats.com/data/marvin/backend_status.json`) });
 
 //Request Processing
 async function expressPOSTRequest(req, res, name, sql) {
@@ -43,7 +50,7 @@ async function expressGETRequest(req, res, name, sql) {
     else { if(rows.length > 0) { res.status(200).send({ error: null, data: rows }) } else { res.status(200).send({ error: "No data found" }) } }
   });
 }
-async function expressGETClanRankings(req, res, name) {
+async function expressGETClanRankings(req, res, name, url) {
   Log.SaveLog("Request", `GET Request to: ${ name }`);
   db.query("SELECT * FROM clans WHERE isTracking='true'", function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
@@ -128,6 +135,14 @@ async function expressGETClanRankings(req, res, name) {
       });
     }
   });
+}
+async function expressGETJSON(req, res, name, url) {
+  Log.SaveLog("Request", `JSON Request to: ${ name }`);
+  const headers = { headers: { "Content-Type": "application/json" } };
+  const request = await fetch(url, headers);
+  const response = await request.json();
+  if(request.ok) { res.status(200).send({ error: null, data: response }) }
+  else { res.status(200).send({ error: "No data found" }) }
 }
 async function apiRequest(sql, callback) {
   db.query(sql, function(error, rows, fields) {

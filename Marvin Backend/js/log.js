@@ -39,14 +39,14 @@ function SaveError(log) {
 function SaveBackendStatus(ClanScans, ScanLength, LastScanTime, StartupTime, ProcessingClans, ScanSpeed, APIDisabled) {
   var thisTime = new Date().getTime();
   var totalTime = thisTime - StartupTime;
-  totalTime = Misc.formatTime(totalTime / 1000);
+  var lastScan = thisTime - LastScanTime;
   var status = {
     "scanSpeed": ScanSpeed,
     "processingClans": ProcessingClans,
     "uptime": totalTime,
     "scans": ClanScans,
     "scanTime": ScanLength,
-    "lastScan": Misc.formatTime((new Date().getTime() - LastScanTime) / 1000),
+    "lastScan": lastScan,
     "APIDisabled": APIDisabled
   }
   fs.writeFile('./data/backend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });

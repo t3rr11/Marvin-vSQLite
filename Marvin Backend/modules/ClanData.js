@@ -25,6 +25,7 @@ async function CheckClanMembers(trackedClan) {
     Log.SaveErrorCounter("ClanNotFound");
   }
   else if(CurrentClanMembers === "Error") { Log.SaveErrorCounter("unknown"); }
+  else if(CurrentClanMembers === "UnhandledException") { Log.SaveErrorCounter("unknown"); }
   else if(CurrentClanMembers === "SystemDisabled") { }
   else if(CurrentClanMembers === "DestinyShardRelayProxyTimeout") { Log.SaveErrorCounter("DestinyShardRelayProxyTimeout"); }
   else if(CurrentClanMembers === "DestinyShardRelayClientTimeout") { Log.SaveErrorCounter("DestinyShardRelayClientTimeout"); }
@@ -93,6 +94,7 @@ async function GetClanMembers(clan_id) {
   const request = await fetch(`https://www.bungie.net/Platform/GroupV2/${ clan_id }/Members/?currentPage=1`, headers);
   const response = await request.json();
   if(request.ok && response.ErrorCode && response.ErrorCode === 1) { return response.Response.results; }
+  else if(response.ErrorCode === 3) { return "UnhandledException"; }
   else if(response.ErrorCode === 5) { return "SystemDisabled"; }
   else if(response.ErrorCode === 686) { return `ClanNotFound - ${ clan_id }`; }
   else if(response.ErrorCode === 1618) { return "DestinyUnexpectedError"; }

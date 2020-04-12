@@ -20,8 +20,6 @@ var ClansLength = [];
 var NewClans = [];
 var StartupTime = new Date().getTime();
 var CommandsInput = 0;
-var LastScanTime = null;
-var ScanLength = null;
 var APIDisabled = null;
 var TimedOutUsers = [];
 var Users = 0;
@@ -55,12 +53,8 @@ async function CheckMaintenance() {
   catch (err) { console.log(Misc.GetReadableDateTime() + " - " + "Failed to check for maintenance as the data was corrupt."); }
 }
 async function UpdateClans() {
-  //Grab discord user count first, Ignore bot advertising discords.
-  Users = 0; for(let g of client.guilds.array()) {
-    if(g.id === "110373943822540800") { }
-    else if(g.id === "264445053596991498") { }
-    else { Users = Users + (g.members.size - 1) }
-  }
+  //Grab discord user count first
+  Users = 0; for(let g of client.guilds.array()) { Users = Users + (g.members.size - 1) }
 
   //Then continue
   CheckMaintenance();
@@ -68,7 +62,7 @@ async function UpdateClans() {
   UpdateActivityList();
 
   //Log status
-  Log.SaveDiscordLog(StartupTime, Users, client);
+  Log.SaveDiscordLog(StartupTime, Users, CommandsInput, client);
 
   await new Promise(resolve => Database.GetClans((isError, Clans) => {
     ClansLength = Clans.length;
@@ -370,12 +364,12 @@ client.on("message", async message => {
         else if(command === "~GLOBAL RESONANCE") { DiscordCommands.GlobalRankings("resonance", message); }
         else if(command === "~GLOBAL CLAN TIME" || command === "~GLOBAL TIME PLAYED" || command === "~GLOBAL TOTAL TIME" || command === "~GLOBAL TOTALTIME") { DiscordCommands.GlobalRankings("totalTime", message); }
         else if(command === "~GLOBAL TRIUMPH SCORE" || command === "~GLOBAL TRIUMPHSCORE") { DiscordCommands.GlobalRankings("triumphScore", message); }
-        else if(command === "~GLOBAL TRIALS SEASONAL WINS" || command === "~GLOBAL TRIALS WINS") { DiscordCommands.GlobalRankings("seasonal_trials_wins", message); }
-        else if(command === "~GLOBAL TRIALS SEASONAL FLAWLESS" || command === "~GLOBAL TRIALS FLAWLESS") { DiscordCommands.GlobalRankings("seasonal_trials_flawless", message); }
-        else if(command === "~GLOBAL TRIALS SEASONAL CARRIES" || command === "~GLOBAL TRIALS CARRIES") { DiscordCommands.GlobalRankings("seasonal_trials_carries", message); }
-        else if(command === "~GLOBAL TRIALS WEEKLY WINS") { DiscordCommands.GlobalRankings("weekly_trials_wins", message); }
-        else if(command === "~GLOBAL TRIALS WEEKLY FLAWLESS") { DiscordCommands.GlobalRankings("weekly_trials_flawless", message); }
-        else if(command === "~GLOBAL TRIALS WEEKLY CARRIES") { DiscordCommands.GlobalRankings("weekly_trials_carries", message); }
+        else if(command === "~GLOBAL TRIALS WEEKLY WINS" || command === "~GLOBAL TRIALS WINS") { DiscordCommands.GlobalRankings("weekly_trials_wins", message); }
+        else if(command === "~GLOBAL TRIALS WEEKLY FLAWLESS" || command === "~GLOBAL TRIALS FLAWLESS") { DiscordCommands.GlobalRankings("weekly_trials_flawless", message); }
+        else if(command === "~GLOBAL TRIALS WEEKLY CARRIES" || command === "~GLOBAL TRIALS CARRIES") { DiscordCommands.GlobalRankings("weekly_trials_carries", message); }
+        else if(command === "~GLOBAL TRIALS SEASONAL WINS") { DiscordCommands.GlobalRankings("seasonal_trials_wins", message); }
+        else if(command === "~GLOBAL TRIALS SEASONAL FLAWLESS") { DiscordCommands.GlobalRankings("seasonal_trials_flawless", message); }
+        else if(command === "~GLOBAL TRIALS SEASONAL CARRIES") { DiscordCommands.GlobalRankings("seasonal_trials_carries", message); }
         else if(command === "~GLOBAL TRIALS OVERALL WINS") { DiscordCommands.GlobalRankings("overall_trials_wins", message); }
         else if(command === "~GLOBAL TRIALS OVERALL FLAWLESS") { DiscordCommands.GlobalRankings("overall_trials_flawless", message); }
         else if(command === "~GLOBAL TRIALS OVERALL CARRIES") { DiscordCommands.GlobalRankings("overall_trials_carries", message); }
@@ -387,7 +381,7 @@ client.on("message", async message => {
         //Other
         else { message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete(2000) }).catch(); }
 
-        try { Log.SaveLog("Command", 'User: ' + message.member.user.tag + ', Command: ' + command); }
+        try { Log.SaveLog("Command", 'User: ' + message.member.user.tag + ', Command: ' + command); CommandsInput++; }
         catch (err) { try { Log.SaveError('Tried to log command in: ' + message.guild.name + ', Command: ' + command); } catch (err) {  } }
       }
       catch (err) {
