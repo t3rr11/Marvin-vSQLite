@@ -1,6 +1,4 @@
 //Required Libraraies
-const Discord = require('discord.js');
-const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
 const Config = require("../data/config.json");
 const fetch = require("node-fetch");
@@ -348,7 +346,10 @@ function GetItems(response) {
     { "name": "Luxurious Toast", "collectibleHash": 1866399776 },
     { "name": "The Fourth Horseman", "collectibleHash": 2318862156 },
     { "name": "Lantern Shell (Trials)", "collectibleHash": 3127711519 },
-    { "name": "Point of the Stag", "collectibleHash": 1135136071 }
+    { "name": "Point of the Stag", "collectibleHash": 1135136071 },
+    { "name": "A Thousand Wings (Whisper Ship)", "collectibleHash": 3142437750 },
+    { "name": "SCRAP CF-717-91 (Outbreak Ship)", "collectibleHash": 1840126886 },
+    { "name": "Silver Tercel (Dreaming City Sparrow)", "collectibleHash": 1469913807 }
   ];
   var items = [];
   for(var i in itemList) {
