@@ -1,7 +1,7 @@
 const MySQL = require('mysql');
 const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
-const Config = require('../data/config.json');
+const Backend_Config = require('../../Combined/configs/backend_config.json');
 const DBConfig = require('../../Combined/configs/db_config.json');
 const fetch = require("node-fetch");
 
@@ -287,7 +287,7 @@ function SetPrivate(membershipId) {
 
 //Non database functions
 async function GetClanName(clan_id) {
-  const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
+  const headers = { headers: { "X-API-Key": Backend_Config.apiKey, "Content-Type": "application/json" } };
   const request = await fetch(`https://www.bungie.net/Platform/GroupV2/${ clan_id }/`, headers);
   const response = await request.json();
   if(request.ok && response.ErrorCode && response.ErrorCode !== 1) { console.log(`Couldn't find ${ clan_id } due to ${ response }`); return { "clan_id": null, "clan_name": null } }
@@ -295,7 +295,7 @@ async function GetClanName(clan_id) {
   else { console.log(`Couldn't find ${ clan_id } due to ${ response }`); return { "clan_id": null, "clan_name": null } }
 }
 async function GetClanMembersFromAPI(clan_id) {
-  const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
+  const headers = { headers: { "X-API-Key": Backend_Config.apiKey, "Content-Type": "application/json" } };
   const request = await fetch(`https://www.bungie.net/Platform/GroupV2/${ clan_id }/Members/?currentPage=1`, headers);
   const response = await request.json();
   if(request.ok && response.ErrorCode && response.ErrorCode !== 1) {

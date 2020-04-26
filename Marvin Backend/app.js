@@ -1,6 +1,7 @@
 //Modules
 const fs = require('fs');
-let Config = require(__dirname + "/data/config.json");
+let Config = require('../Combined/configs/config.json');
+let Backend_config = require('../Combined/configs/backend_config.json');
 let Misc = require(__dirname + '/js/misc.js');
 let Log = require(__dirname + '/js/log.js');
 let Database = require(__dirname + '/modules/Database.js');
@@ -13,7 +14,7 @@ var Clans = [];
 var StartupTime = new Date().getTime();
 var CommandsInput = 0;
 var ClanScans = 0;
-var ScanSpeed = Config.scan_speed;
+var ScanSpeed = Backend_config.scan_speed;
 var ProcessingClans = null;
 var LastScanTime = null;
 var ScanLength = null;
@@ -28,7 +29,7 @@ async function CheckMaintenance() {
 }
 
 async function CheckScanSpeedChange() {
-  var newConfig = JSON.parse(fs.readFileSync('./data/config.json').toString());
+  var newConfig = JSON.parse(fs.readFileSync('../Combined/configs/backend_config.json').toString());
   if(newConfig.scan_speed !== ScanSpeed) { ScanSpeed = newConfig.scan_speed; }
 }
 
@@ -140,6 +141,7 @@ async function StartUp() {
   setInterval(function() { Log.SaveBackendStatus(ClanScans, ScanLength, LastScanTime, StartupTime, ProcessingClans, ScanSpeed, APIDisabled) }, 10000);
 
   //Start Up Console Log
+  if(Config.enableDebug){ console.clear(); }
   Log.SaveLog("Info", `Backend server has started.`);
   Log.SaveLog("Info", `Tracking ${ Config.enableTracking ? "Enabled." : "Disabled." }`);
 };

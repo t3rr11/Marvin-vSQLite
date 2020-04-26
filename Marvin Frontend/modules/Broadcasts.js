@@ -1,8 +1,8 @@
 //Required Libraraies
+const Config = require('../../Combined/configs/config.json');
 const Discord = require('discord.js');
 const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
-const Config = require('../data/config.json');
 const Database = require('./Database.js');
 
 module.exports = { SetupBroadcasts, RemoveBroadcasts, AddToBlacklist, AddToWhitelist, SendBroadcast, SendFinishedLoadingAnnouncement };
@@ -119,50 +119,63 @@ async function AddToWhitelist(message, item) {
   }
 }
 async function SendBroadcast(client, broadcast) {
-  //Here lie the broadcast sending function, this needs to filter through GetGuilds and find ones that have a likeness of the broadcast.clanId value. Then check if they have a broadcast channel other than null,
-  //If so then send broadcast else, just report the broadcast.
-  var message = null;
-  if(broadcast.type === "item") {
-    if(broadcast.count === -1) { message = `${ broadcast.displayName } has obtained ${ broadcast.broadcast }`; }
-    else { message = `${ broadcast.displayName } has obtained ${ broadcast.broadcast } in ${ broadcast.count } ${ broadcast.count > 1 ? "raids!" : "raid!" }` }
+  const BroadcastType = broadcast.type;
+  let BroadcastMessage = null;
+
+  if(BroadcastType === "item") {
+    if(broadcast.count === -1) {
+      //If broadcast count === -1 then the broadcast is not a raid specific broadcast.
+      BroadcastMessage = `${ broadcast.displayName } has obtained ${ broadcast.broadcast }`;
+    }
+    else {
+      //If the broadcast count has a value other than -1 then it must be a raid broadcast so the message needs to be changed to include this.
+      BroadcastMessage = `${ broadcast.displayName } has obtained ${ broadcast.broadcast } in ${ broadcast.count } ${ broadcast.count > 1 ? "raids!" : "raid!" }`;
+    }
   }
-  else if(broadcast.type === "title") { message = `${ broadcast.displayName } has obtained the ${ broadcast.broadcast } title!` }
-  Database.GetGuilds(function(isError, Guilds) {
-    if(!isError) {
-      for(var i in Guilds) {
-        var clans = Guilds[i].clans.split(',');
-        for(var j in clans) {
-          if(clans[j] === broadcast.clanId) {
-            if(Guilds[i].enable_whitelist === "true") {
-              //If whitelist is enabled then check the whitelisted items
-              var whitelistItems = Guilds[i].whitelist.split(',');
-              if(whitelistItems.find(e => e.toUpperCase() === broadcast.broadcast.toUpperCase())) {
-                //If broadcasts channel != null then broadcast, otherwise ignore.
-                if(Guilds[i].broadcasts_channel !== "null") {
-                  const thisDate = new Date();
-                  const embed = new Discord.RichEmbed().setColor(0xFFE000).setAuthor("Clan Broadcast").setDescription(message).setFooter(Config.defaultFooter, Config.defaultLogoURL).setTimestamp();
-                  try { client.guilds.get(Guilds[i].guild_id).channels.get(Guilds[i].broadcasts_channel).send({embed}); }
-                  catch(err) { console.log(`Failed to broadcast to ${ Guilds[i].guild_id } because of ${ err }`); }
+  else if(BroadcastType === "title") {
+    //If the broadcast is a title, then set the message as seen below.
+    BroadcastMessage = `${ broadcast.displayName } has obtained the ${ broadcast.broadcast } title!` 
+  }
+  else { Log.SaveError(`New broadcast type found, but we are unsure of what to do with it. Type: ${ BroadcastType }`); }
+
+  //Check to see if broadcasts are enabled. Usually disabled for debugging.
+  if(Config.enableBroadcasts) {
+    //Loop through guilds and find guilds where the clan_id matches those guilds tracked clans.
+    Database.GetGuilds(function(isError, Guilds) {
+      if(!isError) {
+        for(var i in Guilds) {
+          var clans = Guilds[i].clans.split(',');
+          for(var j in clans) {
+            if(clans[j] === broadcast.clanId) {
+              //Check to see if they have broadcasts enabled. If they have broadcasts disabled it will return null.
+              if(Guilds[i].broadcasts_channel !== "null") {
+                //If whitelist is enabled then check the whitelisted items to see if it needs to be broadcasted.
+                if(Guilds[i].enable_whitelist === "true") {
+                  var whitelistItems = Guilds[i].whitelist.split(',');
+                  if(whitelistItems.find(e => e.toUpperCase() === broadcast.broadcast.toUpperCase())) {
+                    const thisDate = new Date();
+                    const embed = new Discord.RichEmbed().setColor(0xFFE000).setAuthor("Clan Broadcast").setDescription(BroadcastMessage).setFooter(Config.defaultFooter, Config.defaultLogoURL).setTimestamp();
+                    try { client.guilds.get(Guilds[i].guild_id).channels.get(Guilds[i].broadcasts_channel).send({embed}); }
+                    catch(err) { console.log(`Failed to broadcast to ${ Guilds[i].guild_id } because of ${ err }`); }
+                  }
                 }
-              }
-            }
-            else {
-              //If whitelist is disabled then check the blacklisted items.
-              var blacklistItems = Guilds[i].blacklist.split(",");
-              if(!blacklistItems.find(e => e.toUpperCase() === broadcast.broadcast.toUpperCase())) {
-                if(Guilds[i].broadcasts_channel !== "null") {
-                  const thisDate = new Date();
-                  const embed = new Discord.RichEmbed().setColor(0xFFE000).setAuthor("Clan Broadcast").setDescription(message).setFooter(Config.defaultFooter, Config.defaultLogoURL).setTimestamp();
-                  try { client.guilds.get(Guilds[i].guild_id).channels.get(Guilds[i].broadcasts_channel).send({embed}); }
-                  catch(err) { console.log(`Failed to broadcast to ${ Guilds[i].guild_id } because of ${ err }`); }
+                else {
+                  //If whitelist is disabled then check the blacklisted items to make sure it's not blacklisted.
+                  var blacklistItems = Guilds[i].blacklist.split(",");
+                  if(!blacklistItems.find(e => e.toUpperCase() === broadcast.broadcast.toUpperCase())) {
+                    const thisDate = new Date();
+                    const embed = new Discord.RichEmbed().setColor(0xFFE000).setAuthor("Clan Broadcast").setDescription(BroadcastMessage).setFooter(Config.defaultFooter, Config.defaultLogoURL).setTimestamp();
+                    try { client.guilds.get(Guilds[i].guild_id).channels.get(Guilds[i].broadcasts_channel).send({embed}); }
+                    catch(err) { console.log(`Failed to broadcast to ${ Guilds[i].guild_id } because of ${ err }`); }
+                  }
                 }
               }
             }
           }
         }
       }
-    }
-  });
+    });
+  }
   Database.AddBroadcast(broadcast);
 }
 async function SendFinishedLoadingAnnouncement(client, Clan) {

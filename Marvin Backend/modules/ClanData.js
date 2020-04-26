@@ -1,6 +1,7 @@
 //Required Libraraies
 const Log = require("../js/log.js");
-const Config = require("../data/config.json");
+const Config = require("../../Combined/configs/config.json");
+const Backend_Config = require("../../Combined/configs/backend_config.json");
 const fetch = require("node-fetch");
 const Database = require("./Database");
 var id = 0;
@@ -88,7 +89,7 @@ async function CheckClanMembers(trackedClan) {
   return trackedClan.clan_id;
 }
 async function GetClanMembers(clan_id) {
-  const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
+  const headers = { headers: { "X-API-Key": Backend_Config.apiKey, "Content-Type": "application/json" } };
   const request = await fetch(`https://www.bungie.net/Platform/GroupV2/${ clan_id }/Members/?currentPage=1`, headers);
   const response = await request.json();
   if(request.ok && response.ErrorCode && response.ErrorCode === 1) { return response.Response.results; }
@@ -106,7 +107,7 @@ async function GetClanMembers(clan_id) {
 }
 async function GetClanMemberData(playerInfo, retried) {
   try {
-    const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
+    const headers = { headers: { "X-API-Key": Backend_Config.apiKey, "Content-Type": "application/json" } };
     const request = await fetch(`https://bungie.net/Platform/Destiny2/${ playerInfo.membershipType }/Profile/${ playerInfo.membership_Id }/?components=100,200,202,204,800,900,1100`, headers);
     const response = await request.json();
     if(request.ok && response.ErrorCode && response.ErrorCode !== 1) {
@@ -140,7 +141,7 @@ function ProcessPlayerData(response, clanId, firstScan, forcedScan) {
   const Titles = GetTitles(response);
   const Seasonal = GetSeasonal(response);
   const Others = GetOthers(response);
-
+  
   //Compare data
   Database.GetPlayerDetails(AccountInfo, function(isError, isFound, SQLData) {
     if(!isError) {
@@ -478,7 +479,7 @@ function SendBroadcast(data, type, broadcast, count) {
 
 //Others
 async function GetClanDetails(clan_id) {
-  const headers = { headers: { "X-API-Key": Config.apiKey, "Content-Type": "application/json" } };
+  const headers = { headers: { "X-API-Key": Backend_Config.apiKey, "Content-Type": "application/json" } };
   const request = await fetch(`https://www.bungie.net/Platform/GroupV2/${ clan_id }/`, headers);
   const response = await request.json();
   if(request.ok && response.ErrorCode && response.ErrorCode !== 1) { console.log(`Couldn't find ${ clan_id } due to ${ JSON.stringify(response) }`); return { "error": true, "reason": response } }

@@ -6,7 +6,7 @@ const DBL = require("dblapi.js");
 const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzMTM1MTM2Njc5OTA2NTA4OCIsImJvdCI6dHJ1ZSwiaWF0IjoxNTg0NDIxMzAxfQ.qZ5CrrQdaC9cIfeuqx7svNTwiSTH_R0JD5H-1CVzrCo', client);
 
 //Modules
-let Config = require(__dirname + "/data/config.json");
+const Config = require('../Combined/configs/config.json');
 let Misc = require(__dirname + '/js/misc.js');
 let Log = require(__dirname + '/js/log.js');
 let Database = require(__dirname + '/modules/Database.js');
@@ -114,20 +114,16 @@ function GetScanSpeed(message) {
   message.channel.send(`ScanSpeed is scanning at a rate of ${ backend_status.scanSpeed } clans per second. With a slow down rate of ${ Math.round(backend_status.scanSpeed * 0.8) } and a reset of ${ Math.round(backend_status.scanSpeed * 0.6) }`);
 }
 function SetScanSpeed(message, input) {
-  var backend_config = JSON.parse(fs.readFileSync('../Marvin Backend/data/config.json').toString());
+  var backend_config = JSON.parse(fs.readFileSync('../Combined/configs/backend_config.json').toString());
   backend_config.scan_speed = parseInt(input);
-  fs.writeFile('../Marvin Backend/data/config.json', JSON.stringify(backend_config), (err) => { if (err) console.error(err) });
+  fs.writeFile('../Combined/configs/backend_config.json', JSON.stringify(backend_config), (err) => { if (err) console.error(err) });
   message.channel.send(`ScanSpeed is now scanning at a rate of ${ input } clans per second. With a slow down rate of ${ Math.round(input * 0.8) } and a reset of ${ Math.round(input * 0.6) }`);
 }
 function ForceTopGGUpdate(message) { dbl.postStats(client.guilds.size); message.channel.send("Updated stats on Top.GG"); }
 
 //Discord Client Code
 client.on("ready", async () => {
-  console.log(ClansLength);
   if(ClansLength === null) {
-    Log.SaveLog("Info", `Bot start time: ${ new Date(StartupTime) }`);
-    Log.SaveLog("Info", `Clan Length: ${ ClansLength } - (Should be null)`);
-
     //Define variables
     await UpdateClans();
   
@@ -136,6 +132,7 @@ client.on("ready", async () => {
     setInterval(() => { dbl.postStats(client.guilds.size); }, 1800000);
   
     //Start Up Console Log
+    if(Config.enableDebug){ console.clear(); }
     Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
     Log.SaveLog("Info", `Tracking ${ ClansLength } clans!`);
   }

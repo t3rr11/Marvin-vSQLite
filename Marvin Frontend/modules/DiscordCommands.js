@@ -4,7 +4,7 @@ const fs = require('fs');
 const Bot = require("../bot.js");
 const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
-const Config = require('../data/config.json');
+const Config = require('../../Combined/configs/config.json');
 const fetch = require("node-fetch");
 const Database = require("./Database");
 
@@ -182,8 +182,8 @@ function GetTrackedClans(message) {
                   clanData.ids.push(data.clan_id);
                 }
                 else {
-                  clanData.names.push("Unknown");
-                  clanData.ids.push("Uhh try again? Not sure what happened.");
+                  clanData.names.push("Clan not found");
+                  clanData.ids.push("Clan was not found in database, still loading possibly? Or no longer exists.");
                 }
               }
               else {
@@ -2149,28 +2149,36 @@ function ClanInfo(message) {
         for(var i in clans) {
           await new Promise(resolve =>
             Database.GetClan(clans[i], function(isError, isFound, data) {
-              clanData.push(data);
+              if(!isError) {
+                if(isFound) { clanData.push({ clanId: clans[i], isError: false, isFound: true, data: data }); }
+                else { clanData.push({ clanId: clans[i], isError: false, isFound: false, data: null }); }
+              }
+              else { clanData.push({ clanId: clans[i], isError: true, isFound: false, data: null }); }
               resolve(true);
             })
           );
         }
         for(var i in clanData) {
-          var firstScan = new Date(parseInt(clanData[i].joinedOn)).toLocaleString("en-AU");
-          var lastScan = new Date(parseInt(clanData[i].lastScan)).toLocaleString("en-AU");
-          console.log(lastScan.toLocaleString("en-AU"));
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor(`${ clanData[i].clan_name } (${ clanData[i].clan_id })`)
-          .setDescription(
-            `The first time we scanned this clan was: ${ firstScan }.
-            The last time we scanned this clan was: ${ lastScan }`
-          )
-          .addField("Clan Level", clanData[i].clan_level, true)
-          .addField("Members", `${ clanData[i].member_count } / 100`, true)
-          .addField("Online", `${ clanData[i].online_players }`, true)
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
+          if(!clanData[i].isError) {
+            if(clanData[i].isFound) {
+              const timeOptions = { weekday: "long", year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" };
+              const embed = new Discord.RichEmbed()
+              .setColor(0x0099FF)
+              .setAuthor(`${ clanData[i].data.clan_name } (${ clanData[i].data.clan_id })`)
+              .setDescription(
+                `We have been tracking this clan for: ${ Misc.formatTime((new Date() - clanData[i].data.joinedOn) / 1000) }.
+                The last time we scanned this clan was: ${ Misc.formatTime((new Date() - clanData[i].data.lastScan) / 1000) } ago.`
+              )
+              .addField("Clan Level", clanData[i].data.clan_level, true)
+              .addField("Members", `${ clanData[i].data.member_count } / 100`, true)
+              .addField("Online", `${ clanData[i].data.online_players }`, true)
+              .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+              .setTimestamp()
+              message.channel.send({embed});
+            }
+            else { message.channel.send(`Failed to find clan information possibly due to clan no longer existing or have not finished scanning it yet. Clan ID: (${ clanData[i].clanId })`); }
+          }
+          else { message.channel.send(`Failed to find information on clan due to an error, please try again. Clan ID: (${ clanData[i].clanId })`); }
         }
       }
       else { console.log("Guild not found"); message.channel.send("No data for this server was found. My guess is you have not added a clan yet. Use: `~set clan` to add your clan!"); }

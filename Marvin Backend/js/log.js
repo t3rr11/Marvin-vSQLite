@@ -1,7 +1,7 @@
 //Required Libraraies
 const fs = require('fs');
 var Misc = require("./misc.js");
-var Config = require("../data/config.json");
+var Config = require("../../Combined/configs/config.json");
 
 //Variables
 var LogTime = Misc.GetDateString();
