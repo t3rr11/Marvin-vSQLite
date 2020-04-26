@@ -15,6 +15,9 @@
 /Marvin Backend/data/backend_status.json
 /Marvin Frontend/data/frontend_status.json
 
+#databasefile
+/Combined/configs/db_config.json
+
 #others
 /Images
 
