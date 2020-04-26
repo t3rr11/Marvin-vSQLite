@@ -19,7 +19,25 @@ module.exports = { app };
 //Posts
 app.post("/GetGuildsFromDiscordID", async function(req, res) { await expressPOSTRequest(req, res, `GetGuildsFromDiscordID`, `SELECT * FROM guilds WHERE owner_id="${ req.body.id }" AND owner_avatar="${ req.body.avatar }"`); });
 app.post("/GetClan", async function(req, res) { await expressPOSTRequest(req, res, `GetClan`, `SELECT * FROM clans WHERE clan_id="${ req.body.clan_id }"`); });
+app.post("/GetClanMembers", async function(req, res) { await expressPOSTRequest(req, res, `GetClanMembers`, `SELECT * FROM playerInfo WHERE clanId="${ req.body.clan_id }"`); });
 app.post("/CheckIfPatreon", async function(req, res) { await expressPOSTRequest(req, res, `CheckIfPatreon`, `SELECT * FROM status_tags WHERE membershipId="${ req.body.membershipId }"`); });
+
+//Update Posts
+app.post("/UpdateServerInfo", async function(req, res) {
+  await expressUpdatePOSTRequest(req, res, `UpdateServerInfo`, 
+    `UPDATE 
+      guilds
+    SET 
+      enable_whitelist="${ req.body.enable_whitelist }",
+      enable_broadcasts_items="${ req.body.enable_broadcasts_items }",
+      enable_broadcasts_titles="${ req.body.enable_broadcasts_titles }",
+      enable_broadcasts_clans="${ req.body.enable_broadcasts_clans }",
+      enable_broadcasts_dungeons="${ req.body.enable_broadcasts_dungeons }",
+      enable_broadcasts_catalysts="${ req.body.enable_broadcasts_catalysts }"
+    WHERE 
+      owner_id="${ req.body.owner_id }" AND owner_avatar="${ req.body.owner_avatar }" AND joinedOn="${ req.body.joinedOn }"`
+  );
+});
 
 //Gets
 app.get("/GetClans", async function(req, res) { await expressGETRequest(req, res, `GetClans`, `SELECT * FROM clans`); });
@@ -41,6 +59,13 @@ async function expressPOSTRequest(req, res, name, sql) {
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
     else { if(rows.length > 0) { res.status(200).send({ error: null, data: rows }) } else { res.status(200).send({ error: "No data found" }) } }
+  });
+}
+async function expressUpdatePOSTRequest(req, res, name, sql) {
+  Log.SaveLog("Request", `POST Request to: ${ name }`);
+  db.query(sql, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
+    else { res.status(200).send({ error: null, data: "Successfully updated guild information..." }) }
   });
 }
 async function expressGETRequest(req, res, name, sql) {
