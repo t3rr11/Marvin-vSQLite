@@ -1,7 +1,7 @@
 const MySQL = require('mysql');
 const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
-const Config = require('../data/config.json');
+const Config = require("../../Combined/configs/config.json");
 const DBConfig = require('../../Combined/configs/db_config.json');
 const fetch = require("node-fetch");
 
