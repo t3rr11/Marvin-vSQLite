@@ -11,6 +11,10 @@
 /Marvin Frontend/data/logs
 /Marvin Express/data/logs
 
+#data
+/Marvin Backend/data/backend_status.json
+/Marvin Frontend/data/frontend_status.json
+
 #others
 /Images
 
