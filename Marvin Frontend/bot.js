@@ -16,7 +16,7 @@ let ManageClans = require(__dirname + '/modules/ManageClans.js');
 let Broadcasts = require(__dirname + '/modules/Broadcasts.js');
 
 //Data
-var ClansLength = [];
+var ClansLength = null;
 var NewClans = [];
 var StartupTime = new Date().getTime();
 var CommandsInput = 0;
@@ -123,16 +123,23 @@ function ForceTopGGUpdate(message) { dbl.postStats(client.guilds.size); message.
 
 //Discord Client Code
 client.on("ready", async () => {
-  //Define variables
-  await UpdateClans();
+  console.log(ClansLength);
+  if(ClansLength === null) {
+    Log.SaveLog("Info", `Bot start time: ${ new Date(StartupTime) }`);
+    Log.SaveLog("Info", `Clan Length: ${ ClansLength } - (Should be null)`);
 
-	//SetTimeouts
-	setInterval(function() { UpdateClans() }, 10000);
-  setInterval(() => { dbl.postStats(client.guilds.size); }, 1800000);
-
-  //Start Up Console Log
-  Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
-  Log.SaveLog("Info", `Tracking ${ ClansLength } clans!`);
+    //Define variables
+    await UpdateClans();
+  
+    //SetTimeouts
+    setInterval(function() { UpdateClans() }, 10000);
+    setInterval(() => { dbl.postStats(client.guilds.size); }, 1800000);
+  
+    //Start Up Console Log
+    Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
+    Log.SaveLog("Info", `Tracking ${ ClansLength } clans!`);
+  }
+  else { Log.SaveError(`Bot lost connection to discord, It has been reconnected now, but in order to avoid spam broadcasts the startup funciton has been cancelled, As the bot has already started.`); }
 });
 
 client.on("guildCreate", guild => {
@@ -354,6 +361,7 @@ client.on("message", async message => {
         else if(command === "~SET CLAN") { ManageClans.RegisterClan(message); }
         else if(command === "~TRACKED CLANS" || command === "~CLANS TRACKED") { DiscordCommands.GetTrackedClans(message); }
         else if(command === "~REAUTH") { DiscordCommands.RenewLeadership(message); }
+        else if(command === "~CLANINFO" || command === "~CLAN INFO") { DiscordCommands.ClanInfo(message); }
 
         //Globals
         else if(command.startsWith("~GLOBAL DRYSTREAK ")) { DiscordCommands.GlobalDryStreak(message, command.substr("~GLOBAL DRYSTREAK ".length)) }

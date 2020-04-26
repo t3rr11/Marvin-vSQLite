@@ -349,7 +349,9 @@ function GetItems(response) {
     { "name": "Point of the Stag", "collectibleHash": 1135136071 },
     { "name": "A Thousand Wings (Whisper Ship)", "collectibleHash": 3142437750 },
     { "name": "SCRAP CF-717-91 (Outbreak Ship)", "collectibleHash": 1840126886 },
-    { "name": "Silver Tercel (Dreaming City Sparrow)", "collectibleHash": 1469913807 }
+    { "name": "Silver Tercel (Dreaming City Sparrow)", "collectibleHash": 1469913807 },
+    { "name": "Heir Apparent", "collectibleHash": 2842076592 },
+    { "name": "Felwinter's Lie", "collectibleHash": 3371544734 }
   ];
   var items = [];
   for(var i in itemList) {

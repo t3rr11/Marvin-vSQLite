@@ -339,7 +339,12 @@ function RemoveAwaitingBroadcast(broadcast) {
 function ForceFullScan(callback) {
   db.query(`UPDATE clans SET forcedScan="true" WHERE isTracking="true"`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error trying to force a rescan, Error: ${ error }`); callback(true); }
-    else { callback(false); }
+    else {
+      db.query(`UPDATE playerInfo SET firstLoad="true"`, function(error, rows, fields) {
+        if(!!error) { Log.SaveError(`Error trying to force a rescan, Error: ${ error }`); callback(true); }
+        else { callback(false); }
+      });
+    }
   });
 }
 function EnableWhitelist(guild_id, callback) {

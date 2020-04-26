@@ -13,7 +13,7 @@ module.exports = {
   Help, BroadcastsHelp, DrystreaksHelp, Request,
   GlobalRankings, Rankings, TrialsRankings, GlobalDryStreak, GetTrackedItems, DryStreak, GetTrackedClans,
   Profile, GetTrackedTitles, ForceFullScan, ForceGuildCheck, ToggleWhitelist, RenewLeadership, TransferLeadership,
-  DisplayClanRankings, Trials
+  DisplayClanRankings, Trials, ClanInfo
 };
 
 //Important
@@ -156,7 +156,6 @@ function DrystreaksHelp(message) {
   .setTimestamp()
   message.channel.send({embed});
 }
-
 function Request(client, message) {
   const request = message.content.substr("~request ".length);
   const embed = new Discord.RichEmbed()
@@ -177,8 +176,20 @@ function GetTrackedClans(message) {
         for(var i in clans) {
           await new Promise(resolve =>
             Database.GetClan(clans[i], function(isError, isFound, data) {
-              clanData.names.push(data.clan_name);
-              clanData.ids.push(data.clan_id);
+              if(!isError) {
+                if(isFound) {
+                  clanData.names.push(data.clan_name);
+                  clanData.ids.push(data.clan_id);
+                }
+                else {
+                  clanData.names.push("Unknown");
+                  clanData.ids.push("Uhh try again? Not sure what happened.");
+                }
+              }
+              else {
+                clanData.names.push("Failed");
+                clanData.ids.push("Please try again...");
+              }
               resolve(true);
             })
           );
@@ -987,86 +998,6 @@ function DisplayRankings(message, type, leaderboards, playerData) {
   }
   catch (err) { console.log(err); message.reply("Sorry we broke... Usually happens when there was no data returned. Possibly someone doesn't have the item or title you are looking for."); }
 }
-
-//Trials
-function TrialsRankings(message, type, stat) {
-  Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {
-    if(!isError) {
-      if(isFound) {
-        var playerData = Data;
-        //Give personalised response if user has registered
-        Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
-          if(!isError) {
-            if(isFound) {
-              //Get all clan data from playerInfo using clans
-              var allClanIds = Data.clans.split(",");
-              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayTrialsRankings(message, leaderboards, playerData, type, stat); } }
-                else { message.reply("Sorry! An error occurred, Please try again..."); }
-              });
-            } else { message.reply("No clan set, to set one use: `~Set clan`"); }
-          } else { message.reply("Sorry! An error occurred, Please try again..."); }
-        });
-      }
-      else {
-        //Give results for default server clan as the user has not registered
-        Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
-          if(!isError) {
-            if(isFound) {
-              //Get all clan data from playerInfo using clan_id
-              var allClanIds = Data.clans.split(",");
-              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayTrialsRankings(message, leaderboards, undefined, type, stat); } }
-                else { message.reply("Sorry! An error occurred, Please try again..."); }
-              });
-            } else { message.reply("No clan set, to set one use: `~Set clan`"); }
-          } else { message.reply("Sorry! An error occurred, Please try again..."); }
-        });
-      }
-    }
-    else { message.reply("Sorry! An error occurred, Please try again..."); }
-  });
-}
-function DisplayTrialsRankings(message, leaderboards, playerData, type, stat) {
-  try {
-    var leaderboard = { "names": [], "stat": [] };
-    leaderboards.sort(function(a, b) { return JSON.parse(b.trials)[type][stat] - JSON.parse(a.trials)[type][stat]; });
-    top = leaderboards.slice(0, 10);
-    for(var i in top) {
-      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-      leaderboard.stat.push(Misc.AddCommas(JSON.parse(top[i].trials)[type][stat]));
-    }
-
-    try {
-      if(playerData !== null) {
-        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-        leaderboard.stat.push("", Misc.AddCommas(JSON.parse(playerStats.trials)[type][stat]));
-      }
-      else { leaderboard.names.push("", `~Register to see your rank`); }
-    }
-    catch(err) { }
-
-    if(stat === "wins"){ stat = "Wins" }
-    else if(stat === "winStreak"){ stat = "Win Streak" }
-    else if(stat === "flawlessTickets"){ stat = "Flawless Tickets" }
-    else if(stat === "finalBlows"){ stat = "Final Blows" }
-    else if(stat === "postFlawlessWins"){ stat = "Post Flawless Wins" }
-    else if(stat === "carries"){ stat = "Carries (With Emblem)" }
-
-    const embed = new Discord.RichEmbed()
-    .setColor(0x0099FF)
-    .setAuthor(`Top 10 ${ Misc.capitalize(type) } Trials ${ stat }`)
-    .addField("Name", leaderboard.names, true)
-    .addField(`${ stat }`, leaderboard.stat, true)
-    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-    .setTimestamp()
-    message.channel.send({embed});
-  }
-  catch (err) { console.log(err); message.reply("Sorry we broke... Usually happens when there was no data returned. Possibly someone doesn't have the item or title you are looking for."); }
-}
-
 function GlobalRankings(type, message) {
   Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {
     if(!isError) {
@@ -1983,6 +1914,84 @@ function DisplayProfile(message, leaderboards, playerData) {
   catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
 }
 
+//Trials
+function TrialsRankings(message, type, stat) {
+  Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {
+    if(!isError) {
+      if(isFound) {
+        var playerData = Data;
+        //Give personalised response if user has registered
+        Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
+          if(!isError) {
+            if(isFound) {
+              //Get all clan data from playerInfo using clans
+              var allClanIds = Data.clans.split(",");
+              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayTrialsRankings(message, leaderboards, playerData, type, stat); } }
+                else { message.reply("Sorry! An error occurred, Please try again..."); }
+              });
+            } else { message.reply("No clan set, to set one use: `~Set clan`"); }
+          } else { message.reply("Sorry! An error occurred, Please try again..."); }
+        });
+      }
+      else {
+        //Give results for default server clan as the user has not registered
+        Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
+          if(!isError) {
+            if(isFound) {
+              //Get all clan data from playerInfo using clan_id
+              var allClanIds = Data.clans.split(",");
+              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayTrialsRankings(message, leaderboards, undefined, type, stat); } }
+                else { message.reply("Sorry! An error occurred, Please try again..."); }
+              });
+            } else { message.reply("No clan set, to set one use: `~Set clan`"); }
+          } else { message.reply("Sorry! An error occurred, Please try again..."); }
+        });
+      }
+    }
+    else { message.reply("Sorry! An error occurred, Please try again..."); }
+  });
+}
+function DisplayTrialsRankings(message, leaderboards, playerData, type, stat) {
+  try {
+    var leaderboard = { "names": [], "stat": [] };
+    leaderboards.sort(function(a, b) { return JSON.parse(b.trials)[type][stat] - JSON.parse(a.trials)[type][stat]; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.stat.push(Misc.AddCommas(JSON.parse(top[i].trials)[type][stat]));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.stat.push("", Misc.AddCommas(JSON.parse(playerStats.trials)[type][stat]));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    if(stat === "wins"){ stat = "Wins" }
+    else if(stat === "winStreak"){ stat = "Win Streak" }
+    else if(stat === "flawlessTickets"){ stat = "Flawless Tickets" }
+    else if(stat === "finalBlows"){ stat = "Final Blows" }
+    else if(stat === "postFlawlessWins"){ stat = "Post Flawless Wins" }
+    else if(stat === "carries"){ stat = "Carries (With Emblem)" }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor(`Top 10 ${ Misc.capitalize(type) } Trials ${ stat }`)
+    .addField("Name", leaderboard.names, true)
+    .addField(`${ stat }`, leaderboard.stat, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  catch (err) { console.log(err); message.reply("Sorry we broke... Usually happens when there was no data returned. Possibly someone doesn't have the item or title you are looking for."); }
+}
 function Trials(message, type) {
   var userId = null;
   if(message.mentions.users.first()) { userId = message.mentions.users.first().id }
@@ -2041,7 +2050,7 @@ function DisplayTrials(message, leaderboards, playerData, type) {
 
 //Others
 function GetTrackedItems(message) {
-  const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Bastion, Fourth Horseman";
+  const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Bastion, Fourth Horseman, Heir Apparent";
   const pvpItems = "Luna Howl, Not Forgotten, Redrix Broadsword, Redrix Claymore, Mountain Top, Recluse, Revoker, Randys Throwing Knife, Komodo-4FR, Point of the Stag";
   const gambitItems = "Breakneck, 21% Delirium, Hush, Exit Strategy, Python";
   const others = "Always On Time, A Thousand Wings, SCRAP CF-717-91, Silver Tercel";
@@ -2128,5 +2137,44 @@ function TransferLeadership(message) {
         });
       } else { message.reply("Please register first to use this command."); }
     } else { message.reply("Sorry! An error occurred, Please try again..."); }
+  });
+}
+function ClanInfo(message) {
+  //Get guild info
+  Database.GetGuild(message.guild.id, async function(isError, isFound, data) {
+    if(!isError) {
+      if(isFound) {
+        var clans = data.clans.split(",");
+        var clanData = [];
+        for(var i in clans) {
+          await new Promise(resolve =>
+            Database.GetClan(clans[i], function(isError, isFound, data) {
+              clanData.push(data);
+              resolve(true);
+            })
+          );
+        }
+        for(var i in clanData) {
+          var firstScan = new Date(parseInt(clanData[i].joinedOn)).toLocaleString("en-AU");
+          var lastScan = new Date(parseInt(clanData[i].lastScan)).toLocaleString("en-AU");
+          console.log(lastScan.toLocaleString("en-AU"));
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setAuthor(`${ clanData[i].clan_name } (${ clanData[i].clan_id })`)
+          .setDescription(
+            `The first time we scanned this clan was: ${ firstScan }.
+            The last time we scanned this clan was: ${ lastScan }`
+          )
+          .addField("Clan Level", clanData[i].clan_level, true)
+          .addField("Members", `${ clanData[i].member_count } / 100`, true)
+          .addField("Online", `${ clanData[i].online_players }`, true)
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        }
+      }
+      else { console.log("Guild not found"); message.channel.send("No data for this server was found. My guess is you have not added a clan yet. Use: `~set clan` to add your clan!"); }
+    }
+    else { console.log("Server error"); message.channel.send("Server error. Please try again?"); }
   });
 }
