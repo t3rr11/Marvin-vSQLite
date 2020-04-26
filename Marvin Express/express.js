@@ -55,21 +55,21 @@ app.get("/GetBackStatus", async function(req, res) { await expressGETJSON(req, r
 
 //Request Processing
 async function expressPOSTRequest(req, res, name, sql) {
-  Log.SaveLog("Request", `POST Request to: ${ name }`);
+  Log.SaveLog("Request", `POST Request; From: ${ req.headers["x-forwarded-for"] } to: ${ name }`);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
     else { if(rows.length > 0) { res.status(200).send({ error: null, data: rows }) } else { res.status(200).send({ error: "No data found" }) } }
   });
 }
 async function expressUpdatePOSTRequest(req, res, name, sql) {
-  Log.SaveLog("Request", `POST Request to: ${ name }`);
+  Log.SaveLog("Request", `UPDATE POST Request; From: ${ req.headers["x-forwarded-for"] } to: ${ name }`);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
     else { res.status(200).send({ error: null, data: "Successfully updated guild information..." }) }
   });
 }
 async function expressGETRequest(req, res, name, sql) {
-  Log.SaveLog("Request", `GET Request to: ${ name }`);
+  Log.SaveLog("Request", `GET Request; From: ${ req.headers["x-forwarded-for"] } to: ${ name }`);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
     else { if(rows.length > 0) { res.status(200).send({ error: null, data: rows }) } else { res.status(200).send({ error: "No data found" }) } }
@@ -162,7 +162,7 @@ async function expressGETClanRankings(req, res, name, url) {
   });
 }
 async function expressGETJSON(req, res, name, url) {
-  Log.SaveLog("Request", `JSON Request to: ${ name }`);
+  Log.SaveLog("Request", `JSON Request; From: ${ req.headers["x-forwarded-for"] } to: ${ name }`);
   const headers = { headers: { "Content-Type": "application/json" } };
   const request = await fetch(url, headers);
   const response = await request.json();
