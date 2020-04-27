@@ -22,6 +22,7 @@ var StartupTime = new Date().getTime();
 var CommandsInput = 0;
 var APIDisabled = null;
 var TimedOutUsers = [];
+var BannedUsers = [];
 var Users = 0;
 
 //Functions
@@ -60,6 +61,7 @@ async function UpdateClans() {
   CheckMaintenance();
   CheckForBroadcasts();
   UpdateActivityList();
+  UpdateBannedUsers();
 
   //Log status
   Log.SaveDiscordLog(StartupTime, Users, CommandsInput, client);
@@ -131,6 +133,21 @@ function SetScanSpeed(message, input) {
   message.channel.send(`ScanSpeed is now scanning at a rate of ${ input } clans per second. With a slow down rate of ${ Math.round(input * 0.8) } and a reset of ${ Math.round(input * 0.6) }`);
 }
 function ForceTopGGUpdate(message) { dbl.postStats(client.guilds.size); message.channel.send("Updated stats on Top.GG"); }
+function UpdateBannedUsers() { try { BannedUsers = JSON.parse(fs.readFileSync('./data/banned_users.json').toString()); } catch(err) { console.log("Couldn't parse banned users file."); } }
+async function CheckBanned(message) {
+  var isFound = BannedUsers.find(usr => usr.id == message.author.id);
+  if(isFound !== undefined) {
+    const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("You have been banned and can no longer use this bots features.")
+      .setDescription(`**User:** ${ message.author.username }\n**Reason:** ${ isFound.reason }`)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp();
+    message.channel.send({embed});
+    return true;
+  }
+  else { return false; }
+}
 
 //Discord Client Code
 client.on("ready", async () => {
@@ -186,7 +203,7 @@ client.on("message", async message => {
 
   //Ignored Commands
   var ignoredCommands = [
-    "~~", "~PLAY", "~PRUNE", "~PURGE", "~Q", "~P", "~FEED", "~PAY", "~GRAB", "~BANK", "~VAULT", "~BAL", "~BUY", "~SELECT", "~SHOOT", "~SHOP", "~OPEN", "~STEAL",
+    "~~", "~PLAY", "~PRUNE", "~PURGE", "~FEED", "~PAY", "~GRAB", "~BANK", "~VAULT", "~BAL", "~BUY", "~SELECT", "~SHOOT", "~SHOP", "~OPEN", "~STEAL",
     "~DRUGS", "~EXCH", "~BM", "~SMOKE", "~DOSE"
   ];
 
@@ -194,20 +211,20 @@ client.on("message", async message => {
   if(message.author.bot) return;
   if(message.guild) {
     if(message.guild.id === "110373943822540800" || message.guild.id === "264445053596991498") return;
-    if(command.startsWith("~") && ignoredCommands.filter(f => command.startsWith(f)).length === 0) {
+    if(command.startsWith("~") && ignoredCommands.filter(f => command.startsWith(f)).length === 0 && !command.endsWith("~")) {
       try {
-        if(command.startsWith("~REGISTER ")) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)); } else { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
-        else if(command.startsWith("~REQUEST ")) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message); } }
-        else if(command.startsWith("~DEL ")) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); }
-        else if(command.startsWith("~SET SCANSPEED ")) { var input = command.substr("~SET SCANSPEED ".length); SetScanSpeed(message, input); }
-        else if(command.startsWith("~PROFILE ")) { DiscordCommands.Profile(message); }
-        else if(command === "~REGISTER") { message.reply("To register please use: Use: `~Register example` example being your steam name."); }
-        else if(command === "~DONATE" || command === "~SPONSOR" || command === "~SUPPORTING") { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); }
-        else if(command === "~PROFILE") { DiscordCommands.Profile(message); }
-        else if(command === "~FORCE RESCAN") { DiscordCommands.ForceFullScan(message); }
-        else if(command === "~FORCE GUILD CHECK") { DiscordCommands.ForceGuildCheck(client, message); }
+        if(command.startsWith("~REGISTER ")) { if(!CheckBanned(message)) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)) } else { message.reply("To register please use: Use: `~Register example` example being your steam name.") } } }
+        else if(command.startsWith("~REQUEST ")) { if(!CheckBanned(message)) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message) } } }
+        else if(command.startsWith("~DEL ")) { if(!CheckBanned(message)) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); } }
+        else if(command.startsWith("~SET SCANSPEED ")) { if(!CheckBanned(message)) { var input = command.substr("~SET SCANSPEED ".length); SetScanSpeed(message, input); } }
+        else if(command.startsWith("~PROFILE ")) { if(!CheckBanned(message)) { DiscordCommands.Profile(message); } }
+        else if(command === "~REGISTER") { if(!CheckBanned(message)) { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
+        else if(command === "~DONATE" || command === "~SPONSOR" || command === "~SUPPORTING") { if(!CheckBanned(message)) { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); } }
+        else if(command === "~PROFILE") { if(!CheckBanned(message)) { DiscordCommands.Profile(message); } }
+        else if(command === "~FORCE RESCAN") { if(message.author.id === "194972321168097280") { DiscordCommands.ForceFullScan(message); } }
+        else if(command === "~FORCE GUILD CHECK") { if(message.author.id === "194972321168097280") { DiscordCommands.ForceGuildCheck(client, message); } }
         else if(command === "~FORCE TOPGG") { if(message.author.id === "194972321168097280") { ForceTopGGUpdate(message); } }
-        else if(command === "~SCANSPEED") { GetScanSpeed(message); }
+        else if(command === "~SCANSPEED") { if(!CheckBanned(message)) { GetScanSpeed(message); } }
         else if(command === "~CHECKAPI") { if(APIDisabled) { message.reply("API is offline."); } else { message.reply("API is online."); } }
         else if(command === "~TEST") {
           if(message.author.id === "194972321168097280") {
@@ -220,179 +237,183 @@ client.on("message", async message => {
 
         //Help menu
         else if(command.startsWith("~HELP ")) {
-          if(command === "~HELP ALL") { DiscordCommands.Help(message, "all"); }
-          else if(command === "~HELP RANKINGS") { DiscordCommands.Help(message, "rankings"); }
-          else if(command === "~HELP RAIDS") { DiscordCommands.Help(message, "raids"); }
-          else if(command === "~HELP ITEMS") { DiscordCommands.Help(message, "items"); }
-          else if(command === "~HELP TITLES") { DiscordCommands.Help(message, "titles"); }
-          else if(command === "~HELP SEASONAL") { DiscordCommands.Help(message, "seasonal"); }
-          else if(command === "~HELP PRESEASONAL" || command === "~HELP PRE-SEASONAL") { DiscordCommands.Help(message, "preseasonal"); }
-          else if(command === "~HELP CLANS" || command === "~HELP CLAN") { DiscordCommands.Help(message, "clan"); }
-          else if(command === "~HELP GLOBALS" || command === "~HELP GLOBAL") { DiscordCommands.Help(message, "globals"); }
-          else if(command === "~HELP DRYSTREAKS" || command === "HELP DRYSTREAK") { DiscordCommands.Help(message, "drystreaks"); }
-          else if(command === "~HELP TRIALS") { DiscordCommands.Help(message, "trials"); }
-          else if(command === "~HELP OTHERS" || command === "~HELP OTHER") { DiscordCommands.Help(message, "others"); }
-          else { message.reply("I am unsure of that help command, type `~help` to see them all."); }
+          if(!CheckBanned(message)) {
+            if(command === "~HELP ALL") { DiscordCommands.Help(message, "all"); }
+            else if(command === "~HELP RANKINGS") { DiscordCommands.Help(message, "rankings"); }
+            else if(command === "~HELP RAIDS") { DiscordCommands.Help(message, "raids"); }
+            else if(command === "~HELP ITEMS") { DiscordCommands.Help(message, "items"); }
+            else if(command === "~HELP TITLES") { DiscordCommands.Help(message, "titles"); }
+            else if(command === "~HELP SEASONAL") { DiscordCommands.Help(message, "seasonal"); }
+            else if(command === "~HELP PRESEASONAL" || command === "~HELP PRE-SEASONAL") { DiscordCommands.Help(message, "preseasonal"); }
+            else if(command === "~HELP CLANS" || command === "~HELP CLAN") { DiscordCommands.Help(message, "clan"); }
+            else if(command === "~HELP GLOBALS" || command === "~HELP GLOBAL") { DiscordCommands.Help(message, "globals"); }
+            else if(command === "~HELP DRYSTREAKS" || command === "HELP DRYSTREAK") { DiscordCommands.Help(message, "drystreaks"); }
+            else if(command === "~HELP TRIALS") { DiscordCommands.Help(message, "trials"); }
+            else if(command === "~HELP OTHERS" || command === "~HELP OTHER") { DiscordCommands.Help(message, "others"); }
+            else { message.reply("I am unsure of that help command, type `~help` to see them all."); }
+          }
         }
-        else if(command === "~HELP" || command === "~COMMANDS") { DiscordCommands.Help(message, "none"); }
-        else if(command === "~RANKINGS") { DiscordCommands.Help(message, "rankings"); }
-        else if(command === "~RAIDS") { DiscordCommands.Help(message, "raids"); }
-        else if(command === "~SEASONAL") { DiscordCommands.Help(message, "seasonal"); }
-        else if(command === "~PRESEASONAL") { DiscordCommands.Help(message, "preseasonal"); }
-        else if(command === "~CLANS" || command === "~CLAN") { DiscordCommands.Help(message, "clan"); }
-        else if(command === "~GLOBALS" || command === "~GLOBAL") { DiscordCommands.Help(message, "globals"); }
-        else if(command === "~TRIALS" || command === "~GLOBAL TRIALS") { DiscordCommands.Help(message, "trials") }
-        else if(command === "~OTHERS" || command === "~OTHER") { DiscordCommands.Help(message, "others"); }
+        else if(command === "~HELP" || command === "~COMMANDS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "none"); } }
+        else if(command === "~RANKINGS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "rankings"); } }
+        else if(command === "~RAIDS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "raids"); } }
+        else if(command === "~SEASONAL") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "seasonal"); } }
+        else if(command === "~PRESEASONAL") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "preseasonal"); } }
+        else if(command === "~CLANS" || command === "~CLAN") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "clan"); } }
+        else if(command === "~GLOBALS" || command === "~GLOBAL") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "globals"); } }
+        else if(command === "~TRIALS" || command === "~GLOBAL TRIALS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "trials"); } }
+        else if(command === "~OTHERS" || command === "~OTHER") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "others"); } }
 
         //Rankings
-        else if(command.startsWith("~DRYSTREAK ")) { DiscordCommands.DryStreak(message, command.substr("~DRYSTREAK ".length)) }
-        else if(command.startsWith("~ITEM ")) { DiscordCommands.Rankings("item", message); }
-        else if(command.startsWith("~TITLE ")) { DiscordCommands.Rankings("title", message); }
-        else if(command === "~DRYSTREAK" || command === "~DRYSTREAKS") { DiscordCommands.DrystreaksHelp(message); }
-        else if(command === "~INFAMY") { DiscordCommands.Rankings("infamy", message); }
-        else if(command === "~VALOR") { DiscordCommands.Rankings("valor", message); }
-        else if(command === "~GLORY") { DiscordCommands.Rankings("glory", message); }
-        else if(command === "~IRON BANNER") { DiscordCommands.Rankings("ironBanner", message); }
-        else if(command === "~LEVIATHAN" || command === "~LEVI") { DiscordCommands.Rankings("levi", message); }
-        else if(command === "~PRESTIGELEVIATHAN" || command === "~PRESTIGELEVI" || command === "~PLEVI") { DiscordCommands.Rankings("leviPres", message); }
-        else if(command === "~EATEROFWORLDS" || command === "~EOW") { DiscordCommands.Rankings("eow", message); }
-        else if(command === "~PRESTIGEEATEROFWORLDS" || command === "~PRESTIGEEOW" || command === "~PEOW") { DiscordCommands.Rankings("eowPres", message); }
-        else if(command === "~SPIREOFSTARS" || command === "~SOS") { DiscordCommands.Rankings("sos", message); }
-        else if(command === "~PRESTIGESPIRE" || command === "~PRESTIGESOS" || command === "~PSOS") { DiscordCommands.Rankings("sosPres", message); }
-        else if(command === "~LW" || command === "~LAST WISH") { DiscordCommands.Rankings("lastWish", message); }
-        else if(command === "~SOTP" || command === "~SCOURGE") { DiscordCommands.Rankings("scourge", message); }
-        else if(command === "~COS" || command === "~CROWN") { DiscordCommands.Rankings("sorrows", message); }
-        else if(command === "~GOS" || command === "~GARDEN") { DiscordCommands.Rankings("garden", message); }
-        else if(command === "~SUNDIAL") { DiscordCommands.Rankings("sundial", message); }
-        else if(command === "~FRACTALINE") { DiscordCommands.Rankings("fractaline", message); }
-        else if(command === "~RESONANCE") { DiscordCommands.Rankings("resonance", message); }
-        else if(command === "~TRIUMPH SCORE" || command === "~TRIUMPHSCORE") { DiscordCommands.Rankings("triumphScore", message); }
-        else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME" || command === "~TIME") { DiscordCommands.Rankings("totalTime", message);  }
-        else if(command === "~SEASON RANKS" || command === "~SEASONRANKS" || command === "~SEASON RANK" || command === "~SEASONRANK") { DiscordCommands.Rankings("seasonRank", message); }
-        else if(command === "~ITEMS") { DiscordCommands.GetTrackedItems(message); }
-        else if(command === "~TITLES") { DiscordCommands.GetTrackedTitles(message); }
-        else if(command === "~TITLES TOTAL" || command === "~THENUMBEROFTITLESTHATIHAVEEARNED") { DiscordCommands.Rankings("totalTitles", message); }
+        else if(command.startsWith("~DRYSTREAK ")) { if(!CheckBanned(message)) { DiscordCommands.DryStreak(message, command.substr("~DRYSTREAK ".length)); } }
+        else if(command.startsWith("~ITEM ")) { if(!CheckBanned(message)) { DiscordCommands.Rankings("item", message); } }
+        else if(command.startsWith("~TITLE ")) { if(!CheckBanned(message)) { DiscordCommands.Rankings("title", message); } }
+        else if(command === "~DRYSTREAK" || command === "~DRYSTREAKS") { if(!CheckBanned(message)) { DiscordCommands.DrystreaksHelp(message); } }
+        else if(command === "~INFAMY") { if(!CheckBanned(message)) { DiscordCommands.Rankings("infamy", message); } }
+        else if(command === "~VALOR") { if(!CheckBanned(message)) { DiscordCommands.Rankings("valor", message); } }
+        else if(command === "~GLORY") { if(!CheckBanned(message)) { DiscordCommands.Rankings("glory", message); } }
+        else if(command === "~IRON BANNER") { if(!CheckBanned(message)) { DiscordCommands.Rankings("ironBanner", message); } }
+        else if(command === "~LEVIATHAN" || command === "~LEVI") { if(!CheckBanned(message)) { DiscordCommands.Rankings("levi", message); } }
+        else if(command === "~PRESTIGELEVIATHAN" || command === "~PRESTIGELEVI" || command === "~PLEVI") { if(!CheckBanned(message)) { DiscordCommands.Rankings("leviPres", message); } }
+        else if(command === "~EATEROFWORLDS" || command === "~EOW") { if(!CheckBanned(message)) { DiscordCommands.Rankings("eow", message); } }
+        else if(command === "~PRESTIGEEATEROFWORLDS" || command === "~PRESTIGEEOW" || command === "~PEOW") { if(!CheckBanned(message)) { DiscordCommands.Rankings("eowPres", message); } }
+        else if(command === "~SPIREOFSTARS" || command === "~SOS") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sos", message); } }
+        else if(command === "~PRESTIGESPIRE" || command === "~PRESTIGESOS" || command === "~PSOS") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sosPres", message); } }
+        else if(command === "~LW" || command === "~LAST WISH") { if(!CheckBanned(message)) { DiscordCommands.Rankings("lastWish", message); } }
+        else if(command === "~SOTP" || command === "~SCOURGE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("scourge", message); } }
+        else if(command === "~COS" || command === "~CROWN") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sorrows", message); } }
+        else if(command === "~GOS" || command === "~GARDEN") { if(!CheckBanned(message)) { DiscordCommands.Rankings("garden", message); } }
+        else if(command === "~SUNDIAL") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sundial", message); } }
+        else if(command === "~FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("fractaline", message); } }
+        else if(command === "~RESONANCE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("resonance", message); } }
+        else if(command === "~TRIUMPH SCORE" || command === "~TRIUMPHSCORE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("triumphScore", message); } }
+        else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME" || command === "~TIME") { if(!CheckBanned(message)) { DiscordCommands.Rankings("totalTime", message); } }
+        else if(command === "~SEASON RANKS" || command === "~SEASONRANKS" || command === "~SEASON RANK" || command === "~SEASONRANK") { if(!CheckBanned(message)) { DiscordCommands.Rankings("seasonRank", message); } }
+        else if(command === "~ITEMS") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedItems(message); } }
+        else if(command === "~TITLES") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedTitles(message); } }
+        else if(command === "~TITLES TOTAL" || command === "~THENUMBEROFTITLESTHATIHAVEEARNED") { if(!CheckBanned(message)) { DiscordCommands.Rankings("totalTitles", message); } }
         else if(command.startsWith("~TRIALS ")) {
-          if(command.startsWith("~TRIALS WEEKLY ")) {
-            if(message.mentions.users.first()) { DiscordCommands.Trials(message, "weekly"); }
-            else {
-              if(command.substr("~TRIALS WEEKLY ".length) === "WINS") { DiscordCommands.TrialsRankings(message, "weekly", "wins") }
-              else if(command.substr("~TRIALS WEEKLY ".length) === "WIN STREAK") { DiscordCommands.TrialsRankings(message, "weekly", "winStreak") }
-              else if(command.substr("~TRIALS WEEKLY ".length) === "FLAWLESS") { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets") }
-              else if(command.substr("~TRIALS WEEKLY ".length) === "FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows") }
-              else if(command.substr("~TRIALS WEEKLY ".length) === "POST WINS") { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins") }
-              else if(command.substr("~TRIALS WEEKLY ".length) === "CARRIES") { DiscordCommands.TrialsRankings(message, "weekly", "carries") }
-              else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+          if(!CheckBanned(message)) {
+            if(command.startsWith("~TRIALS WEEKLY ")) {
+              if(message.mentions.users.first()) { DiscordCommands.Trials(message, "weekly"); }
+              else {
+                if(command.substr("~TRIALS WEEKLY ".length) === "WINS") { DiscordCommands.TrialsRankings(message, "weekly", "wins") }
+                else if(command.substr("~TRIALS WEEKLY ".length) === "WIN STREAK") { DiscordCommands.TrialsRankings(message, "weekly", "winStreak") }
+                else if(command.substr("~TRIALS WEEKLY ".length) === "FLAWLESS") { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets") }
+                else if(command.substr("~TRIALS WEEKLY ".length) === "FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows") }
+                else if(command.substr("~TRIALS WEEKLY ".length) === "POST WINS") { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins") }
+                else if(command.substr("~TRIALS WEEKLY ".length) === "CARRIES") { DiscordCommands.TrialsRankings(message, "weekly", "carries") }
+                else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+              }
             }
-          }
-          else if(command.startsWith("~TRIALS SEASONAL ")) {
-            if(message.mentions.users.first()) { DiscordCommands.Trials(message, "seasonal"); }
-            else {
-              if(command.substr("~TRIALS SEASONAL ".length) === "WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "wins") }
-              else if(command.substr("~TRIALS SEASONAL ".length) === "WIN STREAK") { DiscordCommands.TrialsRankings(message, "seasonal", "winStreak") }
-              else if(command.substr("~TRIALS SEASONAL ".length) === "FLAWLESS") { DiscordCommands.TrialsRankings(message, "seasonal", "flawlessTickets") }
-              else if(command.substr("~TRIALS SEASONAL ".length) === "FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "seasonal", "finalBlows") }
-              else if(command.substr("~TRIALS SEASONAL ".length) === "POST WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "postFlawlessWins") }
-              else if(command.substr("~TRIALS SEASONAL ".length) === "CARRIES") { DiscordCommands.TrialsRankings(message, "seasonal", "carries") }
-              else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+            else if(command.startsWith("~TRIALS SEASONAL ")) {
+              if(message.mentions.users.first()) { DiscordCommands.Trials(message, "seasonal"); }
+              else {
+                if(command.substr("~TRIALS SEASONAL ".length) === "WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "wins") }
+                else if(command.substr("~TRIALS SEASONAL ".length) === "WIN STREAK") { DiscordCommands.TrialsRankings(message, "seasonal", "winStreak") }
+                else if(command.substr("~TRIALS SEASONAL ".length) === "FLAWLESS") { DiscordCommands.TrialsRankings(message, "seasonal", "flawlessTickets") }
+                else if(command.substr("~TRIALS SEASONAL ".length) === "FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "seasonal", "finalBlows") }
+                else if(command.substr("~TRIALS SEASONAL ".length) === "POST WINS") { DiscordCommands.TrialsRankings(message, "seasonal", "postFlawlessWins") }
+                else if(command.substr("~TRIALS SEASONAL ".length) === "CARRIES") { DiscordCommands.TrialsRankings(message, "seasonal", "carries") }
+                else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+              }
             }
-          }
-          else if(command.startsWith("~TRIALS OVERALL ")) {
-            if(message.mentions.users.first()) { DiscordCommands.Trials(message, "overall"); }
-            else {
-              if(command.substr("~TRIALS OVERALL ".length) === "WINS") { DiscordCommands.TrialsRankings(message, "overall", "wins") }
-              else if(command.substr("~TRIALS OVERALL ".length) === "FLAWLESS") { DiscordCommands.TrialsRankings(message, "overall", "flawlessTickets") }
-              else if(command.substr("~TRIALS OVERALL ".length) === "FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "overall", "finalBlows") }
-              else if(command.substr("~TRIALS OVERALL ".length) === "POST WINS") { DiscordCommands.TrialsRankings(message, "overall", "postFlawlessWins") }
-              else if(command.substr("~TRIALS OVERALL ".length) === "CARRIES") { DiscordCommands.TrialsRankings(message, "overall", "carries") }
-              else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+            else if(command.startsWith("~TRIALS OVERALL ")) {
+              if(message.mentions.users.first()) { DiscordCommands.Trials(message, "overall"); }
+              else {
+                if(command.substr("~TRIALS OVERALL ".length) === "WINS") { DiscordCommands.TrialsRankings(message, "overall", "wins") }
+                else if(command.substr("~TRIALS OVERALL ".length) === "FLAWLESS") { DiscordCommands.TrialsRankings(message, "overall", "flawlessTickets") }
+                else if(command.substr("~TRIALS OVERALL ".length) === "FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "overall", "finalBlows") }
+                else if(command.substr("~TRIALS OVERALL ".length) === "POST WINS") { DiscordCommands.TrialsRankings(message, "overall", "postFlawlessWins") }
+                else if(command.substr("~TRIALS OVERALL ".length) === "CARRIES") { DiscordCommands.TrialsRankings(message, "overall", "carries") }
+                else { message.reply("I am not sure what this trials command is sorry. For help use: `~Trials Help`"); }
+              }
             }
+            else if(command.startsWith("~TRIALS PROFILE ")) {
+              if(command.startsWith("~TRIALS PROFILE WEEKLY")) { DiscordCommands.Trials(message, "weekly") }
+              else if(command.startsWith("~TRIALS PROFILE SEASONAL")) { DiscordCommands.Trials(message, "seasonal") }
+              else if(command.startsWith("~TRIALS PROFILE OVERALL")) { DiscordCommands.Trials(message, "overall") }
+              else { DiscordCommands.Trials(message, "overall"); }
+            }
+            else if(command.startsWith("~TRIALS WINS ")) {
+              if(command.startsWith("~TRIALS WINS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "wins"); }
+              else if(command.startsWith("~TRIALS WINS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "wins"); }
+              else if(command.startsWith("~TRIALS WINS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "wins"); }
+              else { DiscordCommands.TrialsRankings(message, "weekly", "wins"); }
+            }
+            else if(command.startsWith("~TRIALS FLAWLESS ")) {
+              if(command.startsWith("~TRIALS FLAWLESS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets"); }
+              else if(command.startsWith("~TRIALS FLAWLESS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "flawlessTickets"); }
+              else if(command.startsWith("~TRIALS FLAWLESS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "flawlessTickets"); }
+              else { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets"); }
+            }
+            else if(command.startsWith("~TRIALS FINAL BLOWS ")) {
+              if(command.startsWith("~TRIALS FINAL BLOWS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows"); }
+              else if(command.startsWith("~TRIALS FINAL BLOWS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "finalBlows"); }
+              else if(command.startsWith("~TRIALS FINAL BLOWS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "finalBlows"); }
+              else { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows"); }
+            }
+            else if(command.startsWith("~TRIALS POST WINS ")) {
+              if(command.startsWith("~TRIALS POST WINS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins"); }
+              else if(command.startsWith("~TRIALS POST WINS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "postFlawlessWins"); }
+              else if(command.startsWith("~TRIALS POST WINS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "postFlawlessWins"); }
+              else { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins"); }
+            }
+            else if(command.startsWith("~TRIALS CARRIES ")) {
+              if(command.startsWith("~TRIALS CARRIES WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "carries"); }
+              else if(command.startsWith("~TRIALS CARRIES SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "carries"); }
+              else if(command.startsWith("~TRIALS CARRIES OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "carries"); }
+              else { DiscordCommands.TrialsRankings(message, "weekly", "carries"); }
+            }
+            else if(command === "~TRIALS PROFILE") { DiscordCommands.Trials(message, "overall") }
+            else if(command === "~TRIALS WINS") { DiscordCommands.TrialsRankings(message, "weekly", "wins"); }
+            else if(command === "~TRIALS FLAWLESS") { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets"); }
+            else if(command === "~TRIALS FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows"); }
+            else if(command === "~TRIALS POST WINS") { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins"); }
+            else if(command === "~TRIALS CARRIES") { DiscordCommands.TrialsRankings(message, "weekly", "carries"); }
+            else if(command === "~TRIALS PROFILE") { DiscordCommands.Trials(message, "overall") }
+            else { DiscordCommands.Help(message, "trials"); }
           }
-          else if(command.startsWith("~TRIALS PROFILE ")) {
-            if(command.startsWith("~TRIALS PROFILE WEEKLY")) { DiscordCommands.Trials(message, "weekly") }
-            else if(command.startsWith("~TRIALS PROFILE SEASONAL")) { DiscordCommands.Trials(message, "seasonal") }
-            else if(command.startsWith("~TRIALS PROFILE OVERALL")) { DiscordCommands.Trials(message, "overall") }
-            else { DiscordCommands.Trials(message, "overall"); }
-          }
-          else if(command.startsWith("~TRIALS WINS ")) {
-            if(command.startsWith("~TRIALS WINS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "wins"); }
-            else if(command.startsWith("~TRIALS WINS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "wins"); }
-            else if(command.startsWith("~TRIALS WINS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "wins"); }
-            else { DiscordCommands.TrialsRankings(message, "weekly", "wins"); }
-          }
-          else if(command.startsWith("~TRIALS FLAWLESS ")) {
-            if(command.startsWith("~TRIALS FLAWLESS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets"); }
-            else if(command.startsWith("~TRIALS FLAWLESS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "flawlessTickets"); }
-            else if(command.startsWith("~TRIALS FLAWLESS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "flawlessTickets"); }
-            else { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets"); }
-          }
-          else if(command.startsWith("~TRIALS FINAL BLOWS ")) {
-            if(command.startsWith("~TRIALS FINAL BLOWS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows"); }
-            else if(command.startsWith("~TRIALS FINAL BLOWS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "finalBlows"); }
-            else if(command.startsWith("~TRIALS FINAL BLOWS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "finalBlows"); }
-            else { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows"); }
-          }
-          else if(command.startsWith("~TRIALS POST WINS ")) {
-            if(command.startsWith("~TRIALS POST WINS WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins"); }
-            else if(command.startsWith("~TRIALS POST WINS SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "postFlawlessWins"); }
-            else if(command.startsWith("~TRIALS POST WINS OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "postFlawlessWins"); }
-            else { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins"); }
-          }
-          else if(command.startsWith("~TRIALS CARRIES ")) {
-            if(command.startsWith("~TRIALS CARRIES WEEKLY")) { DiscordCommands.TrialsRankings(message, "weekly", "carries"); }
-            else if(command.startsWith("~TRIALS CARRIES SEASONAL")) { DiscordCommands.TrialsRankings(message, "seasonal", "carries"); }
-            else if(command.startsWith("~TRIALS CARRIES OVERALL")) { DiscordCommands.TrialsRankings(message, "overall", "carries"); }
-            else { DiscordCommands.TrialsRankings(message, "weekly", "carries"); }
-          }
-          else if(command === "~TRIALS PROFILE") { DiscordCommands.Trials(message, "overall") }
-          else if(command === "~TRIALS WINS") { DiscordCommands.TrialsRankings(message, "weekly", "wins"); }
-          else if(command === "~TRIALS FLAWLESS") { DiscordCommands.TrialsRankings(message, "weekly", "flawlessTickets"); }
-          else if(command === "~TRIALS FINAL BLOWS") { DiscordCommands.TrialsRankings(message, "weekly", "finalBlows"); }
-          else if(command === "~TRIALS POST WINS") { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins"); }
-          else if(command === "~TRIALS CARRIES") { DiscordCommands.TrialsRankings(message, "weekly", "carries"); }
-          else if(command === "~TRIALS PROFILE") { DiscordCommands.Trials(message, "overall") }
-          else { DiscordCommands.Help(message, "trials"); }
         }
 
         //Clan Management
-        else if(command.startsWith("~SET BROADCASTS ")) { Broadcasts.SetupBroadcasts(message); }
-        else if(command.startsWith("~FILTER ")) { Broadcasts.AddToBlacklist(message, default_command.substr("~FILTER ".length)); }
-        else if(command.startsWith("~BLACKLIST ")) { Broadcasts.AddToBlacklist(message, default_command.substr("~BLACKLIST ".length)); }
-        else if(command.startsWith("~WHITELIST ")) { Broadcasts.AddToWhitelist(message, default_command.substr("~WHITELIST ".length)); }
-        else if(command.startsWith("~ADD CLAN")) { ManageClans.AddClan(message, command.substr("~ADD CLAN ".length)); }
-        else if(command.startsWith("~REMOVE CLAN")) { ManageClans.RemoveClan(message, command.substr("~REMOVE CLAN ".length)); }
-        else if(command.startsWith("~TRANSFER ")) { DiscordCommands.TransferLeadership(message); }
-        else if(command === "~BROADCASTS HELP") { DiscordCommands.BroadcastsHelp(message); }
-        else if(command === "~REMOVE BROADCASTS") { Broadcasts.RemoveBroadcasts(message); }
-        else if(command === "~SET BROADCASTS") { message.reply("Please set the broadcasts channel by tagging it in the message. E.g: `~Set Broadcasts #general`"); }
-        else if(command === "~TOGGLE WHITELIST") { DiscordCommands.ToggleWhitelist(message); }
-        else if(command === "~SET CLAN") { ManageClans.RegisterClan(message); }
-        else if(command === "~TRACKED CLANS" || command === "~CLANS TRACKED") { DiscordCommands.GetTrackedClans(message); }
-        else if(command === "~REAUTH") { DiscordCommands.RenewLeadership(message); }
-        else if(command === "~CLANINFO" || command === "~CLAN INFO") { DiscordCommands.ClanInfo(message); }
+        else if(command.startsWith("~SET BROADCASTS ")) { if(!CheckBanned(message)) { Broadcasts.SetupBroadcasts(message); } }
+        else if(command.startsWith("~FILTER ")) { if(!CheckBanned(message)) { Broadcasts.AddToBlacklist(message, default_command.substr("~FILTER ".length)); } }
+        else if(command.startsWith("~BLACKLIST ")) { if(!CheckBanned(message)) { Broadcasts.AddToBlacklist(message, default_command.substr("~BLACKLIST ".length)); } }
+        else if(command.startsWith("~WHITELIST ")) { if(!CheckBanned(message)) { Broadcasts.AddToWhitelist(message, default_command.substr("~WHITELIST ".length)); } }
+        else if(command.startsWith("~ADD CLAN")) { if(!CheckBanned(message)) { ManageClans.AddClan(message, command.substr("~ADD CLAN ".length)); } }
+        else if(command.startsWith("~REMOVE CLAN")) { if(!CheckBanned(message)) { ManageClans.RemoveClan(message, command.substr("~REMOVE CLAN ".length)); } }
+        else if(command.startsWith("~TRANSFER ")) { if(!CheckBanned(message)) { DiscordCommands.TransferLeadership(message); } }
+        else if(command === "~BROADCASTS HELP") { if(!CheckBanned(message)) { DiscordCommands.BroadcastsHelp(message); } }
+        else if(command === "~REMOVE BROADCASTS") { if(!CheckBanned(message)) { Broadcasts.RemoveBroadcasts(message); } }
+        else if(command === "~SET BROADCASTS") { if(!CheckBanned(message)) { message.reply("Please set the broadcasts channel by tagging it in the message. E.g: `~Set Broadcasts #general`"); } }
+        else if(command === "~TOGGLE WHITELIST") { if(!CheckBanned(message)) { DiscordCommands.ToggleWhitelist(message); } }
+        else if(command === "~SET CLAN") { if(!CheckBanned(message)) { ManageClans.RegisterClan(message); } }
+        else if(command === "~TRACKED CLANS" || command === "~CLANS TRACKED") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedClans(message); } }
+        else if(command === "~REAUTH") { if(!CheckBanned(message)) { DiscordCommands.RenewLeadership(message); } }
+        else if(command === "~CLANINFO" || command === "~CLAN INFO") { if(!CheckBanned(message)) { DiscordCommands.ClanInfo(message); } }
 
         //Globals
-        else if(command.startsWith("~GLOBAL DRYSTREAK ")) { DiscordCommands.GlobalDryStreak(message, command.substr("~GLOBAL DRYSTREAK ".length)) }
-        else if(command === "~GLOBAL DRYSTREAK" || command === "~GLOBAL DRYSTREAKS") { DiscordCommands.DrystreaksHelp(message); }
-        else if(command === "~GLOBAL IRON BANNER") { DiscordCommands.GlobalRankings("ironBanner", message); }
-        else if(command === "~GLOBAL SEASON RANK") { DiscordCommands.GlobalRankings("seasonRank", message); }
-        else if(command === "~GLOBAL FRACTALINE") { DiscordCommands.GlobalRankings("fractaline", message); }
-        else if(command === "~GLOBAL RESONANCE") { DiscordCommands.GlobalRankings("resonance", message); }
-        else if(command === "~GLOBAL CLAN TIME" || command === "~GLOBAL TIME PLAYED" || command === "~GLOBAL TOTAL TIME" || command === "~GLOBAL TOTALTIME") { DiscordCommands.GlobalRankings("totalTime", message); }
-        else if(command === "~GLOBAL TRIUMPH SCORE" || command === "~GLOBAL TRIUMPHSCORE") { DiscordCommands.GlobalRankings("triumphScore", message); }
-        else if(command === "~GLOBAL TRIALS WEEKLY WINS" || command === "~GLOBAL TRIALS WINS") { DiscordCommands.GlobalRankings("weekly_trials_wins", message); }
-        else if(command === "~GLOBAL TRIALS WEEKLY FLAWLESS" || command === "~GLOBAL TRIALS FLAWLESS") { DiscordCommands.GlobalRankings("weekly_trials_flawless", message); }
-        else if(command === "~GLOBAL TRIALS WEEKLY CARRIES" || command === "~GLOBAL TRIALS CARRIES") { DiscordCommands.GlobalRankings("weekly_trials_carries", message); }
-        else if(command === "~GLOBAL TRIALS SEASONAL WINS") { DiscordCommands.GlobalRankings("seasonal_trials_wins", message); }
-        else if(command === "~GLOBAL TRIALS SEASONAL FLAWLESS") { DiscordCommands.GlobalRankings("seasonal_trials_flawless", message); }
-        else if(command === "~GLOBAL TRIALS SEASONAL CARRIES") { DiscordCommands.GlobalRankings("seasonal_trials_carries", message); }
-        else if(command === "~GLOBAL TRIALS OVERALL WINS") { DiscordCommands.GlobalRankings("overall_trials_wins", message); }
-        else if(command === "~GLOBAL TRIALS OVERALL FLAWLESS") { DiscordCommands.GlobalRankings("overall_trials_flawless", message); }
-        else if(command === "~GLOBAL TRIALS OVERALL CARRIES") { DiscordCommands.GlobalRankings("overall_trials_carries", message); }
+        else if(command.startsWith("~GLOBAL DRYSTREAK ")) { if(!CheckBanned(message)) { DiscordCommands.GlobalDryStreak(message, command.substr("~GLOBAL DRYSTREAK ".length)) } }
+        else if(command === "~GLOBAL DRYSTREAK" || command === "~GLOBAL DRYSTREAKS") { if(!CheckBanned(message)) { DiscordCommands.DrystreaksHelp(message); } }
+        else if(command === "~GLOBAL IRON BANNER") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("ironBanner", message); } }
+        else if(command === "~GLOBAL SEASON RANK") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("seasonRank", message); } }
+        else if(command === "~GLOBAL FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("fractaline", message); } }
+        else if(command === "~GLOBAL RESONANCE") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("resonance", message); } }
+        else if(command === "~GLOBAL CLAN TIME" || command === "~GLOBAL TIME PLAYED" || command === "~GLOBAL TOTAL TIME" || command === "~GLOBAL TOTALTIME") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("totalTime", message); } }
+        else if(command === "~GLOBAL TRIUMPH SCORE" || command === "~GLOBAL TRIUMPHSCORE") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("triumphScore", message); } }
+        else if(command === "~GLOBAL TRIALS WEEKLY WINS" || command === "~GLOBAL TRIALS WINS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("weekly_trials_wins", message); } }
+        else if(command === "~GLOBAL TRIALS WEEKLY FLAWLESS" || command === "~GLOBAL TRIALS FLAWLESS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("weekly_trials_flawless", message); } }
+        else if(command === "~GLOBAL TRIALS WEEKLY CARRIES" || command === "~GLOBAL TRIALS CARRIES") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("weekly_trials_carries", message); } }
+        else if(command === "~GLOBAL TRIALS SEASONAL WINS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("seasonal_trials_wins", message); } }
+        else if(command === "~GLOBAL TRIALS SEASONAL FLAWLESS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("seasonal_trials_flawless", message); } }
+        else if(command === "~GLOBAL TRIALS SEASONAL CARRIES") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("seasonal_trials_carries", message); } }
+        else if(command === "~GLOBAL TRIALS OVERALL WINS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("overall_trials_wins", message); } }
+        else if(command === "~GLOBAL TRIALS OVERALL FLAWLESS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("overall_trials_flawless", message); } }
+        else if(command === "~GLOBAL TRIALS OVERALL CARRIES") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("overall_trials_carries", message); } }
 
         //Clan Global Rankings
-        else if(command === "~CLANRANK FRACTALINE") {  DiscordCommands.DisplayClanRankings("fractaline", message);  }
-        else if(command === "~CLANRANK RESONANCE") {  DiscordCommands.DisplayClanRankings("resonance", message);  }
+        else if(command === "~CLANRANK FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.DisplayClanRankings("fractaline", message); } }
+        else if(command === "~CLANRANK RESONANCE") { if(!CheckBanned(message)) { DiscordCommands.DisplayClanRankings("resonance", message); } }
 
         //Other
         else { message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete(2000) }).catch(); }
