@@ -136,6 +136,7 @@ async function SendBroadcast(client, broadcast) {
     //If the broadcast is a title, then set the message as seen below.
     BroadcastMessage = `${ broadcast.displayName } has obtained the ${ broadcast.broadcast } title!` 
   }
+  else if(BroadcastType === "clan") { BroadcastMessage = broadcast.broadcast; }
   else { Log.SaveError(`New broadcast type found, but we are unsure of what to do with it. Type: ${ BroadcastType }`); }
 
   //Check to see if broadcasts are enabled. Usually disabled for debugging.

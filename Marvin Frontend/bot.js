@@ -90,13 +90,24 @@ function CheckForNewlyScannedClans(Clans) {
 function CheckForBroadcasts() {
   Database.GetNewBroadcasts(async function (isError, isFound, broadcasts) {
     for(var i in broadcasts) {
-      await new Promise(resolve =>
-        Database.CheckNewBroadcast(broadcasts[i].membershipId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
-          if(!isFound) { Broadcasts.SendBroadcast(client, broadcasts[i]); }
-          else { Database.RemoveAwaitingBroadcast(broadcasts[i]); }
-          resolve(true);
-        })
-      );
+      if(broadcasts[i].type === "clan") {
+        await new Promise(resolve =>
+          Database.CheckNewClanBroadcast(broadcasts[i].clanId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
+            if(!isFound) { Broadcasts.SendBroadcast(client, broadcasts[i]); }
+            else { Database.RemoveAwaitingClanBroadcast(broadcasts[i]); }
+            resolve(true);
+          })
+        );
+      }
+      else {
+        await new Promise(resolve =>
+          Database.CheckNewBroadcast(broadcasts[i].membershipId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
+            if(!isFound) { Broadcasts.SendBroadcast(client, broadcasts[i]); }
+            else { Database.RemoveAwaitingBroadcast(broadcasts[i]); }
+            resolve(true);
+          })
+        );
+      }
     }
   });
 }

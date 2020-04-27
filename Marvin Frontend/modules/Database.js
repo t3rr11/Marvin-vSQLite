@@ -8,9 +8,9 @@ const fetch = require("node-fetch");
 //Exports
 module.exports = {
   GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetUsers, GetGlobalDryStreak, GetClanDryStreaks, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
-  CheckRegistered, CheckNewBroadcast,
+  CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, 
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
-  RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast,
+  RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast,
   ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking
 };
 
@@ -191,6 +191,18 @@ function CheckNewBroadcast(membershipId, season, broadcast, callback) {
     }
   });
 }
+function CheckNewClanBroadcast(clanId, season, broadcast, callback) {
+  var sql = "SELECT * FROM broadcasts WHERE clanId = ? AND season = ? AND broadcast = ?";
+  var inserts = [clanId, season, broadcast];
+  sql = db.format(sql, inserts);
+  db.query(sql, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error finding broadcast: ${ error }`); callback(true); }
+    else {
+      if(rows.length > 0) { callback(false, true); }
+      else { callback(false, false); }
+    }
+  });
+}
 
 //Adds
 function AddTrackedPlayer(discord_id, membershipData, callback) {
@@ -332,6 +344,15 @@ function RemoveAwaitingBroadcast(broadcast) {
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error deleteing broadcast from awaiting_broadcast, Error: ${ error }`); }
     else { Log.SaveError(`Tried to duplicate entry this broadcast: (${ broadcast.clanId }) ${ broadcast.displayName } has obtained ${ broadcast.broadcast }`); }
+  });
+}
+function RemoveAwaitingClanBroadcast(broadcast) {
+  var sql = "DELETE FROM awaiting_broadcasts WHERE clanId=? AND season=? AND broadcast=?";
+  var inserts = [broadcast.clanId, broadcast.season, broadcast.broadcast];
+  sql = db.format(sql, inserts);
+  db.query(sql, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error deleteing broadcast from awaiting_broadcast, Error: ${ error }`); }
+    else { Log.SaveError(`Tried to duplicate entry this broadcast: (${ broadcast.clanId }) ${ broadcast.broadcast }`); }
   });
 }
 

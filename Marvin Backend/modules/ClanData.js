@@ -10,7 +10,7 @@ var id = 0;
 module.exports = { CheckClanMembers, GetClanMembers, GetClanDetails };
 
 //Functions
-flagEnum = (state, value) => !!(state & value);
+const flagEnum = (state, value) => !!(state & value);
 function GetItemState(state) { return { none: flagEnum(state, 0), notAcquired: flagEnum(state, 1), obscured: flagEnum(state, 2), invisible: flagEnum(state, 4), cannotAffordMaterialRequirements: flagEnum(state, 8), inventorySpaceUnavailable: flagEnum(state, 16), uniquenessViolation: flagEnum(state, 32), purchaseDisabled: flagEnum(state, 64) }; }
 async function CheckClanMembers(trackedClan) {
   //Get current clan members.
@@ -48,6 +48,7 @@ async function CheckClanMembers(trackedClan) {
 
   //Next is onto processing each players information. First we get the clan to determine some variables then process player data.
   await new Promise(resolve => Database.GetClan(trackedClan.clan_id, async function(isError, isFound, data) {
+    let PreviousClanDetails = data;
     if(!isError) {
       if(isFound) {
         //Determine whether this is the first time the clan has been scanned or not, or if a forced scan was put in place.
@@ -76,7 +77,7 @@ async function CheckClanMembers(trackedClan) {
         if(data.forcedScan === "true") { Database.UpdateClanForcedScan(trackedClan.clan_id); }
 
         //Finally update all other clan details, including last scan time and online player count.
-        if(!ClanDetails.error) { Database.UpdateClanDetails(ClanDetails.detail, trackedClan.clan_id, MembersToScan.length); }
+        if(!ClanDetails.error) { ProcessClanData(ClanDetails, PreviousClanDetails, MembersToScan); }
       }
       else {
         if(trackedClan.clan_id.length === 6 || trackedClan.clan_id.length === 7) { Database.AddNewClan(trackedClan.clan_id); }
@@ -132,6 +133,7 @@ async function GetClanMemberData(playerInfo, retried) {
   catch (err) { return { playerInfo, private: false, failed: true, reason: `Timed out` }; }
 }
 
+//Process player data
 function ProcessPlayerData(response, clanId, firstScan, forcedScan) {
   //Rankings
   const AccountInfo = GetAccountInfo(response, clanId);
@@ -175,7 +177,6 @@ function ProcessPlayerData(response, clanId, firstScan, forcedScan) {
     }
   });
 }
-
 function GetAccountInfo(response, clanId) {
   var displayName = response.playerInfo.displayName;
   var membershipId = response.playerInfo.membership_Id;
@@ -431,8 +432,27 @@ function GetOthers(response) {
   }
 }
 
+//Check for clan broadcasts
+function ProcessClanData(ClanDetails, PreviousClanDetails, MembersToScan) {
+  //Check clan details for changes.
+  if(PreviousClanDetails.firstScan === "false") {
+    CheckClanNameChange(ClanDetails, PreviousClanDetails);
+    CheckClanTagChange(ClanDetails, PreviousClanDetails);
+    CheckClanLevelUp(ClanDetails, PreviousClanDetails);
+  }
+  //Update details in database to the newest.
+  Database.UpdateClanDetails(ClanDetails, MembersToScan);
+}
+function CheckClanNameChange(Data, SQLData) { if(Data.detail.name !== SQLData.clan_name) { SendClanBroadcast(Data, SQLData, "name_change"); } }
+function CheckClanTagChange(Data, SQLData) { if(Data.detail.clanInfo.clanCallsign !== SQLData.clan_callsign) { SendClanBroadcast(Data, SQLData, "tag_change"); } }
+function CheckClanLevelUp(Data, SQLData) {
+  let new_clan_level = Data.detail.clanInfo.d2ClanProgressions["584850370"].level;
+  if(new_clan_level !== SQLData.clan_level && new_clan_level > SQLData.clan_level) {
+    SendClanBroadcast(Data, SQLData, "level_up");
+  }
+}
 
-//Player Updates
+//Check for player broadcasts
 function CheckItems(Data, SQLData) {
   if(Data.Items.items.length > 0) {
     var prevData = SQLData.items.split(',');
@@ -462,19 +482,27 @@ function CheckTitles(Data, SQLData) {
   }
 }
 
-//Send Broadcast
+//Send broadcasts
 function SendBroadcast(data, type, broadcast, count) {
-  if(Config.enableBroadcasts) {
-    Database.AddNewBroadcast(data, Config.currentSeason, type, broadcast, count, new Date().getTime(), function(isError) {
-      if(isError) { console.log("There was an error saving broadcast to awaiting_broadcasts."); }
-      else {
-        var message = null;
-        if(type === "item") { if(count === -1) { message = `${ data.AccountInfo.displayName } has obtained ${ broadcast }`; } else { message = `${ data.AccountInfo.displayName } has obtained ${ broadcast } in ${ count } ${ count > 1 ? "raids!" : "raid!" }` } }
-        else if(type === "title") { message = `${ data.AccountInfo.displayName } has obtained the ${ broadcast } title!` }
-        Log.SaveLog("Clans", `[${ data.AccountInfo.clanId }]: ${ message }`);
-      }
-    });
-  }
+  Database.AddNewBroadcast(data, Config.currentSeason, type, broadcast, count, new Date().getTime(), function(isError) {
+    if(isError) { console.log("There was an error saving broadcast to awaiting_broadcasts."); }
+    else {
+      let BroadcastMessage = null;
+      if(type === "item") { if(count === -1) { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained ${ broadcast }`; } else { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained ${ broadcast } in ${ count } ${ count > 1 ? "raids!" : "raid!" }` } }
+      else if(type === "title") { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained the ${ broadcast } title!` }
+      Log.SaveLog("Clans", `[${ data.AccountInfo.clanId }]: ${ BroadcastMessage }`);
+    }
+  });
+}
+function SendClanBroadcast(Data, SQLData, type) {
+  var BroadcastMessage = null;
+  if(type === "name_change") { BroadcastMessage = `The clan name has been changed from ${ SQLData.clan_name } to ${ Data.detail.name }` }
+  if(type === "tag_change") { BroadcastMessage = `The clan tag has been changed from ${ SQLData.clan_callsign } to ${ Data.detail.clanInfo.clanCallsign }` }
+  if(type === "level_up") { BroadcastMessage = `The clan name leveled up from level: ${ SQLData.clan_level } to ${ Data.detail.clanInfo.d2ClanProgressions["584850370"].level }` }
+  Database.AddNewClanBroadcast(Data, SQLData, "clan", Config.currentSeason, BroadcastMessage, new Date().getTime(), function(isError) {
+    if(isError) { console.log("There was an error saving broadcast to awaiting_broadcasts."); }
+    else { Log.SaveLog("Clans", `[${ Data.detail.groupId }]: ${ BroadcastMessage }`); }
+  });
 }
 
 //Others

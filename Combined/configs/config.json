@@ -7,7 +7,7 @@
   "defaultLogoURL": "https://guardianstats.com/images/logo.png",
   "enableDebug": true,
   "enableTracking": true,
-  "enableBroadcasts": false,
+  "enableBroadcasts": true,
   "enableLogging": true,
   "currentSeason": 10
 }

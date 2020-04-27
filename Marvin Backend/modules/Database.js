@@ -7,7 +7,7 @@ const fetch = require("node-fetch");
 
 //Exports
 module.exports = {
-  AddNewBroadcast, AddNewClan, CheckClanMembers, CheckNewBroadcast, SetPrivate,
+  AddNewBroadcast, AddNewClanBroadcast, AddNewClan, CheckClanMembers, CheckNewBroadcast, SetPrivate,
   GetClans, GetGuilds, GetPlayers, GetUsers, GetClan, GetPlayerDetails,
   RemoveClan, UpdateClanFirstScan, UpdateClanForcedScan, UpdateClanDetails, UpdatePlayerDetails
 };
@@ -35,6 +35,15 @@ handleDisconnect();
 function AddNewBroadcast(data, season, type, broadcast, count, date, callback) {
   var sql = "INSERT IGNORE INTO awaiting_broadcasts (clanId,displayName,membershipId,season,type,broadcast,count,date) VALUES (?,?,?,?,?,?,?,?)";
   var inserts = [data.AccountInfo.clanId, data.AccountInfo.displayName, data.AccountInfo.membershipId, season, type, broadcast, count, date];
+  sql = db.format(sql, inserts);
+  db.query(sql, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error adding new broadcast, Error: ${ error }`); callback(true); }
+    else { callback(false); }
+  });
+}
+function AddNewClanBroadcast(Data, SQLData, type, season, broadcast, date, callback) {
+  var sql = "INSERT IGNORE INTO awaiting_broadcasts (clanId,displayName,membershipId,type,season,broadcast,count,date) VALUES (?,?,?,?,?,?,?,?)";
+  var inserts = [SQLData.clan_id, null, null, type, season, broadcast, null, date];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error adding new broadcast, Error: ${ error }`); callback(true); }
@@ -202,28 +211,55 @@ function UpdateClanForcedScan(clan_id) {
     }
   });
 }
-async function UpdateClanDetails(clanData, clan_id, players) {
-
-  var trackedClans = [];
-
-  await new Promise(resolve =>
-    db.query(`SELECT * FROM guilds WHERE isTracking="true"`, function(error, rows, fields) {
-      if(!!error) { Log.SaveError(`Error getting all registered guilds from server: ${ error }`); }
-      else { for(var i in rows) { var clans = rows[i].clans.split(','); for(var j in clans) { if(!trackedClans.includes(clans[j])) { trackedClans.push(clans[j]); } } } }
-      resolve(true);
-    })
-  );
-
-  db.query(`SELECT * FROM clans WHERE clan_id="${ clan_id }"`, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error getting clan: ${ clan_id }, Error: ${ error }`); }
+async function UpdateClanDetails(ClanDetails, Online_Players) {
+  //Check to see if clan is still being tracked by a guild.
+  db.query(`SELECT * FROM guilds WHERE clans LIKE "%${ ClanDetails.detail.groupId }%"`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error getting clan: ${ ClanDetails.detail.groupId }, Error: ${ error }`); }
     else {
-      var isTracked = trackedClans.includes(clan_id);
-      var sql = `UPDATE clans SET clan_name = ?, clan_callsign = ?, member_count = ?, clan_level = ?, lastScan="${ new Date().getTime() }", online_players="${ players }", isTracking="${ isTracked }" WHERE clan_id="${ clan_id }"`;
-      var inserts = [clanData.name, clanData.clanInfo.clanCallsign, clanData.memberCount, clanData.clanInfo.d2ClanProgressions["584850370"].level];
-      sql = db.format(sql, inserts);
-      db.query(sql, function(error, rows, fields) {
-        if(!!error) { Log.SaveError(`Error updating last scan value on clan_id: ${ clan_id }, Error: ${ error }`); }
-      });
+      if(rows.length > 0) {
+        //If a guild is found to have this clanId then update the details.
+        db.query(`SELECT * FROM clans WHERE clan_id="${ ClanDetails.detail.groupId }"`, function(error, rows, fields) {
+          if(!!error) { Log.SaveError(`Error getting clan: ${ ClanDetails.detail.groupId }, Error: ${ error }`); }
+          else {
+            if(rows.length > 0) {
+              var sql = `
+              UPDATE clans 
+              SET 
+                clan_name = ?, 
+                clan_callsign = ?, 
+                member_count = ?, 
+                clan_level = ?, 
+                lastScan="${ new Date().getTime() }", 
+                online_players="${ Online_Players.length }", 
+                isTracking="${ rows[0].isTracking }" 
+              WHERE 
+                clan_id="${ ClanDetails.detail.groupId }"
+              `;
+              var inserts = [ClanDetails.detail.name, ClanDetails.detail.clanInfo.clanCallsign, ClanDetails.detail.memberCount, ClanDetails.detail.clanInfo.d2ClanProgressions["584850370"].level];
+              sql = db.format(sql, inserts);
+              db.query(sql, function(error, rows, fields) {
+                if(!!error) { Log.SaveError(`Error updating clan details for (clan_id: ${ ClanDetails.detail.groupId }), Error: ${ error }`); }
+              });
+            }
+          }
+        });
+      }
+      else {
+        //If no guilds are found to have this clanId then update the details and stop the tracking.
+        db.query(`SELECT * FROM clans WHERE clan_id="${ ClanDetails.detail.groupId }"`, function(error, rows, fields) {
+          if(!!error) { Log.SaveError(`Error getting clan: ${ ClanDetails.detail.groupId }, Error: ${ error }`); }
+          else {
+            if(rows.length > 0) {
+              var sql = `UPDATE clans SET lastScan= ?, online_players = ?, isTracking= ? WHERE clan_id="${ ClanDetails.detail.groupId }"`;
+              var inserts = [new Date().getTime(), 0, "false"];
+              sql = db.format(sql, inserts);
+              db.query(sql, function(error, rows, fields) {
+                if(!!error) { Log.SaveError(`Error updating clan details for (clan_id: ${ ClanDetails.detail.groupId }), Error: ${ error }`); }
+              });
+            }
+          }
+        });
+      }
     }
   });
 }
