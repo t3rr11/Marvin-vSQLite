@@ -17,6 +17,7 @@
 
 #databasefile
 /Combined/configs/db_config.json
+/Combined/configs/config.json
 
 #others
 /Images
