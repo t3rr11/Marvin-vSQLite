@@ -421,6 +421,12 @@ function GetOthers(response) {
   var pOH_solo = "0"; try { pOH_solo = response.playerData.profileRecords.data.records["376114010"].objectives[0].progress; } catch (err) { }
   var pOH_solo_flawless = "0"; try { pOH_solo_flawless = response.playerData.profileRecords.data.records["2615277024"].objectives[0].progress; } catch (err) { }
 
+  //Guardian Games
+  var GG_Laurels = "0"; try { GG_Laurels = response.playerData.profileRecords.data.records["379624208"].objectives[0].progress; } catch (err) { }
+  var GG_Medals = "0"; try { GG_Medals = response.playerData.profileRecords.data.records["3800989613"].objectives[0].progress; } catch (err) { }
+  var GG_RumbleSupers = "0"; try { GG_RumbleSupers = response.playerData.profileRecords.data.records["3672040342"].objectives[0].progress; } catch (err) { }
+  var GG_Triumphs = "0"; try { GG_Triumphs = response.playerData.profileRecords.data.records["3199735617"].objectives[0].progress; } catch (err) { }
+
   return {
     "menageire": menageire,
     "runes": runes,
@@ -428,7 +434,8 @@ function GetOthers(response) {
     "wellsRankings": wellsCompleted,
     "epRankings": epsCompleted,
     "shatteredThrone": { "completed": sT_completed, "flawless": sT_flawless, "solo": sT_solo, "solo_flawless": sT_solo_flawless },
-    "pitOfHeresy": { "completed": pOH_completed, "flawless": pOH_flawless, "solo": pOH_solo, "solo_flawless": pOH_solo_flawless }
+    "pitOfHeresy": { "completed": pOH_completed, "flawless": pOH_flawless, "solo": pOH_solo, "solo_flawless": pOH_solo_flawless },
+    "guardianGames": { "laurels": GG_Laurels, "medals": GG_Medals, "rumble_super_kills": GG_RumbleSupers, "triumphs": GG_Triumphs }
   }
 }
 
@@ -498,7 +505,7 @@ function SendClanBroadcast(Data, SQLData, type) {
   var BroadcastMessage = null;
   if(type === "name_change") { BroadcastMessage = `The clan name has been changed from ${ SQLData.clan_name } to ${ Data.detail.name }` }
   if(type === "tag_change") { BroadcastMessage = `The clan tag has been changed from ${ SQLData.clan_callsign } to ${ Data.detail.clanInfo.clanCallsign }` }
-  if(type === "level_up") { BroadcastMessage = `The clan name leveled up from level: ${ SQLData.clan_level } to ${ Data.detail.clanInfo.d2ClanProgressions["584850370"].level }` }
+  if(type === "level_up") { BroadcastMessage = `${ SQLData.clan_name } has leveled up from level: ${ SQLData.clan_level } to ${ Data.detail.clanInfo.d2ClanProgressions["584850370"].level }` }
   Database.AddNewClanBroadcast(Data, SQLData, "clan", Config.currentSeason, BroadcastMessage, new Date().getTime(), function(isError) {
     if(isError) { console.log("There was an error saving broadcast to awaiting_broadcasts."); }
     else { Log.SaveLog("Clans", `[${ Data.detail.groupId }]: ${ BroadcastMessage }`); }
