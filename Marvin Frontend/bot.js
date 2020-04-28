@@ -6,7 +6,7 @@ const DBL = require("dblapi.js");
 const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzMTM1MTM2Njc5OTA2NTA4OCIsImJvdCI6dHJ1ZSwiaWF0IjoxNTg0NDIxMzAxfQ.qZ5CrrQdaC9cIfeuqx7svNTwiSTH_R0JD5H-1CVzrCo', client);
 
 //Modules
-const Config = require('../Combined/configs/config.json');
+let Config = require('../Combined/configs/config.json');
 let Misc = require(__dirname + '/js/misc.js');
 let Log = require(__dirname + '/js/log.js');
 let Database = require(__dirname + '/modules/Database.js');
@@ -24,6 +24,8 @@ var APIDisabled = null;
 var TimedOutUsers = [];
 var BannedUsers = [];
 var Users = 0;
+var NewSeasonCountdown = null;
+var NewSeasonDate = null;
 
 //Functions
 function UpdateActivityList() {
@@ -132,9 +134,23 @@ function SetScanSpeed(message, input) {
   fs.writeFile('../Combined/configs/backend_config.json', JSON.stringify(backend_config), (err) => { if (err) console.error(err) });
   message.channel.send(`ScanSpeed is now scanning at a rate of ${ input } clans per second. With a slow down rate of ${ Math.round(input * 0.8) } and a reset of ${ Math.round(input * 0.6) }`);
 }
+function CheckNewSeason() {
+  if(NewSeasonDate !== null) {
+    if(new Date(NewSeasonDate) - new Date() < 0) {
+      Config.newSeasonDate = new Date(new Date(NewSeasonDate).getTime() + 7776000000).toISOString();
+      Config.currentSeason = Config.currentSeason + 1;
+      NewSeasonDate = null;
+      fs.writeFile('../Combined/configs/config.json', JSON.stringify(Config), (err) => { if (err) console.error(err) });
+      try { client.guilds.get('664237007261925404').channels.get('664237007261925409').send(`A new season is upon us. The current season has been changed from ${ Config.currentSeason-1 } to ${ Config.currentSeason }`); }
+      catch (err) { console.log("Failed to send new season message."); }
+    }
+  }
+  else { NewSeasonDate = Config.newSeasonDate; }
+}
+function GetTimeLeftOnSeason() { return Misc.formatTime(Math.ceil((NewSeasonCountdown._idleStart + NewSeasonCountdown._idleTimeout - Date.now()) / 1000)); }
 function ForceTopGGUpdate(message) { dbl.postStats(client.guilds.size); message.channel.send("Updated stats on Top.GG"); }
 function UpdateBannedUsers() { try { BannedUsers = JSON.parse(fs.readFileSync('./data/banned_users.json').toString()); } catch(err) { console.log("Couldn't parse banned users file."); } }
-async function CheckBanned(message) {
+function CheckBanned(message) {
   var isFound = BannedUsers.find(usr => usr.id == message.author.id);
   if(isFound !== undefined) {
     const embed = new Discord.RichEmbed()
@@ -148,6 +164,74 @@ async function CheckBanned(message) {
   }
   else { return false; }
 }
+function AddBannedUser(message) {
+  var id = message.content.toUpperCase().substr(6, 18);
+  var reason = message.content.substr(`~MBAN ${ id } `.length);
+  if(!BannedUsers.find(usr => usr.id == id)) {
+    BannedUsers.push({
+      "id": id,
+      "reason": reason.length > 4 ? reason : "You have been banned."
+    });
+    fs.writeFile('./data/banned_users.json', JSON.stringify(BannedUsers), (err) => { if (err) console.error(err) });
+    const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("User has been banned!")
+      .setDescription(`**User:** ${ id }\n**Reason:** ${ reason.length > 4 ? reason : "You have been banned." }`)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp();
+    message.channel.send({embed});
+  }
+  else { message.reply("Cannot ban this user as they are already banned. To unban please use: ~MUNBAN"); }
+}
+function RemoveBannedUser(message) {
+  var id = message.content.toUpperCase().substr(8, 18);
+  if(BannedUsers.find(usr => usr.id == id)) {
+    BannedUsers.splice(BannedUsers.indexOf(BannedUsers.find(usr => usr.id === id)), 1);
+    fs.writeFile('./data/banned_users.json', JSON.stringify(BannedUsers), (err) => { if (err) console.error(err) });
+    const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("User has been unbanned!")
+      .setDescription(`**User:** ${ id }`)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp();
+    message.channel.send({embed});
+  }
+  else { message.reply("Cannot Unban as this user is not banned."); }
+}
+function ChangeBannedUser(message) {
+  var id = message.content.toUpperCase().substr(9, 18);
+  if(BannedUsers.find(usr => usr.id == id)) {
+    var user = BannedUsers.find(usr => usr.id == id);
+    var previousReason = user.reason;
+    var newReason = message.content.substr(`~MCHANGE ${ id } `.length);
+    if(newReason.length > 4) {
+      user.reason = newReason;
+      fs.writeFile('./data/banned_users.json', JSON.stringify(BannedUsers), (err) => { if (err) console.error(err) });
+      const embed = new Discord.RichEmbed()
+        .setColor(0x0099FF)
+        .setAuthor("Reason for users ban updated.")
+        .setDescription(`**User:** ${ user.id }\n**Previous Reason:** ${ previousReason }\n**Reason:** ${ user.reason }`)
+        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+        .setTimestamp();
+      message.channel.send({embed});
+    }
+    else { message.reply("No reason specified.. Did not update."); }
+  }
+  else { message.reply("Cannot change reason as this user is not banned."); }
+}
+function ViewBans(message) {
+  const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Here lies a list of banned users. Who no longer have access to Marvins features.")
+    .setDescription(
+      BannedUsers.map((user) => {
+        return (`**User: ** ${ user.id }\n**Reason: ** ${ user.reason }\n`)
+      })
+    )
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp();
+  message.channel.send({embed});
+}
 
 //Discord Client Code
 client.on("ready", async () => {
@@ -158,6 +242,7 @@ client.on("ready", async () => {
     //SetTimeouts
     setInterval(function() { UpdateClans() }, 10000);
     setInterval(() => { dbl.postStats(client.guilds.size); }, 1800000);
+    NewSeasonCountdown = setInterval(() => { CheckNewSeason(); }, 1000)
   
     //Start Up Console Log
     if(Config.enableDebug){ console.clear(); }
@@ -218,14 +303,23 @@ client.on("message", async message => {
         else if(command.startsWith("~DEL ")) { if(!CheckBanned(message)) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); } }
         else if(command.startsWith("~SET SCANSPEED ")) { if(!CheckBanned(message)) { var input = command.substr("~SET SCANSPEED ".length); SetScanSpeed(message, input); } }
         else if(command.startsWith("~PROFILE ")) { if(!CheckBanned(message)) { DiscordCommands.Profile(message); } }
+        else if(command.startsWith("~MBAN ")) { if(message.author.id === "194972321168097280") { AddBannedUser(message) } else { message.channel.send("No permission to use this command."); } }
+        else if(command.startsWith("~MUNBAN ")) { if(message.author.id === "194972321168097280") { RemoveBannedUser(message) } else { message.channel.send("No permission to use this command."); } }
+        else if(command.startsWith("~MCHANGE ")) { if(message.author.id === "194972321168097280") { ChangeBannedUser(message) } else { message.channel.send("No permission to use this command."); } }
         else if(command === "~REGISTER") { if(!CheckBanned(message)) { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
         else if(command === "~DONATE" || command === "~SPONSOR" || command === "~SUPPORTING") { if(!CheckBanned(message)) { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); } }
         else if(command === "~PROFILE") { if(!CheckBanned(message)) { DiscordCommands.Profile(message); } }
-        else if(command === "~FORCE RESCAN") { if(message.author.id === "194972321168097280") { DiscordCommands.ForceFullScan(message); } }
-        else if(command === "~FORCE GUILD CHECK") { if(message.author.id === "194972321168097280") { DiscordCommands.ForceGuildCheck(client, message); } }
-        else if(command === "~FORCE TOPGG") { if(message.author.id === "194972321168097280") { ForceTopGGUpdate(message); } }
+        else if(command === "~FORCE RESCAN") { if(message.author.id === "194972321168097280") { DiscordCommands.ForceFullScan(message); } else { message.channel.send("No permission to use this command."); } }
+        else if(command === "~FORCE GUILD CHECK") { if(message.author.id === "194972321168097280") { DiscordCommands.ForceGuildCheck(client, message); } else { message.channel.send("No permission to use this command."); } }
+        else if(command === "~FORCE TOPGG") { if(message.author.id === "194972321168097280") { ForceTopGGUpdate(message); } else { message.channel.send("No permission to use this command."); } }
+        else if(command === "~MBANS") { if(message.author.id === "194972321168097280") { ViewBans(message); } else { message.channel.send("No permission to use this command."); } }
         else if(command === "~SCANSPEED") { if(!CheckBanned(message)) { GetScanSpeed(message); } }
         else if(command === "~CHECKAPI") { if(APIDisabled) { message.reply("API is offline."); } else { message.reply("API is online."); } }
+        else if(command === "~NEW SEASON" || command === "~SEASON 11" || command === "~NEXT SEASON") {
+          if(new Date(NewSeasonDate) - new Date() > 0) { message.channel.send(`Next season starts in: ${ Misc.formatTime((new Date(NewSeasonDate) - new Date().getTime()) / 1000) }`); }
+          else { message.channel.send(`Season ${ Config.currentSeason } has already started!`) }
+        }
+        else if(command === "~CURRENT SEASON" || command === "~SEASON") { message.channel.send(`Destiny 2 is current in it's ${ Config.currentSeason } season. Season ${ Config.currentSeason+1 } starts in: ${ Misc.formatTime((new Date(NewSeasonDate) - new Date().getTime()) / 1000) }`) }
         else if(command === "~TEST") {
           if(message.author.id === "194972321168097280") {
             //message.reply("We saw and we did nothing.");

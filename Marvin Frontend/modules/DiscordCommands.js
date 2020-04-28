@@ -1854,23 +1854,8 @@ function Profile(message) {
       if(isFound) {
         var playerData = Data;
         //Give personalised response if user has registered
-        Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
-          if(!isError) {
-            if(isFound) {
-              //Get all clan data from playerInfo using clans
-              var allClanIds = Data.clans.split(",");
-              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayProfile(message, leaderboards, playerData); } }
-                else { message.reply("Sorry! An error occurred, Please try again..."); }
-              });
-            }
-            else {
-              Database.GetGlobalLeaderboards(function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayProfile(message, leaderboards, playerData); } }
-                else { message.reply("Sorry! An error occurred, Please try again..."); }
-              });
-            }
-          }
+        Database.GetGlobalLeaderboards(function(isError, isFound, leaderboards) {
+          if(!isError) { if(isFound) { DisplayProfile(message, leaderboards, playerData); } }
           else { message.reply("Sorry! An error occurred, Please try again..."); }
         });
       }

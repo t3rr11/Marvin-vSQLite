@@ -9,5 +9,6 @@
   "enableTracking": true,
   "enableBroadcasts": true,
   "enableLogging": true,
-  "currentSeason": 10
+  "currentSeason": 10,
+  "newSeasonDate": "2020-06-09T17:00:00.000Z"
 }
