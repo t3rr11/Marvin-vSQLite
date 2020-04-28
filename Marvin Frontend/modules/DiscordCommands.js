@@ -62,7 +62,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Seasonal Help Menu")
     .setDescription("Here is a list of seasonal commands! Example: `~Fractaline`")
-    .addField("Commands", "`~Season Rank`")
+    .addField("Commands", "`~Season Rank`, `~Guardian Games`, `~GG`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -120,6 +120,16 @@ function Help(message, type) {
     .setAuthor("Others Help Menu")
     .setDescription("Here is a list of other commands! Example: `~Donate`")
     .addField("Commands", "`~Donate`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "guardianGames") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Guardian Games Help Menu")
+    .setDescription("Here is a list of Guardian Games commands! Example: `~GG Laurels`")
+    .addField("Commands", "`~GG Laurels`, `~GG Medals`, `~GG Triumphs`, `~GG Rumble`, `~GG Supers`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -907,6 +917,128 @@ function DisplayRankings(message, type, leaderboards, playerData) {
       message.channel.send({embed});
     }
 
+    //Guardian Games
+    else if(type === "gg_laurels") {
+      var leaderboard = { "names": [], "laurels": [] };
+      leaderboards = leaderboards.filter(e => JSON.parse(e.guardianGames) !== null);
+      leaderboards.sort(function(a, b) { return JSON.parse(b.guardianGames)["laurels"] - JSON.parse(a.guardianGames)["laurels"]; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.laurels.push(Misc.AddCommas(JSON.parse(top[i].guardianGames)["laurels"]));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.laurels.push("", Misc.AddCommas(JSON.parse(playerStats.guardianGames)["laurels"]));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Laurels Collected")
+      .addField("Name", leaderboard.names, true)
+      .addField("Laurels", leaderboard.laurels, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "gg_medals") {
+      var leaderboard = { "names": [], "medals": [] };
+      leaderboards = leaderboards.filter(e => JSON.parse(e.guardianGames) !== null);
+      leaderboards.sort(function(a, b) { return JSON.parse(b.guardianGames)["medals"] - JSON.parse(a.guardianGames)["medals"]; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.medals.push(Misc.AddCommas(JSON.parse(top[i].guardianGames)["medals"]));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.medals.push("", Misc.AddCommas(JSON.parse(playerStats.guardianGames)["medals"]));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Medals Donated")
+      .addField("Name", leaderboard.names, true)
+      .addField("Medals", leaderboard.medals, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "gg_rumble_super_kills") {
+      var leaderboard = { "names": [], "rumble_super_kills": [] };
+      leaderboards = leaderboards.filter(e => JSON.parse(e.guardianGames) !== null);
+      leaderboards.sort(function(a, b) { return JSON.parse(b.guardianGames)["rumble_super_kills"] - JSON.parse(a.guardianGames)["rumble_super_kills"]; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.rumble_super_kills.push(Misc.AddCommas(JSON.parse(top[i].guardianGames)["rumble_super_kills"]));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.rumble_super_kills.push("", Misc.AddCommas(JSON.parse(playerStats.guardianGames)["rumble_super_kills"]));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Rumble Super Kills throughout Guardian Games")
+      .addField("Name", leaderboard.names, true)
+      .addField("Super Kills", leaderboard.rumble_super_kills, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "gg_triumphs") {
+      var leaderboard = { "names": [], "triumphs": [] };
+      leaderboards = leaderboards.filter(e => JSON.parse(e.guardianGames) !== null);
+      leaderboards.sort(function(a, b) { return JSON.parse(b.guardianGames)["triumphs"] - JSON.parse(a.guardianGames)["triumphs"]; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.triumphs.push(Misc.AddCommas(JSON.parse(top[i].guardianGames)["triumphs"]));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.triumphs.push("", Misc.AddCommas(JSON.parse(playerStats.guardianGames)["triumphs"]));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Guardian Games Triumphs Completed")
+      .addField("Name", leaderboard.names, true)
+      .addField("Fractaline", leaderboard.triumphs, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+
     //Others
     else if(type === "triumphScore") {
       var leaderboard = { "names": [], "score": [] };
@@ -996,7 +1128,7 @@ function DisplayRankings(message, type, leaderboards, playerData) {
       message.channel.send({embed});
     }
   }
-  catch (err) { console.log(err); message.reply("Sorry we broke... Usually happens when there was no data returned. Possibly someone doesn't have the item or title you are looking for."); }
+  catch (err) { console.log(err); message.channel.send("Sorry we broke... This usually happens if you have just added a clan to Marvin and he has not scanned it yet. But If this keeps happening please join the discord and check if it's a known bug. https://guardianstats.com/joinmarvin"); }
 }
 function GlobalRankings(type, message) {
   Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {

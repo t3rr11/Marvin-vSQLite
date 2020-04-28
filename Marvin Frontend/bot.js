@@ -468,6 +468,16 @@ client.on("message", async message => {
             else { DiscordCommands.Help(message, "trials"); }
           }
         }
+        else if(command.startsWith("~GG ")) {
+          if(!CheckBanned(message)) {
+            if(command === "~GG LAURELS") { DiscordCommands.Rankings("gg_laurels", message); }
+            else if(command === "~GG MEDALS") { DiscordCommands.Rankings("gg_medals", message); }
+            else if(command === "~GG TRIUMPHS") { DiscordCommands.Rankings("gg_triumphs", message); }
+            else if(command === "~GG SUPER KILLS" || command === "~GG SUPERS" || command === "~GG RUMBLE") { DiscordCommands.Rankings("gg_rumble_super_kills", message); }
+            else { DiscordCommands.Help(message, "guardianGames"); }
+          }
+        }
+        else if(command === "~GUARDIAN GAMES" || command === "~GG") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "guardianGames"); } }
 
         //Clan Management
         else if(command.startsWith("~SET BROADCASTS ")) { if(!CheckBanned(message)) { Broadcasts.SetupBroadcasts(message); } }
