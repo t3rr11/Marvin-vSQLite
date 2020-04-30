@@ -36,7 +36,9 @@ function UpdateActivityList() {
     ActivityList.push(`Tracking ${ ClansLength } clans!`);
     ActivityList.push(`Use ~HELP for Support`);
     ActivityList.push(`Consider Donating? ~Donate`);
-    ActivityList.push(`New command! ~Trials`);
+    ActivityList.push(`Try ~Trials`);
+    ActivityList.push(`Try ~Guardian Games`);
+    ActivityList.push(`Try ~Season`);
     var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
     client.user.setActivity(activity);
   }
@@ -470,9 +472,9 @@ client.on("message", async message => {
         }
         else if(command.startsWith("~GG ")) {
           if(!CheckBanned(message)) {
-            if(command === "~GG LAURELS") { DiscordCommands.Rankings("gg_laurels", message); }
-            else if(command === "~GG MEDALS") { DiscordCommands.Rankings("gg_medals", message); }
-            else if(command === "~GG TRIUMPHS") { DiscordCommands.Rankings("gg_triumphs", message); }
+            if(command === "~GG LAURELS" || command === "~GG LAUREL") { DiscordCommands.Rankings("gg_laurels", message); }
+            else if(command === "~GG MEDALS" || command === "~GG MEDAL") { DiscordCommands.Rankings("gg_medals", message); }
+            else if(command === "~GG TRIUMPHS" || command === "~GG TRIUMPH") { DiscordCommands.Rankings("gg_triumphs", message); }
             else if(command === "~GG SUPER KILLS" || command === "~GG SUPERS" || command === "~GG RUMBLE") { DiscordCommands.Rankings("gg_rumble_super_kills", message); }
             else { DiscordCommands.Help(message, "guardianGames"); }
           }

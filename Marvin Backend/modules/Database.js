@@ -230,7 +230,7 @@ async function UpdateClanDetails(ClanDetails, Online_Players) {
                 member_count = ?, 
                 clan_level = ?, 
                 lastScan="${ new Date().getTime() }", 
-                online_players="${ Online_Players.length }", 
+                online_players="${ ClanDetails.detail.memberCount === Online_Players.length ? 0 : Online_Players.length }", 
                 isTracking="${ rows[0].isTracking }" 
               WHERE 
                 clan_id="${ ClanDetails.detail.groupId }"

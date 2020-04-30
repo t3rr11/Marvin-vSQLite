@@ -18,24 +18,7 @@ module.exports = {
 
 //Important
 function Help(message, type) {
-  if(type.toUpperCase() === "all") {
-    const embed = new Discord.RichEmbed()
-    .setColor(0x0099FF)
-    .setAuthor("Hey there! I am Marvin. Here is a list of all my commands!")
-    .setDescription("I have so many commands now i've had to split them up here is a list of my help commands!")
-    .addField("Rankings", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`")
-    .addField("Raids", "`~LEVI`, `~pLEVI`, `~EOW`, `~pEOW`, `~SOS`, `~pSOS`, `~LW`, `~SoTP`, `~CoS`, `~GoS`")
-    .addField("Items / Titles", "`~Items`, `~Titles`, `~Item Example`, `~Title Example`")
-    .addField("Seasonal", "`~Season Rank`, `~Sundial`, `~Fractaline`, `~resonance`")
-    .addField("Clan Rankings", "`~Clanrank Fractaline`, `~Clanrank Resonance`")
-    .addField("Globals", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreak 1000 Voices`, `~Global Drystreak Anarchy`, `~Global Fractaline`, `~Global Resonance`")
-    .addField("Others", "`~Donate`, `~Broadcasts Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`, `~Delete Clan`, `~Drystreak 1000 Voices`, `~Drystreak Anarchy`, `~Trials`")
-    .addField("Request", "If you see something that isn't there that you'd like me to track request it like this: `~request I would like to see Marvin track season ranks!`")
-    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-    .setTimestamp()
-    message.channel.send({embed});
-  }
-  else if(type === "rankings") {
+  if(type === "rankings") {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
     .setAuthor("Rankings Help Menu")
@@ -139,7 +122,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Hey there! I am Marvin.")
     .setDescription("I have so many commands now i've had to split them up here is a list of my help commands! Example: `~Help Rankings`")
-    .addField("Categories", "`Rankings`, `Raids`, `Items`, `Titles`, `Seasonal`, `Preseasonal`, `Clan`, `Globals`, `Drystreaks`, `Trials`, `Others`, `All`")
+    .addField("Categories", "`Rankings`, `Raids`, `Items`, `Titles`, `Seasonal`, `Preseasonal`, `Clan`, `Globals`, `Drystreaks`, `Trials`, `Others`")
     .addField("Request", "If you wish to request something or would like to give feedback use the request command like this: `~request I would like to see Marvin track season ranks!`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
@@ -1014,16 +997,18 @@ function DisplayRankings(message, type, leaderboards, playerData) {
       leaderboards.sort(function(a, b) { return JSON.parse(b.guardianGames)["triumphs"] - JSON.parse(a.guardianGames)["triumphs"]; });
       top = leaderboards.slice(0, 10);
       for(var i in top) {
+        var amount = Misc.AddCommas(JSON.parse(top[i].guardianGames)["triumphs"]);
         leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-        leaderboard.triumphs.push(Misc.AddCommas(JSON.parse(top[i].guardianGames)["triumphs"]));
+        leaderboard.triumphs.push(`${ amount } / 11`);
       }
 
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
           var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          var amount = Misc.AddCommas(JSON.parse(playerStats.guardianGames)["triumphs"]);
           leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.triumphs.push("", Misc.AddCommas(JSON.parse(playerStats.guardianGames)["triumphs"]));
+          leaderboard.triumphs.push("", `${ amount } / 11`);
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -1033,7 +1018,7 @@ function DisplayRankings(message, type, leaderboards, playerData) {
       .setColor(0x0099FF)
       .setAuthor("Top 10 Guardian Games Triumphs Completed")
       .addField("Name", leaderboard.names, true)
-      .addField("Fractaline", leaderboard.triumphs, true)
+      .addField("Triumphs Completed", leaderboard.triumphs, true)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp()
       message.channel.send({embed});
