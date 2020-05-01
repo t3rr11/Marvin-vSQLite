@@ -184,7 +184,8 @@ async function logStatus() {
   var Users = frontend_status.users;
   var Servers = frontend_status.servers;
   var T_Users = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM users`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
-  var Players = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM playerInfo`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
+  var PlayersCount = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM playerInfo`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
+  var Players = await new Promise(resolve => apiRequest(`SELECT * FROM playerInfo`, (isError, isFound, Data) => { resolve(Data); }) );
   var T_Players = await new Promise(resolve => apiRequest(`SELECT member_count FROM clans`, (isError, isFound, Data) => { var count = 0; for(var i in Data) { count = count + Data[i].member_count } resolve(count); }) );
   var O_Players = await new Promise(resolve => apiRequest(`SELECT online_players FROM clans`, (isError, isFound, Data) => { var count = 0; for(var i in Data) { count = count + Data[i].online_players } resolve(count); }) );
   var Clans = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM clans`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
@@ -192,14 +193,31 @@ async function logStatus() {
   var Guilds = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM guilds`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
   var T_Guilds = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM guilds WHERE isTracking="true"`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
   var Broadcasts = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM broadcasts`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
+  
+
+  //Get and sort Guardian games data
+  Players = Players.filter(e => JSON.parse(e.guardianGames) !== null);
+  var Guardian_Games = {
+    All: { Warlock: 0, Hunter: 0, Titan: 0 },
+    Online: { Warlock: 0, Hunter: 0, Titan: 0 },
+    Medals: { Warlock: 0, Hunter: 0, Titan: 0 },
+    Laurels: { Warlock: 0, Hunter: 0, Titan: 0 }
+  };
+  for(var i in Players) {
+    let lastPlayed = parseInt(Players[i].lastPlayed);
+    if((new Date().getTime() - new Date(lastPlayed).getTime()) < (1000 * 60 * 15)) { Guardian_Games.Online[Players[i].currentClass]++; }
+    Guardian_Games.All[Players[i].currentClass]++;
+    Guardian_Games.Medals[Players[i].currentClass] = parseInt(Guardian_Games.Medals[Players[i].currentClass]) + parseInt(JSON.parse(Players[i].guardianGames).medals);
+    Guardian_Games.Laurels[Players[i].currentClass] = parseInt(Guardian_Games.Laurels[Players[i].currentClass]) + parseInt(JSON.parse(Players[i].guardianGames).laurels);
+  }
 
   //Check API status
   if(backend_status.APIDisabled) { O_Players = 0; }
   var APIDisabled = backend_status.APIDisabled ? "Disabled" : "Online";
 
   //Now that all data is obtained, save log every 10 minutes.
-  var sql = `INSERT INTO status (users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, broadcasts, api_status, date) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,"${ new Date().getTime() }")`
-  var inserts = [Users, T_Users, Players, T_Players, O_Players, Clans, T_Clans, Guilds, T_Guilds, Servers, Broadcasts, APIDisabled];
+  var sql = `INSERT INTO status (users_all, users_tracked, players_all, players_tracked, players_online, clans_all, clans_tracked, guilds_all, guilds_tracked, servers, broadcasts, guardian_games, api_status, date) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,"${ new Date().getTime() }")`
+  var inserts = [Users, T_Users, PlayersCount, T_Players, O_Players, Clans, T_Clans, Guilds, T_Guilds, Servers, Broadcasts, JSON.stringify(Guardian_Games), APIDisabled];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
     if(error) { console.log(`Failed to log status: ${ error }`); }
