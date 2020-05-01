@@ -476,10 +476,12 @@ client.on("message", async message => {
             else if(command === "~GG MEDALS" || command === "~GG MEDAL") { DiscordCommands.Rankings("gg_medals", message); }
             else if(command === "~GG TRIUMPHS" || command === "~GG TRIUMPH") { DiscordCommands.Rankings("gg_triumphs", message); }
             else if(command === "~GG SUPER KILLS" || command === "~GG SUPERS" || command === "~GG RUMBLE") { DiscordCommands.Rankings("gg_rumble_super_kills", message); }
+            else if(command === "~GG CLASSES" || command === "~GG CLASS") { DiscordCommands.Rankings("gg_classes", message); }
             else { DiscordCommands.Help(message, "guardianGames"); }
           }
         }
         else if(command === "~GUARDIAN GAMES" || command === "~GG") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "guardianGames"); } }
+        else if(command === "~CLASSES") { if(!CheckBanned(message)) { DiscordCommands.Rankings("gg_classes", message); } }
 
         //Clan Management
         else if(command.startsWith("~SET BROADCASTS ")) { if(!CheckBanned(message)) { Broadcasts.SetupBroadcasts(message); } }
@@ -521,7 +523,9 @@ client.on("message", async message => {
         else if(command === "~GLOBAL TRIALS OVERALL WINS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("overall_trials_wins", message); } }
         else if(command === "~GLOBAL TRIALS OVERALL FLAWLESS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("overall_trials_flawless", message); } }
         else if(command === "~GLOBAL TRIALS OVERALL CARRIES") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("overall_trials_carries", message); } }
-        else if(command === "~GLOBAL CLASSES") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("classes", message); } }
+        else if(command === "~GLOBAL CLASSES") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("gg_classes", message); } }
+        else if(command === "~GLOBAL LAURELS" || command === "~GLOBAL GG LAURELS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("gg_laurels", message); } }
+        else if(command === "~GLOBAL MEDALS" || command === "~GLOBAL GG LAURELS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("gg_medals", message); } }
 
         //Clan Global Rankings
         else if(command === "~CLANRANK FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.DisplayClanRankings("fractaline", message); } }

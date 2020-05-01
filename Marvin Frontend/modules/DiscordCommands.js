@@ -112,7 +112,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Guardian Games Help Menu")
     .setDescription("Here is a list of Guardian Games commands! Example: `~GG Laurels`")
-    .addField("Commands", "~GG Laurels`, `~GG Medals`, `~GG Triumphs`, `~GG Rumble`, `~GG Supers`, `Global Classes`")
+    .addField("Commands", "~GG Laurels`, `~GG Medals`, `~GG Triumphs`, `~GG Rumble`, `~GG Supers`, `~GG Classes`, `~Global Classes`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -1032,6 +1032,48 @@ function DisplayRankings(message, type, leaderboards, playerData) {
       .setTimestamp()
       message.channel.send({embed});
     }
+    else if(type === "gg_classes") {
+      leaderboards = leaderboards.filter(e => JSON.parse(e.guardianGames) !== null);
+      var classes = { Warlock: 0, Hunter: 0, Titan: 0 };
+      var active_classes = { Warlock: 0, Hunter: 0, Titan: 0 };
+      var medals = { Warlock: 0, Hunter: 0, Titan: 0 };
+      var laurels = { Warlock: 0, Hunter: 0, Titan: 0 };
+      for(var i in leaderboards) {
+        let lastPlayed = parseInt(leaderboards[i].lastPlayed);
+        if((new Date().getTime() - new Date(lastPlayed).getTime()) < (1000 * 60 * 15)) { active_classes[leaderboards[i].currentClass]++; }
+        classes[leaderboards[i].currentClass]++;
+        medals[leaderboards[i].currentClass] = parseInt(medals[leaderboards[i].currentClass]) + parseInt(JSON.parse(leaderboards[i].guardianGames).medals);
+        laurels[leaderboards[i].currentClass] = parseInt(laurels[leaderboards[i].currentClass]) + parseInt(JSON.parse(leaderboards[i].guardianGames).laurels);
+      }
+      
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Guardian Games - Classes")
+      .setDescription(`
+      **Total**: 
+        Titans: ${ Misc.AddCommas(classes.Titan) }
+        Hunters: ${ Misc.AddCommas(classes.Hunter) }
+        Warlocks: ${ Misc.AddCommas(classes.Warlock) }
+  
+      **Online**: 
+        Titans: ${ Misc.AddCommas(active_classes.Titan) }
+        Hunters: ${ Misc.AddCommas(active_classes.Hunter) }
+        Warlocks: ${ Misc.AddCommas(active_classes.Warlock) }
+  
+      **Overall Medals**: 
+        Titans: ${ Misc.AddCommas(medals.Titan) }
+        Hunters: ${ Misc.AddCommas(medals.Hunter) }
+        Warlocks: ${ Misc.AddCommas(medals.Warlock) }
+  
+      **Overall Laurels**: 
+        Titans: ${ Misc.AddCommas(laurels.Titan) }
+        Hunters: ${ Misc.AddCommas(laurels.Hunter) }
+        Warlocks: ${ Misc.AddCommas(laurels.Warlock) }
+      `)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
 
     //Others
     else if(type === "triumphScore") {
@@ -1594,7 +1636,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     .setTimestamp()
     message.channel.send({embed});
   }
-  else if(type === "classes") {
+  else if(type === "gg_classes") {
     leaderboards = leaderboards.filter(e => JSON.parse(e.guardianGames) !== null);
     var classes = { Warlock: 0, Hunter: 0, Titan: 0 };
     var active_classes = { Warlock: 0, Hunter: 0, Titan: 0 };
@@ -1632,6 +1674,66 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
       Hunters: ${ Misc.AddCommas(laurels.Hunter) }
       Warlocks: ${ Misc.AddCommas(laurels.Warlock) }
     `)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "gg_laurels") {
+    var leaderboard = { "names": [], "laurels": [] };
+    leaderboards = leaderboards.filter(e => JSON.parse(e.guardianGames) !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.guardianGames)["laurels"] - JSON.parse(a.guardianGames)["laurels"]; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.laurels.push(Misc.AddCommas(JSON.parse(top[i].guardianGames)["laurels"]));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.laurels.push("", Misc.AddCommas(JSON.parse(playerStats.guardianGames)["laurels"]));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Global Laurels Collected")
+    .addField("Name", leaderboard.names, true)
+    .addField("Laurels", leaderboard.laurels, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "gg_medals") {
+    var leaderboard = { "names": [], "medals": [] };
+    leaderboards = leaderboards.filter(e => JSON.parse(e.guardianGames) !== null);
+    leaderboards.sort(function(a, b) { return JSON.parse(b.guardianGames)["medals"] - JSON.parse(a.guardianGames)["medals"]; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.medals.push(Misc.AddCommas(JSON.parse(top[i].guardianGames)["medals"]));
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.medals.push("", Misc.AddCommas(JSON.parse(playerStats.guardianGames)["medals"]));
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Global Medals Donated")
+    .addField("Name", leaderboard.names, true)
+    .addField("Medals", leaderboard.medals, true)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
