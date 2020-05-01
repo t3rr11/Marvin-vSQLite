@@ -75,7 +75,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Globals Help Menu")
     .setDescription("Here is a list of global commands! Example: `~Global Time Played`")
-    .addField("Commands", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreaks`, `~Global Trials`, `Global Classes`")
+    .addField("Commands", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreaks`, `~Global Trials`, `~Global Laruels`, `~Global Medals`, `~Global Classes`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
