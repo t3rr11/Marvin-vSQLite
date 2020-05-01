@@ -267,7 +267,7 @@ function UpdatePlayerDetails(Data, callback) {
   var sql = `
   UPDATE playerInfo
   SET
-    clanId = ?, displayName = ?, timePlayed = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }",
+    clanId = ?, displayName = ?, timePlayed = ?, currentClass = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }",
     infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, wellsCompleted = ?,
     epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, leviCompletions = ?, leviPresCompletions = ?, eowCompletions = ?, eowPresCompletions = ?, sosCompletions = ?,
     sosPresCompletions = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, shatteredThrone = ?, pitOfHeresy = ?, guardianGames = ?, trials = ?,
@@ -277,6 +277,7 @@ function UpdatePlayerDetails(Data, callback) {
     Data.AccountInfo.clanId,
     Misc.cleanString(Data.AccountInfo.displayName),
     Data.AccountInfo.totalTime,
+    Data.AccountInfo.currentClass,
     Data.Rankings.infamy,
     Data.Rankings.valor,
     Data.Rankings.glory,

@@ -1,5 +1,6 @@
 //Required Libraraies
 const Log = require("../js/log.js");
+const Misc = require("../js/misc.js");
 const Config = require("../../Combined/configs/config.json");
 const Backend_Config = require("../../Combined/configs/backend_config.json");
 const fetch = require("node-fetch");
@@ -178,21 +179,28 @@ function ProcessPlayerData(response, clanId, firstScan, forcedScan) {
   });
 }
 function GetAccountInfo(response, clanId) {
-  var displayName = response.playerInfo.displayName;
-  var membershipId = response.playerInfo.membership_Id;
-  var isOnline = response.playerInfo.isOnline;
-  var joinDate = response.playerInfo.joinDate;
-  var characterIds = response.playerData.profile.data.characterIds;
-  var characterLight0 = 0; try { characterLight0 = response.playerData.characters.data[characterIds[0]].light } catch (err) {  }
-  var characterLight1 = 0; try { characterLight1 = response.playerData.characters.data[characterIds[1]].light } catch (err) {  }
-  var characterLight2 = 0; try { characterLight2 = response.playerData.characters.data[characterIds[2]].light } catch (err) {  }
-  var highestPower = Math.max(characterLight0, characterLight1, characterLight2);
-  var lastPlayed = new Date(response.playerData.profile.data.dateLastPlayed).getTime();
-  var dlcOwned = response.playerData.profile.data.versionsOwned;
-  var totalTime0 = 0; try { totalTime0 = response.playerData.characters.data[characterIds[0]].minutesPlayedTotal; } catch (err) {  }
-  var totalTime1 = 0; try { totalTime1 = response.playerData.characters.data[characterIds[1]].minutesPlayedTotal; } catch (err) {  }
-  var totalTime2 = 0; try { totalTime2 = response.playerData.characters.data[characterIds[2]].minutesPlayedTotal; } catch (err) {  }
-  var totalTimeOverall = parseInt(totalTime0) + parseInt(totalTime1) + parseInt(totalTime2);
+  let characterIds = response.playerData.profile.data.characterIds;
+  let characters = response.playerData.characters.data;
+  let lastPlayedCharacter = characters[characterIds[0]];
+  let displayName = response.playerInfo.displayName;
+  let membershipId = response.playerInfo.membership_Id;
+  let isOnline = response.playerInfo.isOnline;
+  let joinDate = response.playerInfo.joinDate;
+  let lastPlayed = new Date(response.playerData.profile.data.dateLastPlayed).getTime();
+  let dlcOwned = response.playerData.profile.data.versionsOwned;
+  let highestLight = 0;
+  let totalTime = 0;
+
+  for(let i in characterIds) {
+    //Get users last played character
+    if(new Date(characters[characterIds[i]].dateLastPlayed).getTime() > new Date(lastPlayedCharacter.dateLastPlayed).getTime()) { lastPlayedCharacter = characters[characterIds[i]]; }
+    
+    //Get users highest light character
+    if(characters[characterIds[i]].light > highestLight) { highestLight = characters[characterIds[i]].light; }
+
+    //Get users overall playtime
+    totalTime = parseInt(totalTime) + parseInt(characters[characterIds[i]].minutesPlayedTotal);
+  }
 
   return {
     "displayName": displayName,
@@ -200,9 +208,10 @@ function GetAccountInfo(response, clanId) {
     "clanId": clanId,
     "isOnline": isOnline,
     "joinDate": joinDate,
-    "highestCurrrentPower": highestPower,
-    "totalTime": totalTimeOverall,
+    "highestCurrrentPower": highestLight,
+    "totalTime": totalTime,
     "lastPlayed": lastPlayed,
+    "currentClass": Misc.GetClassName(lastPlayedCharacter.classType),
     "dlcOwned": dlcOwned
   }
 }
@@ -497,6 +506,7 @@ function SendBroadcast(data, type, broadcast, count) {
       let BroadcastMessage = null;
       if(type === "item") { if(count === -1) { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained ${ broadcast }`; } else { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained ${ broadcast } in ${ count } ${ count > 1 ? "raids!" : "raid!" }` } }
       else if(type === "title") { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained the ${ broadcast } title!` }
+      else if(type === "other") { BroadcastMessage = broadcast; }
       Log.SaveLog("Clans", `[${ data.AccountInfo.clanId }]: ${ BroadcastMessage }`);
     }
   });

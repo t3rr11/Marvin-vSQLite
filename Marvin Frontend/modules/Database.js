@@ -10,7 +10,7 @@ module.exports = {
   GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetUsers, GetGlobalDryStreak, GetClanDryStreaks, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
   CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, 
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
-  RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast,
+  RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
   ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking
 };
 
@@ -524,5 +524,15 @@ function EnableTracking(guild_id, callback) {
         callback(false, false);
       }
     }
+  });
+}
+function ToggleBroadcasts(guild_id, type, previousValue, callback) {
+  let sql = null;
+  if(type === "Item") { sql = `UPDATE guilds SET enable_broadcasts_items = "${ !JSON.parse(previousValue) }" WHERE guild_id = "${ guild_id }"` }
+  else if(type === "Title") { sql = `UPDATE guilds SET enable_broadcasts_titles = "${ !JSON.parse(previousValue) }" WHERE guild_id = "${ guild_id }"` }
+  else if(type === "Clan") { sql = `UPDATE guilds SET enable_broadcasts_clans = "${ !JSON.parse(previousValue) }" WHERE guild_id = "${ guild_id }"` }
+  db.query(sql, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error toggling broadcast for: ${ type }, Error: ${ error }`); callback(true); }
+    else { callback(false); }
   });
 }

@@ -5,7 +5,7 @@ const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
 const Database = require('./Database.js');
 
-module.exports = { SetupBroadcasts, RemoveBroadcasts, AddToBlacklist, AddToWhitelist, SendBroadcast, SendFinishedLoadingAnnouncement };
+module.exports = { SetupBroadcasts, ConfigureBroadcasts, ToggleBroadcasts, RemoveBroadcasts, AddToBlacklist, AddToWhitelist, SendBroadcast, SendFinishedLoadingAnnouncement };
 
 async function SetupBroadcasts(message) {
   Database.CheckRegistered(message.author.id, function(isError, isFound, data) {
@@ -30,6 +30,61 @@ async function SetupBroadcasts(message) {
         });
       } else { message.reply("Please register first. Use: `~Register example`"); }
     } else { Log.SaveError("Failed to set broadcasts channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
+  });
+}
+async function ConfigureBroadcasts(message) {
+  Database.CheckRegistered(message.author.id, function(isError, isFound, data) {
+    if(!isError) {
+      if(isFound) {
+        Database.GetGuild(message.guild.id, function(isError, isFound, data) {
+          if(!isError) {
+            if(isFound) {
+              if(data.creator_id === message.author.id || message.member.hasPermission("ADMINISTRATOR")) {
+                if(data.broadcasts_channel !== "null") {
+                  let broadcastsEnabled = [];
+                  let ignoredBroadcasts = [];
+                  let whitelistedItems = data.whitelist.split(",");
+                  data.enable_broadcasts_items === "true" ? broadcastsEnabled.push("Items") : ignoredBroadcasts.push("Items");
+                  data.enable_broadcasts_titles === "true" ? broadcastsEnabled.push("Titles") : ignoredBroadcasts.push("Titles");
+                  data.enable_broadcasts_clans === "true" ? broadcastsEnabled.push("Clans") : ignoredBroadcasts.push("Clans");
+                  const embed = new Discord.RichEmbed()
+                  .setColor(0x0099FF)
+                  .setAuthor("Configure Broadcasts")
+                  .setDescription(`
+                    Broadcasts Channel: <#${ data.broadcasts_channel }>
+                    Item Whitelist Enabled: ${ data.enable_whitelist }
+                    ${ data.enable_whitelist === "true" ? (`${ whitelistedItems.length > 0 ? (`**Whitelisted Items: ** \n ${ whitelistedItems.map((item) => { return(` ${ item }`) }) } \n`) : "" }`) : "" }
+                    ${ broadcastsEnabled.length > 0 ? (`**Enabled Broadcasts: ** \n ${ broadcastsEnabled.map((item) => { return(` ${ item }`) }) }`) : "" }
+                    ${ ignoredBroadcasts.length > 0 ? (`**Disabled Broadcasts: ** \n ${ ignoredBroadcasts.map((item) => { return(` ${ item }`) }) }\n`) : "" }
+                    To edit these options please see: \n\`~help broadcasts\`
+                  `)
+                  .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+                  .setTimestamp()
+                  message.channel.send({embed});
+                }
+                else {
+                  const embed = new Discord.RichEmbed()
+                  .setColor(0x0099FF)
+                  .setAuthor("Configure Broadcasts")
+                  .setDescription(`
+                    Broadcasts are currently disabled for this guild. If you would like to enable them please use: \`~Set Broadcasts #example\`.
+                    Replace example with whichever channel you would like to have the broadcasts be announced into.
+                  `)
+                  .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+                  .setTimestamp()
+                  message.channel.send({embed});
+                }
+              }
+              else { message.reply("Only discord administrators or the one who linked this server to the clan edit the clan."); }
+            }
+            else { message.reply("Please register a clan to track first. Use: `~Set clan`"); }
+          }
+          else { Log.SaveError("Failed to set broadcasts channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
+        });
+      }
+      else { message.reply("Please register first. Use: `~Register example`"); }
+    }
+    else { Log.SaveError("Failed to set broadcasts channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
   });
 }
 async function RemoveBroadcasts(message) {
@@ -138,6 +193,7 @@ async function SendBroadcast(client, broadcast) {
     BroadcastMessage = `${ broadcast.displayName } has obtained the ${ broadcast.broadcast } title!` 
   }
   else if(BroadcastType === "clan") { BroadcastMessage = broadcast.broadcast; }
+  else if(BroadcastType === "other") { BroadcastMessage = broadcast.broadcast; }
   else { Log.SaveError(`New broadcast type found, but we are unsure of what to do with it. Type: ${ BroadcastType }`); }
 
   //Check to see if broadcasts are enabled. Usually disabled for debugging.
@@ -194,6 +250,10 @@ async function SendBroadcast(client, broadcast) {
                   try { client.guilds.get(Guilds[i].guild_id).channels.get(Guilds[i].broadcasts_channel).send({embed}); }
                   catch(err) { console.log(`Failed to send catalyst broadcast to ${ Guilds[i].guild_id } because of ${ err }`); }
                 }
+                else if(BroadcastType === "other" && Guilds[i].enable_broadcasts_others === "true") {
+                  try { client.guilds.get(Guilds[i].guild_id).channels.get(Guilds[i].broadcasts_channel).send({embed}); }
+                  catch(err) { console.log(`Failed to send other broadcast to ${ Guilds[i].guild_id } because of ${ err }`); }
+                }
               }
             }
           }
@@ -218,5 +278,43 @@ async function SendFinishedLoadingAnnouncement(client, Clan) {
         }
       }
     }
+  });
+}
+async function ToggleBroadcasts(message, type) {
+  Database.CheckRegistered(message.author.id, function(isError, isFound, data) {
+    if(!isError) {
+      if(isFound) {
+        Database.GetGuild(message.guild.id, function(isError, isFound, data) {
+          if(!isError) {
+            if(isFound) {
+              if(data.creator_id === message.author.id || message.member.hasPermission("ADMINISTRATOR")) {
+                Database.ToggleBroadcasts(message.guild.id, type, data.enable_broadcasts_items, function(isError) {
+                  if(!isError) {
+                    if(type === "Item") {
+                      if(data.enable_broadcasts_items === "true") { message.channel.send(`${ type } Broadcasts will no longer be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
+                      else { message.channel.send(`${ type } Broadcasts have been re-enabled and will be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
+                    }
+                    else if(type === "Title") {
+                      if(data.enable_broadcasts_titles === "true") { message.channel.send(`${ type } Broadcasts will no longer be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
+                      else { message.channel.send(`${ type } Broadcasts have been re-enabled and will be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
+                    }
+                    else if(type === "Clan") {
+                      if(data.enable_broadcasts_clans === "true") { message.channel.send(`${ type } Broadcasts will no longer be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
+                      else { message.channel.send(`${ type } Broadcasts have been re-enabled and will be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
+                    }
+                  }
+                  else { Log.SaveError(`Failed to toggle ${ type } broadcast for ${ message.guild.id }`); message.reply("An error has occured... This has been logged, sorry about that!"); }
+                });
+              }
+              else { message.reply("Only discord administrators or the one who linked this server to the clan edit the clan."); }
+            }
+            else { message.reply("Please register a clan to track first. Use: `~Set clan`"); }
+          }
+          else { Log.SaveError("Failed to set broadcasts channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
+        });
+      }
+      else { message.reply("Please register first. Use: `~Register example`"); }
+    }
+    else { Log.SaveError("Failed to set broadcasts channel"); message.reply("An error has occured... This has been logged, sorry about that!"); }
   });
 }

@@ -334,8 +334,7 @@ client.on("message", async message => {
         //Help menu
         else if(command.startsWith("~HELP ")) {
           if(!CheckBanned(message)) {
-            if(command === "~HELP ALL") { DiscordCommands.Help(message, "all"); }
-            else if(command === "~HELP RANKINGS") { DiscordCommands.Help(message, "rankings"); }
+            if(command === "~HELP RANKINGS") { DiscordCommands.Help(message, "rankings"); }
             else if(command === "~HELP RAIDS") { DiscordCommands.Help(message, "raids"); }
             else if(command === "~HELP ITEMS") { DiscordCommands.Help(message, "items"); }
             else if(command === "~HELP TITLES") { DiscordCommands.Help(message, "titles"); }
@@ -345,6 +344,7 @@ client.on("message", async message => {
             else if(command === "~HELP GLOBALS" || command === "~HELP GLOBAL") { DiscordCommands.Help(message, "globals"); }
             else if(command === "~HELP DRYSTREAKS" || command === "HELP DRYSTREAK") { DiscordCommands.Help(message, "drystreaks"); }
             else if(command === "~HELP TRIALS") { DiscordCommands.Help(message, "trials"); }
+            else if(command === "~HELP BROADCASTS") { DiscordCommands.BroadcastsHelp(message); }
             else if(command === "~HELP OTHERS" || command === "~HELP OTHER") { DiscordCommands.Help(message, "others"); }
             else { message.reply("I am unsure of that help command, type `~help` to see them all."); }
           }
@@ -497,12 +497,17 @@ client.on("message", async message => {
         else if(command === "~TRACKED CLANS" || command === "~CLANS TRACKED") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedClans(message); } }
         else if(command === "~REAUTH") { if(!CheckBanned(message)) { DiscordCommands.RenewLeadership(message); } }
         else if(command === "~CLANINFO" || command === "~CLAN INFO") { if(!CheckBanned(message)) { DiscordCommands.ClanInfo(message); } }
+        else if(command === "~CONFIG BROADCASTS" || command === "~CONFIGURE BROADCASTS") { if(!CheckBanned(message)) { Broadcasts.ConfigureBroadcasts(message); } }
+        else if(command === "~TOGGLE BROADCASTS") { if(!CheckBanned(message)) { DiscordCommands.BroadcastsHelp(message); } }
+        else if(command === "~TOGGLE ITEM BROADCASTS" || command === "~TOGGLE ITEMS BROADCASTS" || command === "~TOGGLE ITEM BROADCAST" || command === "~TOGGLE ITEMS BROADCAST") { if(!CheckBanned(message)) { Broadcasts.ToggleBroadcasts(message, "Item"); } }
+        else if(command === "~TOGGLE TITLE BROADCASTS" || command === "~TOGGLE TITLES BROADCASTS" || command === "~TOGGLE TITLE BROADCAST" || command === "~TOGGLE TITLES BROADCAST") { if(!CheckBanned(message)) { Broadcasts.ToggleBroadcasts(message, "Title"); } }
+        else if(command === "~TOGGLE CLAN BROADCASTS" || command === "~TOGGLE CLANS BROADCASTS" || command === "~TOGGLE CLAN BROADCAST" || command === "~TOGGLE CLANS BROADCAST") { if(!CheckBanned(message)) { Broadcasts.ToggleBroadcasts(message, "Clan"); } }
 
         //Globals
         else if(command.startsWith("~GLOBAL DRYSTREAK ")) { if(!CheckBanned(message)) { DiscordCommands.GlobalDryStreak(message, command.substr("~GLOBAL DRYSTREAK ".length)) } }
         else if(command === "~GLOBAL DRYSTREAK" || command === "~GLOBAL DRYSTREAKS") { if(!CheckBanned(message)) { DiscordCommands.DrystreaksHelp(message); } }
-        else if(command === "~GLOBAL IRON BANNER") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("ironBanner", message); } }
-        else if(command === "~GLOBAL SEASON RANK") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("seasonRank", message); } }
+        else if(command === "~GLOBAL IRON BANNER" || command === "~GLOBAL IRONBANNER") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("ironBanner", message); } }
+        else if(command === "~GLOBAL SEASON RANK" || command === "~GLOBAL SEASON RANKS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("seasonRank", message); } }
         else if(command === "~GLOBAL FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("fractaline", message); } }
         else if(command === "~GLOBAL RESONANCE") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("resonance", message); } }
         else if(command === "~GLOBAL CLAN TIME" || command === "~GLOBAL TIME PLAYED" || command === "~GLOBAL TOTAL TIME" || command === "~GLOBAL TOTALTIME") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("totalTime", message); } }
@@ -516,6 +521,7 @@ client.on("message", async message => {
         else if(command === "~GLOBAL TRIALS OVERALL WINS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("overall_trials_wins", message); } }
         else if(command === "~GLOBAL TRIALS OVERALL FLAWLESS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("overall_trials_flawless", message); } }
         else if(command === "~GLOBAL TRIALS OVERALL CARRIES") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("overall_trials_carries", message); } }
+        else if(command === "~GLOBAL CLASSES") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("classes", message); } }
 
         //Clan Global Rankings
         else if(command === "~CLANRANK FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.DisplayClanRankings("fractaline", message); } }

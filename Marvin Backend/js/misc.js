@@ -1,9 +1,14 @@
 const Discord = require('discord.js');
 const Long = require('long');
-module.exports = { GetDateString, GetReadableDateTime, GetReadableDate, formatTime, IsJson, AddCommas, DeleteMessages, GetClanID, GetMembershipID, getDefaultChannel, cleanString };
+module.exports = { GetDateString, GetReadableDateTime, GetReadableDate, formatTime, IsJson, GetClassName, AddCommas, DeleteMessages, GetClanID, GetMembershipID, getDefaultChannel, cleanString };
 
 function AddCommas(x) { try { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") } catch (err) { return x } }
 function IsJson(str) { try { JSON.parse(str); } catch (e) { return false; } return true; }
+function GetClassName(classType) {
+  if(classType === 0) { return "Titan" }
+  else if(classType === 1) { return "Hunter" }
+  else if(classType === 2) { return "Warlock" }
+}
 
 function GetDateString() {
   var d = new Date();

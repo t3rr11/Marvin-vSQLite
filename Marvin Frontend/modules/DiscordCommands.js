@@ -134,7 +134,16 @@ function BroadcastsHelp(message) {
   .setColor(0x0099FF)
   .setAuthor("Broadcasts Help Menu")
   .setDescription("By default clan broadcasts are disabled, To enable this you can set a broadcasts channel.")
-  .addField("Broadcasts Commands", "`~Set Broadcasts #channelName` \n`~Remove Broadcasts` \n`~Filter example` - To add items or titles to blacklist\n `~Toggle Whitelist`\n `~Whitelist example` - To add items or titles to the whitelist.")
+  .addField("Broadcasts Commands", `
+  \`~Set broadcasts #channelName\`
+  \`~Remove broadcasts\`
+  \`~Filter example\` - To add items or titles to blacklist
+  \`~Whitelist example\` - To add items or titles to the whitelist.
+  \`~Toggle whitelist\`
+  \`~Toggle item broadcasts\`
+  \`~Toggle title broadcasts\`
+  \`~Toggle clan broadcasts\`
+  `)
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});
@@ -1581,6 +1590,48 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     .setAuthor("Top 10 Overall Trials Carries")
     .addField("Name", leaderboard.names, true)
     .addField("Carries", leaderboard.carries, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "classes") {
+    leaderboards = leaderboards.filter(e => JSON.parse(e.guardianGames) !== null);
+    var classes = { Warlock: 0, Hunter: 0, Titan: 0 };
+    var active_classes = { Warlock: 0, Hunter: 0, Titan: 0 };
+    var medals = { Warlock: 0, Hunter: 0, Titan: 0 };
+    var laurels = { Warlock: 0, Hunter: 0, Titan: 0 };
+    for(var i in leaderboards) {
+      let lastPlayed = parseInt(leaderboards[i].lastPlayed);
+      if((new Date().getTime() - new Date(lastPlayed).getTime()) < (1000 * 60 * 15)) { active_classes[leaderboards[i].currentClass]++; }
+      classes[leaderboards[i].currentClass]++;
+      medals[leaderboards[i].currentClass] = parseInt(medals[leaderboards[i].currentClass]) + parseInt(JSON.parse(leaderboards[i].guardianGames).medals);
+      laurels[leaderboards[i].currentClass] = parseInt(laurels[leaderboards[i].currentClass]) + parseInt(JSON.parse(leaderboards[i].guardianGames).laurels);
+    }
+    
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Guardian Games - Classes")
+    .setDescription(`
+    Total: 
+      Titans: ${ Misc.AddCommas(classes.Titan) }
+      Hunters: ${ Misc.AddCommas(classes.Hunter) }
+      Warlocks: ${ Misc.AddCommas(classes.Warlock) }
+
+    Online: 
+      Titans: ${ Misc.AddCommas(active_classes.Titan) }
+      Hunters: ${ Misc.AddCommas(active_classes.Hunter) }
+      Warlocks: ${ Misc.AddCommas(active_classes.Warlock) }
+
+    Overall Medals: 
+      Titans: ${ Misc.AddCommas(medals.Titan) }
+      Hunters: ${ Misc.AddCommas(medals.Hunter) }
+      Warlocks: ${ Misc.AddCommas(medals.Warlock) }
+
+    Overall Laurels: 
+      Titans: ${ Misc.AddCommas(laurels.Titan) }
+      Hunters: ${ Misc.AddCommas(laurels.Hunter) }
+      Warlocks: ${ Misc.AddCommas(laurels.Warlock) }
+    `)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
