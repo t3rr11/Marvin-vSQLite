@@ -75,7 +75,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Globals Help Menu")
     .setDescription("Here is a list of global commands! Example: `~Global Time Played`")
-    .addField("Commands", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreaks`, `~Global Trials`")
+    .addField("Commands", "`~Global Iron Banner`, `~Global Time Played`, `~Global Season Rank`, `~Global Triumph Score`, `~Global Drystreaks`, `~Global Trials`, `Global Classes`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -112,7 +112,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Guardian Games Help Menu")
     .setDescription("Here is a list of Guardian Games commands! Example: `~GG Laurels`")
-    .addField("Commands", "`~GG Laurels`, `~GG Medals`, `~GG Triumphs`, `~GG Rumble`, `~GG Supers`")
+    .addField("Commands", "~GG Laurels`, `~GG Medals`, `~GG Triumphs`, `~GG Rumble`, `~GG Supers`, `Global Classes`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -1612,22 +1612,22 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     .setColor(0x0099FF)
     .setAuthor("Guardian Games - Classes")
     .setDescription(`
-    Total: 
+    **Total**: 
       Titans: ${ Misc.AddCommas(classes.Titan) }
       Hunters: ${ Misc.AddCommas(classes.Hunter) }
       Warlocks: ${ Misc.AddCommas(classes.Warlock) }
 
-    Online: 
+    **Online**: 
       Titans: ${ Misc.AddCommas(active_classes.Titan) }
       Hunters: ${ Misc.AddCommas(active_classes.Hunter) }
       Warlocks: ${ Misc.AddCommas(active_classes.Warlock) }
 
-    Overall Medals: 
+    **Overall Medals**: 
       Titans: ${ Misc.AddCommas(medals.Titan) }
       Hunters: ${ Misc.AddCommas(medals.Hunter) }
       Warlocks: ${ Misc.AddCommas(medals.Warlock) }
 
-    Overall Laurels: 
+    **Overall Laurels**: 
       Titans: ${ Misc.AddCommas(laurels.Titan) }
       Hunters: ${ Misc.AddCommas(laurels.Hunter) }
       Warlocks: ${ Misc.AddCommas(laurels.Warlock) }
