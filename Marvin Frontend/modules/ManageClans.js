@@ -187,8 +187,8 @@ async function GetTrackedClans(message) {
     for(var i in clans) {
       await new Promise(resolve =>
         Database.GetClan(clans[i], function(isError, isFound, data) {
-          clanData.names.push(`${ parseInt(i)+1 }. ${ data.clan_name }`);
-          clanData.ids.push(data.clan_id);
+          try { clanData.names.push(`${ parseInt(i)+1 }. ${ data.clan_name }`); } catch (err) { clanData.names.push(`${ parseInt(i)+1 }. No clan name yet. Still loading data...`) }
+          try { clanData.ids.push(data.clan_id); } catch (err) { clanData.ids.push(clans[i]); }
           resolve(true);
         })
       );

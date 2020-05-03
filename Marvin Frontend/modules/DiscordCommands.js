@@ -2284,21 +2284,24 @@ function Trials(message, type) {
 function DisplayTrials(message, leaderboards, playerData, type) {
   try {
     var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-    var name = playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x });
-    var trials = JSON.parse(playerStats.trials)[type];
-
-    const embed = new Discord.RichEmbed()
-    .setColor(0x0099FF)
-    .setAuthor(`Viewing ${ Misc.capitalize(type) } Trials Statistics for ${ name }`)
-    .addField("Name", `${ name }`, true)
-    .addField("Wins", `${ Misc.AddCommas(Math.round(trials.wins)) }`, true)
-    .addField("Flawless", `${ Misc.AddCommas(Math.round(trials.flawlessTickets)) }`, true)
-    .addField("Final Blows", `${ Misc.AddCommas(Math.round(trials.finalBlows)) }`, true)
-    .addField("Post Flawless Wins", `${ Misc.AddCommas(Math.round(trials.postFlawlessWins)) }`, true)
-    .addField("Carries", `${ Misc.AddCommas(Math.round(trials.carries)) }`, true)
-    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-    .setTimestamp()
-    message.channel.send({embed});
+    if(playerStats !== undefined) {
+      var name = playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x });
+      var trials = JSON.parse(playerStats.trials)[type];
+  
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor(`Viewing ${ Misc.capitalize(type) } Trials Statistics for ${ name }`)
+      .addField("Name", `${ name }`, true)
+      .addField("Wins", `${ Misc.AddCommas(Math.round(trials.wins)) }`, true)
+      .addField("Flawless", `${ Misc.AddCommas(Math.round(trials.flawlessTickets)) }`, true)
+      .addField("Final Blows", `${ Misc.AddCommas(Math.round(trials.finalBlows)) }`, true)
+      .addField("Post Flawless Wins", `${ Misc.AddCommas(Math.round(trials.postFlawlessWins)) }`, true)
+      .addField("Carries", `${ Misc.AddCommas(Math.round(trials.carries)) }`, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else { message.reply("Could not find you in our database, Your clan might not be tracked by Marvin. To do so use: `~set clan` or `~add clan` to add another clan."); }
   }
   catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
 }
