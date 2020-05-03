@@ -288,23 +288,33 @@ async function ToggleBroadcasts(message, type) {
           if(!isError) {
             if(isFound) {
               if(data.creator_id === message.author.id || message.member.hasPermission("ADMINISTRATOR")) {
-                Database.ToggleBroadcasts(message.guild.id, type, data.enable_broadcasts_items, function(isError) {
-                  if(!isError) {
-                    if(type === "Item") {
+                if(type === "Item") {
+                  Database.ToggleBroadcasts(message.guild.id, type, data.enable_broadcasts_items, function(isError) {
+                    if(!isError) {
                       if(data.enable_broadcasts_items === "true") { message.channel.send(`${ type } Broadcasts will no longer be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
-                      else { message.channel.send(`${ type } Broadcasts have been re-enabled and will be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
+                      else { message.channel.send(`${ type } Broadcasts have been re-enabled and will be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }  
                     }
-                    else if(type === "Title") {
+                    else { Log.SaveError(`Failed to toggle ${ type } broadcast for ${ message.guild.id }`); message.reply("An error has occured... This has been logged, sorry about that!"); }
+                  });
+                }
+                else if(type === "Title") {
+                  Database.ToggleBroadcasts(message.guild.id, type, data.enable_broadcasts_titles, function(isError) {
+                    if(!isError) {
                       if(data.enable_broadcasts_titles === "true") { message.channel.send(`${ type } Broadcasts will no longer be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
                       else { message.channel.send(`${ type } Broadcasts have been re-enabled and will be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
                     }
-                    else if(type === "Clan") {
+                    else { Log.SaveError(`Failed to toggle ${ type } broadcast for ${ message.guild.id }`); message.reply("An error has occured... This has been logged, sorry about that!"); }
+                  });
+                }
+                else if(type === "Clan") {
+                  Database.ToggleBroadcasts(message.guild.id, type, data.enable_broadcasts_clans, function(isError) {
+                    if(!isError) {
                       if(data.enable_broadcasts_clans === "true") { message.channel.send(`${ type } Broadcasts will no longer be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
                       else { message.channel.send(`${ type } Broadcasts have been re-enabled and will be sent to the broadcasts channel. You can see or configure other broadcasts by using: \`~Configure Broadcasts\``); }
                     }
-                  }
-                  else { Log.SaveError(`Failed to toggle ${ type } broadcast for ${ message.guild.id }`); message.reply("An error has occured... This has been logged, sorry about that!"); }
-                });
+                    else { Log.SaveError(`Failed to toggle ${ type } broadcast for ${ message.guild.id }`); message.reply("An error has occured... This has been logged, sorry about that!"); }
+                  });
+                }
               }
               else { message.reply("Only discord administrators or the one who linked this server to the clan edit the clan."); }
             }
