@@ -45,7 +45,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Seasonal Help Menu")
     .setDescription("Here is a list of seasonal commands! Example: `~Fractaline`")
-    .addField("Commands", "`~Season Rank`, `~Guardian Games`, `~GG`")
+    .addField("Commands", "`~Season Rank`, `~Guardian Games`, `~GG`, `~THE LIE`, `~FELWINTERS`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -1734,6 +1734,28 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     .setAuthor("Top 10 Global Medals Donated")
     .addField("Name", leaderboard.names, true)
     .addField("Medals", leaderboard.medals, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "lie_quest") {
+    leaderboards = leaderboards.filter(e => JSON.parse(e.lieCommQuest) !== null);
+    var planets = { EDZ: 0, MOON: 0, IO: 0 };
+    for(var i in leaderboards) {
+      var lieCommQuest = JSON.parse(leaderboards[i].lieCommQuest);
+      if(planets.EDZ < lieCommQuest.EDZ) { planets.EDZ = lieCommQuest.EDZ }
+      if(planets.MOON < lieCommQuest.MOON) { planets.MOON = lieCommQuest.MOON }
+      if(planets.IO < lieCommQuest.IO) { planets.IO = lieCommQuest.IO }
+    }
+    
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Felwinter's Lie Global Progress")
+    .setDescription(`
+    EDZ: ${ Misc.AddCommas(planets.EDZ) } / 3,000,000 (${ Math.floor((planets.EDZ / 3000000) * 100) }%)
+    MOON: ${ Misc.AddCommas(planets.MOON) } / 3,000,000 (${ Math.floor((planets.MOON / 3000000) * 100) }%)
+    IO: ${ Misc.AddCommas(planets.IO) } / 3,000,000 (${ Math.floor((planets.IO / 3000000) * 100) }%)
+    `)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
