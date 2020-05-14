@@ -271,7 +271,7 @@ function UpdatePlayerDetails(Data, callback) {
     infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, wellsCompleted = ?,
     epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, leviCompletions = ?, leviPresCompletions = ?, eowCompletions = ?, eowPresCompletions = ?, sosCompletions = ?,
     sosPresCompletions = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, shatteredThrone = ?, pitOfHeresy = ?, guardianGames = ?, trials = ?,
-    lastPlayed = ?, isPrivate = "false", firstLoad = "false"
+    lieCommQuest = ?, lastPlayed = ?, isPrivate = "false", firstLoad = "false"
   WHERE membershipId = ?`;
   var inserts = [
     Data.AccountInfo.clanId,
@@ -308,6 +308,7 @@ function UpdatePlayerDetails(Data, callback) {
     JSON.stringify(Data.Others.pitOfHeresy),
     JSON.stringify(Data.Others.guardianGames),
     JSON.stringify(Data.Rankings.trials),
+    JSON.stringify(Data.Others.lieCommQuest),
     Data.AccountInfo.lastPlayed,
     Data.AccountInfo.membershipId
   ];

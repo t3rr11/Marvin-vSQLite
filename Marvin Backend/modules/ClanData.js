@@ -436,6 +436,12 @@ function GetOthers(response) {
   var GG_RumbleSupers = "0"; try { GG_RumbleSupers = response.playerData.profileRecords.data.records["3672040342"].objectives[0].progress; } catch (err) { }
   var GG_Triumphs = "0"; try { GG_Triumphs = response.playerData.profileRecords.data.records["3199735617"].objectives[0].progress; } catch (err) { }
 
+  //Lie Quest
+  var lieCommQuest = { "EDZ": 0, "MOON": 0, "IO": 0 };
+  try { lieCommQuest.EDZ = response.playerData.characterProgressions.data[characterIds[0]].uninstancedItemObjectives[1797229574][0].progress; } catch (err) { }
+  try { lieCommQuest.MOON = response.playerData.characterProgressions.data[characterIds[0]].uninstancedItemObjectives[1797229574][1].progress; } catch (err) { }
+  try { lieCommQuest.IO = response.playerData.characterProgressions.data[characterIds[0]].uninstancedItemObjectives[1797229574][2].progress; } catch (err) { }
+
   return {
     "menageire": menageire,
     "runes": runes,
@@ -444,7 +450,8 @@ function GetOthers(response) {
     "epRankings": epsCompleted,
     "shatteredThrone": { "completed": sT_completed, "flawless": sT_flawless, "solo": sT_solo, "solo_flawless": sT_solo_flawless },
     "pitOfHeresy": { "completed": pOH_completed, "flawless": pOH_flawless, "solo": pOH_solo, "solo_flawless": pOH_solo_flawless },
-    "guardianGames": { "laurels": GG_Laurels, "medals": GG_Medals, "rumble_super_kills": GG_RumbleSupers, "triumphs": GG_Triumphs }
+    "guardianGames": { "laurels": GG_Laurels, "medals": GG_Medals, "rumble_super_kills": GG_RumbleSupers, "triumphs": GG_Triumphs },
+    "lieCommQuest": { "EDZ": lieCommQuest.EDZ, "MOON": lieCommQuest.MOON, "IO": lieCommQuest.IO }
   }
 }
 
