@@ -323,7 +323,7 @@ client.on("message", async message => {
           if(new Date(NewSeasonDate) - new Date() > 0) { message.channel.send(`Next season starts in: ${ Misc.formatTime((new Date(NewSeasonDate) - new Date().getTime()) / 1000) }`); }
           else { message.channel.send(`Season ${ Config.currentSeason } has already started!`) }
         }
-        else if(command === "~CURRENT SEASON" || command === "~SEASON") { message.channel.send(`Destiny 2 is current in it's ${ Config.currentSeason } season. Season ${ Config.currentSeason+1 } starts in: ${ Misc.formatTime((new Date(NewSeasonDate) - new Date().getTime()) / 1000) }`) }
+        else if(command === "~CURRENT SEASON" || command === "~SEASON") { message.channel.send(`Destiny 2 is currently in season ${ Config.currentSeason }. Season ${ Config.currentSeason+1 } starts in: ${ Misc.formatTime((new Date(NewSeasonDate) - new Date().getTime()) / 1000) }`) }
         else if(command === "~TEST") {
           if(message.author.id === "194972321168097280") {
             //message.reply("We saw and we did nothing.");
