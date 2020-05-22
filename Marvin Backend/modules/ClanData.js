@@ -361,7 +361,10 @@ function GetItems(response) {
     { "name": "A Thousand Wings (Whisper Ship)", "collectibleHash": 3142437750 },
     { "name": "SCRAP CF-717-91 (Outbreak Ship)", "collectibleHash": 1840126886 },
     { "name": "Silver Tercel (Dreaming City Sparrow)", "collectibleHash": 1469913807 },
-    { "name": "Heir Apparent", "collectibleHash": 2842076592 },
+    { "name": "Heir Apparent", "collectibleHash": 2842076592 }
+  ];
+
+  let disabledItems = [
     { "name": "Felwinter's Lie", "collectibleHash": 3371544734 }
   ];
   var items = [];
@@ -389,7 +392,8 @@ function GetTitles(response) {
     { "name": "Harbinger", "recordHash": 3793754396 },
     { "name": "Savior", "recordHash": 2460356851 },
     { "name": "Almighty", "recordHash": 2860165064 },
-    { "name": "Flawless", "recordHash": 2945528800 }
+    { "name": "Flawless", "recordHash": 2945528800 },
+    { "name": "Conqueror", "recordHash": 1983630873 }
   ];
   var titles = [];
   for(var i in titleList) { if(response.playerData.profileRecords.data.records[titleList[i].recordHash].objectives[0].complete) { titles.push(titleList[i].name) } }

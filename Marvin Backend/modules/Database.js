@@ -235,7 +235,12 @@ async function UpdateClanDetails(ClanDetails, Online_Players) {
               WHERE 
                 clan_id="${ ClanDetails.detail.groupId }"
               `;
-              var inserts = [ClanDetails.detail.name, ClanDetails.detail.clanInfo.clanCallsign, ClanDetails.detail.memberCount, ClanDetails.detail.clanInfo.d2ClanProgressions["584850370"].level];
+              var inserts = [
+                ClanDetails.detail.name, 
+                ClanDetails.detail.clanInfo.clanCallsign, 
+                ClanDetails.detail.memberCount, 
+                ClanDetails.detail.clanInfo.d2ClanProgressions["584850370"].level
+              ];
               sql = db.format(sql, inserts);
               db.query(sql, function(error, rows, fields) {
                 if(!!error) { Log.SaveError(`Error updating clan details for (clan_id: ${ ClanDetails.detail.groupId }), Error: ${ error }`); }
