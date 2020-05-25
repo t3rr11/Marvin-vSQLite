@@ -17,7 +17,7 @@ div { margin: 0px; padding:0px; }
   border-right: 1px darkgray solid;
   text-align: center;
   display: grid;
-  grid-template-rows: auto 50px 220px 175px;
+  grid-template-rows: auto 50px 180px 175px;
   box-sizing: border-box;
   overflow: hidden;
   border-top: 1px darkgray solid;

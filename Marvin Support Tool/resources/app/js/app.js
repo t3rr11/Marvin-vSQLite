@@ -1,3 +1,4 @@
+const Misc = require('../js/misc');
 const fs = require('fs');
 
 var isRaw = false;
@@ -146,14 +147,12 @@ async function LoadStatus() {
   document.getElementById('status').innerHTML = '';
   document.getElementById('status').innerHTML += `<div><b>Users: </b>${ AddCommas(Frontend_Status.users) }</div>`;
   document.getElementById('status').innerHTML += `<div><b>Servers: </b>${ AddCommas(Frontend_Status.servers) }</div>`;
-  document.getElementById('status').innerHTML += `<div><b>Clans: </b>${ AddCommas(Frontend_Status.clans) }</div>`;
-  document.getElementById('status').innerHTML += `<div><b>Players: </b>${ AddCommas(Frontend_Status.players) }</div>`;
   document.getElementById('status').innerHTML += `<div><b>Scans: </b>${ AddCommas(Backend_Status.scans) }</div>`;
   document.getElementById('status').innerHTML += `<div><b>Scan Speed: </b>${ Backend_Status.processingClans > 1 ? (Backend_Status.processingClans + " clans / s") : (Backend_Status.processingClans + " clan / s") }</div>`;
-  document.getElementById('status').innerHTML += `<div><b>Frontend: </b>${ Frontend_Status.uptime }</div>`;
-  document.getElementById('status').innerHTML += `<div><b>Backend: </b>${ Backend_Status.uptime }</div>`;
-  document.getElementById('status').innerHTML += `<div><b>Scan Time: </b>${ Backend_Status.scanTime }</div>`;
-  document.getElementById('status').innerHTML += `<div><b>Last Scan: </b>${ Backend_Status.lastScan } ago</div>`;
+  document.getElementById('status').innerHTML += `<div><b>Frontend: </b>${ Misc.formatTime(Frontend_Status.uptime / 1000) }</div>`;
+  document.getElementById('status').innerHTML += `<div><b>Backend: </b>${ Misc.formatTime(Backend_Status.uptime / 1000) }</div>`;
+  document.getElementById('status').innerHTML += `<div><b>Scan Time: </b>${ Misc.formatTime(Backend_Status.scanTime / 1000) }</div>`;
+  document.getElementById('status').innerHTML += `<div><b>Last Scan: </b>${ Misc.formatTime(Backend_Status.lastScan / 1000) } ago</div>`;
   document.getElementById('status').innerHTML += `<div><b>Bungie API: </b>${ Backend_Status.apiDisabled === true ? "Disabled" : "Online" }</div>`;
 }
 async function GetCurrentFrontendLog() {
