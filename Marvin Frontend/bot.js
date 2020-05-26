@@ -293,7 +293,8 @@ client.on("message", async message => {
   //Ignored Commands
   var ignoredCommands = [
     "~~", "~PLAY", "~PRUNE", "~PURGE", "~FEED", "~PAY", "~GRAB", "~BANK", "~VAULT", "~BAL", "~BUY", "~SELECT", "~SHOOT", "~SHOP", "~OPEN", "~STEAL",
-    "~DRUGS", "~EXCH", "~BM", "~SMOKE", "~DOSE"
+    "~DRUGS", "~EXCH", "~BM", "~SMOKE", "~DOSE", "~COLLECT", "~KIDNAPPED", "~ADOPT", "~GOOSE", "~HARVEST", "~SLOTS", "~BRIEFCASES", "~DRUG", "~SPOUSE",
+    "~UPGRADE", "~PUNCH"
   ];
 
   //Commands
