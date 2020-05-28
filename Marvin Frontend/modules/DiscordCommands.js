@@ -45,7 +45,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Seasonal Help Menu")
     .setDescription("Here is a list of seasonal commands! Example: `~Fractaline`")
-    .addField("Commands", "`~Season Rank`, `~Guardian Games`, `~GG`, `~THE LIE`, `~FELWINTERS`")
+    .addField("Commands", "`~Season Rank`, `~Guardian Games`, `~GG`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -112,7 +112,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Guardian Games Help Menu")
     .setDescription("Here is a list of Guardian Games commands! Example: `~GG Laurels`")
-    .addField("Commands", "~GG Laurels`, `~GG Medals`, `~GG Triumphs`, `~GG Rumble`, `~GG Supers`, `~GG Classes`, `~Global Classes`")
+    .addField("Commands", "`~GG Laurels`, `~GG Medals`, `~GG Triumphs`, `~GG Rumble`, `~GG Supers`, `~GG Classes`, `~Global Classes`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -2330,8 +2330,8 @@ function DisplayTrials(message, leaderboards, playerData, type) {
 
 //Others
 function GetTrackedItems(message) {
-  const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Bastion, Fourth Horseman, Heir Apparent";
-  const pvpItems = "Luna Howl, Not Forgotten, Redrix Broadsword, Redrix Claymore, Mountain Top, Recluse, Revoker, Randys Throwing Knife, Komodo-4FR, Point of the Stag";
+  const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Fourth Horseman, Heir Apparent";
+  const pvpItems = "Luna Howl, Not Forgotten, Redrix Broadsword, Redrix Claymore, Mountain Top, Recluse, Revoker, Randys Throwing Knife, Komodo-4FR, Point of the Stag, Bastion, Felwinter's Lie";
   const gambitItems = "Breakneck, 21% Delirium, Hush, Exit Strategy, Python";
   const others = "Always On Time, A Thousand Wings, SCRAP CF-717-91, Silver Tercel";
   const embed = new Discord.RichEmbed()

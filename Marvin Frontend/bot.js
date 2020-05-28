@@ -39,8 +39,6 @@ function UpdateActivityList() {
     ActivityList.push(`Try ~Trials`);
     ActivityList.push(`Try ~Guardian Games`);
     ActivityList.push(`Try ~Season`);
-    ActivityList.push(`Try ~Felwinters`);
-    ActivityList.push(`Try ~The lie`);
     var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
     client.user.setActivity(activity);
   }
@@ -529,7 +527,6 @@ client.on("message", async message => {
         else if(command === "~GLOBAL CLASSES") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("gg_classes", message); } }
         else if(command === "~GLOBAL LAURELS" || command === "~GLOBAL GG LAURELS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("gg_laurels", message); } }
         else if(command === "~GLOBAL MEDALS" || command === "~GLOBAL GG LAURELS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("gg_medals", message); } }
-        else if(command === "~THE LIE" || command === "~COMMUNITY PROGRESS" || command === "~FELWINTERS" || command === "~FELWINTERS LIE") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("lie_quest", message); } }
 
         //Clan Global Rankings
         else if(command === "~CLANRANK FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.DisplayClanRankings("fractaline", message); } }
