@@ -527,6 +527,7 @@ client.on("message", async message => {
         else if(command === "~GLOBAL CLASSES") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("gg_classes", message); } }
         else if(command === "~GLOBAL LAURELS" || command === "~GLOBAL GG LAURELS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("gg_laurels", message); } }
         else if(command === "~GLOBAL MEDALS" || command === "~GLOBAL GG LAURELS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("gg_medals", message); } }
+        else if(command === "~THE LIE" || command === "~FELWINTERS" || command === "~FELWINTERS LIE") { if(!CheckBanned(message)) { message.channel.send("This community event has ended, this command will be removed soon. Thanks for participating!") } }
 
         //Clan Global Rankings
         else if(command === "~CLANRANK FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.DisplayClanRankings("fractaline", message); } }
