@@ -31,17 +31,16 @@ function ToggleDarkmode() {
   if(document.getElementById("darkmodeCheckbox").checked) {
     try { document.getElementById("sidebar").classList.add("dark"); } catch (err) { }
     try { document.getElementById("browser").classList.add("lightDark"); } catch (err) { }
-    try { document.getElementById("leftTableRow").classList.add("dark"); } catch (err) { }
-    try { document.getElementById("rightTableRow").classList.add("dark"); } catch (err) { }
     try { document.getElementById("browserRight").classList.add("removeBorder"); } catch (err) { }
   }
   else {
     try { document.getElementById("sidebar").classList.remove("dark"); } catch (err) { }
     try { document.getElementById("browser").classList.remove("lightDark"); } catch (err) { }
-    try { document.getElementById("leftTableRow").classList.remove("dark"); } catch (err) { }
-    try { document.getElementById("rightTableRow").classList.remove("dark"); } catch (err) { }
     try { document.getElementById("browserRight").classList.remove("removeBorder"); } catch (err) { }
   }
+  previous_backend_log = "";
+  previous_frontend_log = "";
+  LoadCurrentLog();
 }
 
 function ForceUpdate() {
@@ -58,80 +57,80 @@ function ForceUpdate() {
 }
 async function LoadCurrentLog() {
   //Get data
+  var darkmode = document.getElementById("darkmodeCheckbox").checked;
   var frontendLog = await GetCurrentFrontendLog();
   var backendLog = await GetCurrentBackendLog();
+  var shownFrontendLog = frontendLog.slice(frontendLog.length > 150 ? frontendLog.length - 150 : 0, frontendLog.length);
+  var shownBackendLog = backendLog.slice(backendLog.length > 150 ? backendLog.length - 150 : 0, backendLog.length);
+  var tableRowClassName = darkmode ? "table-row dark" : "table-row";
 
   if(previous_frontend_log.length < frontendLog.length) {
     //Load frontend log
-    var shownFrontendLog = frontendLog.slice(frontendLog.length > 150 ? frontendLog.length - 150 : 0, frontendLog.length);
-    document.getElementById('browserLeft').innerHTML =
-    '<div class="table-row" id="leftTableRow">' +
-      '<div class="type">Type</div>' +
-      '<div class="log">Frontend Log</div>' +
-      '<div class="date">Date</div>' +
-    '</div>' +
-    '<div id="browser-table-left">' +
-    '</div>';
+    document.getElementById('browserLeft').innerHTML = `
+      <div class="${ tableRowClassName }" id="leftTableRow">
+        <div class="type">Type</div>
+        <div class="log">Frontend Log</div>
+        <div class="date">Date</div>
+      </div>
+      <div id="browser-table-left"></div>
+    `;
     for(i in shownFrontendLog) {
-      var type = JSON.stringify(shownFrontendLog[i].Type).split('"').join('');
-      var log = JSON.stringify(shownFrontendLog[i].Log).split('"').join('');
-      var dateTime = JSON.stringify(shownFrontendLog[i].DateTime).split('"').join('');
-      if(type == 'Info'){ var color = 'black' }
-      if(type == 'Command'){ var color = 'cornflowerblue' }
-      if(type == 'Server'){ var color = 'blueviolet' }
-      if(type == 'Account'){ var color = 'hotpink' }
-      if(type == 'Clans'){ var color = 'forestgreen' }
-      if(type == 'Warning'){ var color = 'Warning' }
-      if(type == 'Error'){ var color = 'Tomato' }
+      var type = shownFrontendLog[i].Type;
+      var log = shownFrontendLog[i].Log
+      var dateTime = shownFrontendLog[i].DateTime;
+      if(type == 'Info'){ var color = darkmode ? '#cecece' : 'black' }
+      if(type == 'Command'){ var color = darkmode ? 'cornflowerblue' : 'cornflowerblue' }
+      if(type == 'Server'){ var color = darkmode ? '#b565ff' : 'blueviolet' }
+      if(type == 'Account'){ var color = darkmode ? 'hotpink' : 'hotpink' }
+      if(type == 'Clans'){ var color = darkmode ? '#3fb93f' : 'forestgreen' }
+      if(type == 'Warning'){ var color = darkmode ? 'darkorange' : 'darkorange' }
+      if(type == 'Error'){ var color = darkmode ? 'tomato' : 'tomato' }
       if(CheckFilter(type) == false) {
-        document.getElementById('browser-table-left').innerHTML +=
-        '<div class="table-row" style="color:'+ color +'">' +
-          '<div class="type">' + type + '</div>' +
-          '<div class="log">' + log + '</div>' +
-          '<div class="date">' + dateTime + '</div>' +
-        '</div>';
+        document.getElementById('browser-table-left').innerHTML += `
+          <div class="table-row" style="color:${ color }">
+            <div class="type">${ type }</div>
+            <div class="log">${ log }</div>
+            <div class="date">${ dateTime }</div>
+          </div>
+        `;
       }
       previous_frontend_log = frontendLog;
       //Scroll to bottom
       var divLeft = document.getElementById('browser-table-left'); divLeft.scrollTop = divLeft.scrollHeight;
     }
-    ToggleDarkmode();
   }
   if(previous_backend_log.length < backendLog.length) {
     //Load backend log
-    var shownBackendLog = backendLog.slice(backendLog.length > 150 ? backendLog.length - 150 : 0, backendLog.length);
-    document.getElementById('browserRight').innerHTML =
-    '<div class="table-row" id="rightTableRow">' +
-      '<div class="type">Type</div>' +
-      '<div class="log">Backend Log</div>' +
-      '<div class="date">Date</div>' +
-    '</div>' +
-    '<div id="browser-table-right">' +
-    '</div>';
+    document.getElementById('browserRight').innerHTML = `
+    <div class="${ tableRowClassName }" id="rightTableRow">
+      <div class="type">Type</div>
+      <div class="log">Backend Log</div>
+      <div class="date">Date</div>
+    </div>
+    <div id="browser-table-right"></div>
+    `;
     for(i in shownBackendLog) {
-      var type = JSON.stringify(shownBackendLog[i].Type).split('"').join('');
-      var log = JSON.stringify(shownBackendLog[i].Log).split('"').join('');
-      var dateTime = JSON.stringify(shownBackendLog[i].DateTime).split('"').join('');
-      if(type == 'Info'){ var color = 'black' }
-      if(type == 'Command'){ var color = 'black' }
-      if(type == 'Server'){ var color = 'black' }
-      if(type == 'Account'){ var color = 'black' }
-      if(type == 'Clans'){ var color = 'black' }
-      if(type == 'Warning'){ var color = 'Warning' }
-      if(type == 'Error'){ var color = 'Tomato' }
+      var type = shownBackendLog[i].Type;
+      var log = shownBackendLog[i].Log;
+      var dateTime = shownBackendLog[i].DateTime;
+      if(type == 'Info'){ color = darkmode ? '#cecece' : 'black' }
+      if(type == 'Account'){ color = darkmode ? '#cecece' : 'black' }
+      if(type == 'Clans'){ color = darkmode ? '#cecece' : 'black' }
+      if(type == 'Warning'){ color = darkmode ? 'darkorange' : 'darkorange' }
+      if(type == 'Error'){ color = darkmode ? 'tomato' : 'tomato' }
       if(CheckFilter(type) == false) {
-        document.getElementById('browser-table-right').innerHTML +=
-        '<div class="table-row" style="color:'+ color +'">' +
-          '<div class="type">' + type + '</div>' +
-          '<div class="log">' + log + '</div>' +
-          '<div class="date">' + dateTime + '</div>' +
-        '</div>';
+        document.getElementById('browser-table-right').innerHTML += `
+          <div class="table-row" style="color:${ color }">
+            <div class="type">${ type }</div>
+            <div class="log">${ log }</div>
+            <div class="date">${ dateTime }</div>
+          </div>
+        `;
       }
       previous_backend_log = backendLog;
       //Scroll to bottom
       var divRight = document.getElementById('browser-table-right'); divRight.scrollTop = divRight.scrollHeight;
     }
-    ToggleDarkmode();
   }
 }
 async function LoadErrors() {
