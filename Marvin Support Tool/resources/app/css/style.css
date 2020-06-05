@@ -124,9 +124,9 @@ div { margin: 0px; padding:0px; }
   background-color: lightgray;
   padding: 1px 0px;
 }
-.table-row > .type { display:inline-block; float:left; padding-left: 5px; }
-.table-row > .log { display:inline-block; float:left; white-space: nowrap; overflow: hidden; }
-.table-row > .date { display:inline-block; float:right; }
+.table-row > .type { display:inline-block; padding-left: 5px; }
+.table-row > .log { display:inline-block; white-space: nowrap; overflow: hidden; }
+.table-row > .date { display:inline-block; }
 .menubar {
   display: inline-block;
   width:100%;
