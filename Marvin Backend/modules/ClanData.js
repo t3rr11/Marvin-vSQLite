@@ -474,7 +474,8 @@ function CheckClanTagChange(Data, SQLData) { if(Data.detail.clanInfo.clanCallsig
 function CheckClanLevelUp(Data, SQLData) {
   let new_clan_level = Data.detail.clanInfo.d2ClanProgressions["584850370"].level;
   if(new_clan_level !== SQLData.clan_level && new_clan_level > SQLData.clan_level) {
-    SendClanBroadcast(Data, SQLData, "level_up");
+    if(new_clan_level === parseInt(SQLData.clan_level)+1) { SendClanBroadcast(Data, SQLData, "level_up"); }
+    else { Log.SaveError(`Caught clan broadcast for ${ SQLData.clan_name } (${ SQLData.clan_id }). From Level: ${ SQLData.clan_level } to ${ new_clan_level }. We didn't send this due to the values being more than 1 level.`) }
   }
 }
 
