@@ -11,7 +11,8 @@ module.exports = {
   CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, 
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
-  ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking
+  ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking,
+  AddLog
 };
 
 //MySQL Connection
@@ -218,7 +219,10 @@ function AddTrackedPlayer(discord_id, membershipData, callback) {
         sql = db.format(sql, inserts);
         db.query(sql, function(error, rows, fields) {
           if(!!error) { Log.SaveError(`Error updating player: ${ membershipData }, Error: ${ error }`); callback(true); }
-          else { callback(false, false, true); }
+          else {
+            AddLog(null, "user re-registered", null, `User: ${ discord_id } has now linked their discord account to another bungie account: ${ membershipData.displayName }(${ membershipData.membershipId })`, null);
+            callback(false, false, true);
+          }
         });
       }
       else {
@@ -227,7 +231,10 @@ function AddTrackedPlayer(discord_id, membershipData, callback) {
         sql = db.format(sql, inserts);
         db.query(sql, function(error, rows, fields) {
           if(!!error) { Log.SaveError(`Error adding player: ${ membershipData }, Error: ${ error }`); callback(true); }
-          else { callback(false, true, false); }
+          else {
+            AddLog(null, "user registered", null, `User: ${ discord_id } has now linked their discord account to their bungie account: ${ membershipData.displayName }(${ membershipData.membershipId })`, null);
+            callback(false, true, false);
+          }
         });
       }
     }
@@ -273,6 +280,7 @@ function AddNewClan(clan_id) {
         sql = db.format(sql, inserts);
         db.query(sql, function(error, rows, fields) {
           if(!!error) { Log.SaveError(`Error adding clan: ${ clan_id }, Error: ${ error }`); }
+          else { AddLog(null, "new clan", null, `New clan added: ${ clan_id }`, null); }
         });
       }
     }
@@ -363,7 +371,10 @@ function ForceFullScan(callback) {
     else {
       db.query(`UPDATE playerInfo SET firstLoad="true"`, function(error, rows, fields) {
         if(!!error) { Log.SaveError(`Error trying to force a rescan, Error: ${ error }`); callback(true); }
-        else { callback(false); }
+        else {
+          AddLog(null, "forced scan", null, `A forced scan has been run. All clans will now be scanned, broadcasts are disabled until done.`, null);
+          callback(false);
+        }
       });
     }
   });
@@ -479,7 +490,10 @@ function DisableTracking(guild_id) {
                   if(rows.length === 1) {
                     db.query(`UPDATE clans SET isTracking="false" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
                       if(!!error) { Log.SaveError(`Failed to disable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
-                      else { Log.SaveLog("Clans", `Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`); }
+                      else {
+                        AddLog(null, "stopped tracking clan", null, `Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`, null);
+                        Log.SaveLog("Clans", `Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`);
+                      }
                     });
                   }
                 }
@@ -509,7 +523,10 @@ function EnableTracking(guild_id, callback) {
                     if(rows[0].isTracking === "false") {
                       db.query(`UPDATE clans SET isTracking="true", forcedScan="true" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
                         if(!!error) { Log.SaveError(`Failed to enable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
-                        else { Log.SaveLog("Clans", `Re-Enabled tracking for ${ clans[i] } as it has returned to being tracked!`); }
+                        else {
+                          AddLog(null, "retracking clan", null, `Re-Enabled tracking for ${ clans[i] } as it has returned to being tracked!`, null);
+                          Log.SaveLog("Clans", `Re-Enabled tracking for ${ clans[i] } as it has returned to being tracked!`);
+                        }
                       });
                     }
                   }
@@ -535,4 +552,25 @@ function ToggleBroadcasts(guild_id, type, previousValue, callback) {
     if(!!error) { Log.SaveError(`Error toggling broadcast for: ${ type }, Error: ${ error }`); callback(true); }
     else { callback(false); }
   });
+}
+function AddLog(message, type, command, description, related) {
+  var sql = `INSERT INTO log ( type, discord_id, discord_name, command, guild_id, guild_name, description, related, date ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  var thisDate = new Date().getTime();
+  if(message !== null) {
+    if(message.author) {
+      var fullusername = `${message.author.username}#${message.author.discriminator}`;
+      var inserts = [type, message.author.id, fullusername, command, message.guild.id, message.guild.name, description, related, thisDate];
+      sql = db.format(sql, inserts);
+    }
+    else {
+      var inserts = [type, "", "", "", message.guild.id, message.guild.name, description, "", thisDate];
+      sql = db.format(sql, inserts);
+    }
+  }
+  else {
+    var thisDate = new Date().getTime();
+    var inserts = [type, "", "", "", "", "", description, "", thisDate];
+    sql = db.format(sql, inserts);
+  }
+  db.query(sql, function(error, rows, fields) { if(!!error) { Log.SaveError(`Error trying to add log to database, Error: ${ error }`); } });
 }
