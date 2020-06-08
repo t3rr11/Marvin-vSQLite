@@ -3,6 +3,7 @@ const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
 const DBConfig = require('../../Combined/configs/db_config.json');
 const Config = require('../../Combined/configs/config.json');
+const LogDesc = require('./LogDescriptions.json');
 const fetch = require("node-fetch");
 
 //Exports
@@ -12,7 +13,7 @@ module.exports = {
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
   ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking,
-  AddLog
+  AddLog, GetLogDesc
 };
 
 //MySQL Connection
@@ -491,7 +492,7 @@ function DisableTracking(guild_id) {
                     db.query(`UPDATE clans SET isTracking="false" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
                       if(!!error) { Log.SaveError(`Failed to disable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
                       else {
-                        AddLog(null, "stopped tracking clan", null, `Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`, null);
+                        AddLog(null, "stopped tracking clan", null, 12, null);
                         Log.SaveLog("Clans", `Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`);
                       }
                     });
@@ -524,7 +525,7 @@ function EnableTracking(guild_id, callback) {
                       db.query(`UPDATE clans SET isTracking="true", forcedScan="true" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
                         if(!!error) { Log.SaveError(`Failed to enable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
                         else {
-                          AddLog(null, "retracking clan", null, `Re-Enabled tracking for ${ clans[i] } as it has returned to being tracked!`, null);
+                          AddLog(null, "retracking clan", null, 13, null);
                           Log.SaveLog("Clans", `Re-Enabled tracking for ${ clans[i] } as it has returned to being tracked!`);
                         }
                       });
@@ -574,3 +575,4 @@ function AddLog(message, type, command, description, related) {
   }
   db.query(sql, function(error, rows, fields) { if(!!error) { Log.SaveError(`Error trying to add log to database, Error: ${ error }`); } });
 }
+function GetLogDesc(id) { try { return LogDesc.find(e => e.id === id); } catch (err) { return `Unknown ID: ${ id }` } }

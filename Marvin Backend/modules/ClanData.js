@@ -362,7 +362,10 @@ function GetItems(response) {
     { "name": "SCRAP CF-717-91 (Outbreak Ship)", "collectibleHash": 1840126886 },
     { "name": "Silver Tercel (Dreaming City Sparrow)", "collectibleHash": 1469913807 },
     { "name": "Heir Apparent", "collectibleHash": 2842076592 },
-    { "name": "Felwinter's Lie", "collectibleHash": 3371544734 }
+    { "name": "Felwinter's Lie", "collectibleHash": 3371544734 },
+    { "name": "The Platinum Starling (Sparrow)", "collectibleHash": 39133431 },
+    { "name": "Harbinger's Echo (Sparrow)", "collectibleHash": 1469913803 },
+    { "name": "Armory Forged Shell", "collectibleHash": 3531075476 }
   ];
   let disabledItems = [];
 

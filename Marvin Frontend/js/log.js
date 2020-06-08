@@ -36,14 +36,15 @@ function SaveError(log) {
   }
 }
 
-function SaveDiscordLog(StartupTime, Users, CommandsInput, client) {
+function SaveDiscordLog(StartupTime, Users, CommandsInput, currentSeason, client) {
   var thisTime = new Date().getTime();
   var totalTime = thisTime - StartupTime;
   var status = {
     "users": Users,
     "servers": client.guilds.size,
     "commandsInput": CommandsInput,
-    "uptime": totalTime
+    "uptime": totalTime,
+    "currentSeason": currentSeason
   }
   fs.writeFile('./data/frontend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });
   fs.writeFile('../../../var/www/guardianstats.com/data/marvin/frontend_status.json', JSON.stringify(status), (err) => { if (err) console.error(err) });

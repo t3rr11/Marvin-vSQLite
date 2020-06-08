@@ -1,0 +1,16 @@
+[
+    { "id": 0, "name": "Command", "description": "This log came from bot.js as the result of detecting a discord command using the tracked prefix." },
+    { "id": 1, "name": "Joined Guild", "description": "Joined a new guild." },
+    { "id": 2, "name": "Left Guild", "description": "Left guild." },
+    { "id": 3, "name": "Discord Connection Error", "description": "Bot lost connection to discord, It has been reconnected now, but in order to avoid spam broadcasts the startup funciton has been cancelled, As the bot has already started." },
+    { "id": 4, "name": "API Online", "description": "The Bungie API is back online!" },
+    { "id": 5, "name": "API Offline", "description": "The Bungie API is temporarily disabled for maintenance." },
+    { "id": 6, "name": "New Season", "description": "A new season is upon us. The current season has been changed." },
+    { "id": 7, "name": "Banned", "description": "A user has been banned" },
+    { "id": 8, "name": "Unbanned", "description": "A user has been unbanned" },
+    { "id": 9, "name": "Startup", "description": "Bot has been started" },
+    { "id": 10, "name": "New Clan", "description": "A new clan has been added" },
+    { "id": 11, "name": "Forced Scan", "description": "A forced scan has been run. All clans will now be scanned, broadcasts are disabled until done." },
+    { "id": 12, "name": "Stopped Tracking Clan", "description": "Disabled tracking for a clan as there are no longer any more guilds tracking it." },
+    { "id": 13, "name": "Re-Tracking Clan", "description": "Re-Enabled tracking for a clan as it has returned to being tracked!" }
+]

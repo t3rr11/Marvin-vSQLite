@@ -713,6 +713,9 @@ function DisplayRankings(message, type, leaderboards, playerData) {
           if(message.content.substr("~ITEM ".length).toUpperCase() === "A THOUSAND WINGS") { itemToFind = "A THOUSAND WINGS (WHISPER SHIP)" }
           if(message.content.substr("~ITEM ".length).toUpperCase() === "SCRAP CF-717-91") { itemToFind = "SCRAP CF-717-91 (OUTBREAK SHIP)" }
           if(message.content.substr("~ITEM ".length).toUpperCase() === "SILVER TERCEL") { itemToFind = "SILVER TERCEL (DREAMING CITY SPARROW)" }
+          if(message.content.substr("~ITEM ".length).toUpperCase() === "HARBINGER'S ECHO") { itemToFind = "HARBINGER'S ECHO (SPARROW)" }
+          if(message.content.substr("~ITEM ".length).toUpperCase() === "HARBINGERS ECHO") { itemToFind = "HARBINGER'S ECHO (SPARROW)" }
+          if(message.content.substr("~ITEM ".length).toUpperCase() === "THE PLATINUM STARLING") { itemToFind = "THE PLATINUM STARLING (SPARROW)" }
           if(items[j].toUpperCase() === itemToFind.toUpperCase()) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); }
         }
       }
@@ -2333,7 +2336,7 @@ function GetTrackedItems(message) {
   const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Fourth Horseman, Heir Apparent";
   const pvpItems = "Luna Howl, Not Forgotten, Redrix Broadsword, Redrix Claymore, Mountain Top, Recluse, Revoker, Randys Throwing Knife, Komodo-4FR, Point of the Stag, Bastion, Felwinter's Lie";
   const gambitItems = "Breakneck, 21% Delirium, Hush, Exit Strategy, Python";
-  const others = "Always On Time, A Thousand Wings, SCRAP CF-717-91, Silver Tercel";
+  const others = "Always On Time, A Thousand Wings, SCRAP CF-717-91, Silver Tercel, The Platinum Starling, Harbinger's Echo, Armory Forged Shell";
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked items!")

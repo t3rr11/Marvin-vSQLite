@@ -19,6 +19,7 @@ var ProcessingClans = null;
 var LastScanTime = null;
 var ScanLength = null;
 var APIDisabled = false;
+var currentSeason = 0;
 
 async function CheckMaintenance() {
   //Check if api is down for maintenance using my clan id.
@@ -32,6 +33,7 @@ async function CheckScanSpeedChange() {
   var newConfig = JSON.parse(fs.readFileSync('../Combined/configs/backend_config.json').toString());
   if(newConfig.scan_speed !== ScanSpeed) { ScanSpeed = newConfig.scan_speed; }
 }
+
 
 async function UpdateBackendStatus() {
   await new Promise(resolve => Database.GetClans((isError, Data) => { Clans = Data; resolve(true); }) );

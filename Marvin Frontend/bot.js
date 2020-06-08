@@ -24,6 +24,7 @@ var APIDisabled = null;
 var TimedOutUsers = [];
 var BannedUsers = [];
 var Users = 0;
+var CurrentSeason = 0;
 var NewSeasonCountdown = null;
 var NewSeasonDate = null;
 
@@ -54,12 +55,12 @@ async function CheckMaintenance() {
       if(backend_status.APIDisabled) {
         if(APIDisabled === false) {
           Log.SaveError("The Bungie API is temporarily disabled for maintenance."); APIDisabled = true; }
-          Database.AddLog(null, "api offline", null, `The Bungie API is temporarily disabled for maintenance.`, null);
+          Database.AddLog(null, "api offline", null, 5, null);
         }
       else {
         if(APIDisabled === true) {
           Log.SaveError("The Bungie API is back online!"); APIDisabled = false;
-          Database.AddLog(null, "api online", null, `The Bungie API is back online!`, null);
+          Database.AddLog(null, "api online", null, 4, null);
         }
       }
     }
@@ -77,7 +78,7 @@ async function UpdateClans() {
   UpdateBannedUsers();
 
   //Log status
-  Log.SaveDiscordLog(StartupTime, Users, CommandsInput, client);
+  Log.SaveDiscordLog(StartupTime, Users, CommandsInput, Config.currentSeason, client);
 
   await new Promise(resolve => Database.GetClans((isError, Clans) => {
     ClansLength = Clans.length;
@@ -154,7 +155,7 @@ function CheckNewSeason() {
       fs.writeFile('../Combined/configs/config.json', JSON.stringify(Config), (err) => { if (err) console.error(err) });
       try { client.guilds.get('664237007261925404').channels.get('664237007261925409').send(`A new season is upon us. The current season has been changed from ${ Config.currentSeason-1 } to ${ Config.currentSeason }`); }
       catch (err) { console.log("Failed to send new season message."); }
-      try { Database.AddLog(null, "season change", null, `A new season is upon us. The current season has been changed from ${ Config.currentSeason-1 } to ${ Config.currentSeason }`, null); } catch (err) {  }
+      try { Database.AddLog(null, "season change", null, 6, null); } catch (err) {  }
     }
   }
   else { NewSeasonDate = Config.newSeasonDate; }
@@ -192,7 +193,7 @@ function AddBannedUser(message) {
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp();
     message.channel.send({embed});
-    Database.AddLog(message, "ban", null, `User: ${ id }, Reason: ${ reason.length > 4 ? reason : "You have been banned." }`, null);
+    Database.AddLog(message, "ban", null, 7, null);
   }
   else { message.reply("Cannot ban this user as they are already banned. To unban please use: ~MUNBAN"); }
 }
@@ -208,7 +209,7 @@ function RemoveBannedUser(message) {
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp();
     message.channel.send({embed});
-    Database.AddLog(message, "unban", null, `User: ${ id }`, null);
+    Database.AddLog(message, "unban", null, 8, null);
   }
   else { message.reply("Cannot Unban as this user is not banned."); }
 }
@@ -261,11 +262,11 @@ client.on("ready", async () => {
     //Start Up Console Log
     if(Config.enableDebug){ console.clear(); }
     Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${client.channels.size} channels of ${client.guilds.size} guilds. Tracking ${ ClansLength } clans!`);
-    Database.AddLog(null, "startup", null, `Bot has started, with ${ Users } users, in ${client.channels.size} channels of ${client.guilds.size} guilds. Tracking ${ ClansLength } clans!`, null);
+    Database.AddLog(null, "startup", null, 9, null);
   }
   else {
     Log.SaveError(`Bot lost connection to discord, It has been reconnected now, but in order to avoid spam broadcasts the startup funciton has been cancelled, As the bot has already started.`);
-    Database.AddLog(null, "error", null, "Bot lost connection to discord, It has been reconnected now, but in order to avoid spam broadcasts the startup funciton has been cancelled, As the bot has already started.", null);
+    Database.AddLog(null, "error", null, 3, null);
   }
 });
 
@@ -273,7 +274,7 @@ client.on("guildCreate", guild => {
   //Joined a server
   try {
     Log.SaveLog("Server", `Joined a new guild: ${ guild.name }`);
-    Database.AddLog({ "guild": { "id": guild.id, "name": guild.name } }, "joined guild", null, `Joined a new guild: ${ guild.name }`, null);
+    Database.AddLog({ "guild": { "id": guild.id, "name": guild.name } }, "joined guild", null, 1, null);
     Database.EnableTracking(guild.id, function(isError, isFound) {
       if(!isError) {
         if(isFound) { Log.SaveLog("Clans", "Clan Tracking Re-Enabled: " + guild.name); }
@@ -294,7 +295,7 @@ client.on("guildCreate", guild => {
 client.on("guildDelete", guild => {
   //Removed from a server
   Log.SaveLog("Server", "Left a guild: " + guild.name);
-  Database.AddLog({ "guild": { "id": guild.id, "name": guild.name } }, "left guild", null, `Left guild: ${ guild.name }`, null);
+  Database.AddLog({ "guild": { "id": guild.id, "name": guild.name } }, "left guild", null, 2, null);
   Database.DisableTracking(guild.id);
 });
 
@@ -558,7 +559,7 @@ client.on("message", async message => {
         catch (err) { try { Log.SaveError('Tried to log command in: ' + message.guild.name + ', Command: ' + command); } catch (err) {  } }
 
         //Try save log to database
-        try { Database.AddLog(message, "command", command, "This log came from bot.js as the result of detecting a discord command using the tracked prefix.", related); }
+        try { Database.AddLog(message, "command", command, 0, related); }
         catch (err) { Log.SaveError("Error when trying to save log to database: " + err); }
       }
       catch (err) {
