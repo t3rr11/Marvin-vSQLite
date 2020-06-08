@@ -128,9 +128,16 @@ async function BuildBroadcastsReport(rows) {
     broadcasts_count++;
   }
 
+  //Filter and Sort the broadcasts by highest amount.
+  broadcasts = broadcasts.filter(n => n);
+  for(let i in broadcasts) {
+    broadcasts[i].items.sort(function(a, b) { return b.amount - a.amount });
+    broadcasts[i].titles.sort(function(a, b) { return b.amount - a.amount });
+  }
+
   //Create processed dataset
   return {
-    data: broadcasts.filter(n => n),
+    data: broadcasts,
     total: broadcasts_count
   }
 }
