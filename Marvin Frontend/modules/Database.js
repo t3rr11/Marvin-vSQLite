@@ -150,13 +150,13 @@ function GetSingleClanLeaderboard(clanId, callback) {
 }
 function GetClanLeaderboards(clanIds, callback) {
   var query = ""; for(var i in clanIds) { if(i == 0) { query = `clanId="${ clanIds[i] }"` } else { query = `${ query } OR clanId="${ clanIds[i] }"` } }
-  db.query(`SELECT * FROM playerInfo WHERE ${ query }`, function(error, rows, fields) {
+  db.query(`SELECT * FROM playerInfo WHERE ${ query } AND isPrivate = "false" AND firstLoad = "false"`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting clan leaderboards: ${ clanIds } Error: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
 }
 function GetGlobalLeaderboards(callback) {
-  db.query(`SELECT * FROM playerInfo WHERE EXISTS (SELECT 1 FROM clans WHERE clans.clan_id = playerInfo.clanId AND clans.isTracking = "true" AND playerInfo.isPrivate = "false")`, function(error, rows, fields) {
+  db.query(`SELECT * FROM playerInfo WHERE EXISTS (SELECT 1 FROM clans WHERE clans.clan_id = playerInfo.clanId AND clans.isTracking = "true" AND playerInfo.isPrivate = "false" AND playerInfo.firstLoad = "false")`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting global leaderboards, Error: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
@@ -560,11 +560,11 @@ function AddLog(message, type, command, description, related) {
   if(message !== null) {
     if(message.author) {
       var fullusername = `${message.author.username}#${message.author.discriminator}`;
-      var inserts = [type, message.author.id, fullusername, command, message.guild.id, message.guild.name, description, related, thisDate];
+      var inserts = [type, message.author.id, fullusername, command, message.guild.id, Misc.cleanString(message.guild.name), description, related, thisDate];
       sql = db.format(sql, inserts);
     }
     else {
-      var inserts = [type, "", "", "", message.guild.id, message.guild.name, description, "", thisDate];
+      var inserts = [type, "", "", "", message.guild.id, Misc.cleanString(message.guild.name), description, "", thisDate];
       sql = db.format(sql, inserts);
     }
   }

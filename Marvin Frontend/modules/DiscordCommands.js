@@ -276,6 +276,7 @@ function Rankings(type, message) {
 }
 function DisplayRankings(message, type, leaderboards, playerData) {
   //PvP
+  leaderboards = leaderboards.filter(leader => leader.isPrivate === "false");
   try {
     if(type === "infamy") {
       var leaderboard = { "names": [], "infamy": [], "resets": [] };

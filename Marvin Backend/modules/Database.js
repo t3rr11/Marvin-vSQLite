@@ -324,7 +324,7 @@ function UpdatePlayerDetails(Data, callback) {
   });
 }
 function SetPrivate(membershipId) {
-  db.query(`UPDATE playerInfo SET isPrivate="true" WHERE membershipId="${ membershipId }"`, function(error, rows, fields) {
+  db.query(`UPDATE playerInfo SET isPrivate="true", firstLoad="true", glory=0, seasonRank=0 WHERE membershipId="${ membershipId }"`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error setting ${ membershipId } to private, Error: ${ error }`); }
   });
 }
