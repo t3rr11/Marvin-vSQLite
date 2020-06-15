@@ -23,7 +23,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Rankings Help Menu")
     .setDescription("Here is a list of ranking commands! Example: `~Iron Banner`")
-    .addField("Commands", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Triumph Score`, `~Time Played`, `~Season Rank`, `~Clanrank Fractaline`, `~Clanrank Resonance`")
+    .addField("Commands", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Max Power`, `~Triumph Score`, `~Time Played`, `~Season Rank`, `~Clanrank Fractaline`, `~Clanrank Resonance`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -44,8 +44,8 @@ function Help(message, type) {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
     .setAuthor("Seasonal Help Menu")
-    .setDescription("Here is a list of seasonal commands! Example: `~Fractaline`")
-    .addField("Commands", "`~Season Rank`, `~Guardian Games`, `~GG`")
+    .setDescription("Here is a list of seasonal commands! Example: `~Season Rank`")
+    .addField("Commands", "`~Season Rank`, `~Max Power`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -55,7 +55,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Pre-seasonal Help Menu")
     .setDescription("Here is a list of pre-seasonal commands! Example: `~Fractaline`")
-    .addField("Commands", "`~Sundial`, `~Fractaline`, `~Resonance`")
+    .addField("Commands", "`~Sundial`, `~Fractaline`, `~Guardian Games`, `~GG`, `~Resonance`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -908,6 +908,36 @@ function DisplayRankings(message, type, leaderboards, playerData) {
       .setAuthor("Top 10 Resonance Power")
       .addField("Name", leaderboard.names, true)
       .addField("Resonance", leaderboard.resonance, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "maxPower") {
+      var leaderboard = { "names": [], "power": [] };
+      leaderboards.sort(function(a, b) { return b.highestPower - a.highestPower; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.power.push(Misc.AddCommas(top[i].highestPower));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.power.push("", Misc.AddCommas(playerStats.highestPower));
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Highest Power")
+      .setDescription("In order for this to be as accurate as possible, accounts are scanned every 3-5 minutes. If you have your highest light gear equipped for that long of a period, it should update on the leaderboards.")
+      .addField("Name", leaderboard.names, true)
+      .addField("Power", leaderboard.power, true)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp()
       message.channel.send({embed});
@@ -2174,6 +2204,7 @@ function DisplayProfile(message, leaderboards, playerData) {
     var seasonRank = playerStats.seasonRank;
     var titles = playerStats.titles.split(",");
     var lastPlayed = playerStats.lastPlayed;
+    var highestPower = playerStats.highestPower;
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
@@ -2187,6 +2218,7 @@ function DisplayProfile(message, leaderboards, playerData) {
     .addField("Triumph Score", `${ Misc.AddCommas(triumphScore) }`, true)
     .addField("Raids", `${ Misc.AddCommas(playerStats.leviCompletions + playerStats.leviPresCompletions + playerStats.eowCompletions + playerStats.eowPresCompletions + playerStats.sosCompletions + playerStats.sosPresCompletions + playerStats.lastWishCompletions + playerStats.scourgeCompletions + playerStats.sorrowsCompletions + playerStats.gardenCompletions) }`, true)
     .addField("Titles", `${ titles.length }`, true)
+    .addField("Highest Power", `${ Misc.AddCommas(highestPower) }`, true)
     .addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
