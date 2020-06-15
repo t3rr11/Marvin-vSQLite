@@ -374,7 +374,8 @@ function GetItems(response) {
     { "name": "Felwinter's Lie", "collectibleHash": 3371544734 },
     { "name": "The Platinum Starling (Sparrow)", "collectibleHash": 39133431 },
     { "name": "Harbinger's Echo (Sparrow)", "collectibleHash": 1469913803 },
-    { "name": "Armory Forged Shell", "collectibleHash": 3531075476 }
+    { "name": "Armory Forged Shell", "collectibleHash": 3531075476 },
+    { "name": "Khvostov 7G-02", "collectibleHash": 3686153571 }
   ];
   let disabledItems = [];
 
