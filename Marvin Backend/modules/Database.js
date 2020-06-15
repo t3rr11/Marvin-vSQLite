@@ -272,7 +272,7 @@ function UpdatePlayerDetails(Data, callback) {
   var sql = `
   UPDATE playerInfo
   SET
-    clanId = ?, displayName = ?, timePlayed = ?, currentClass = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }",
+    clanId = ?, displayName = ?, timePlayed = ?, currentClass = ?, lightLevels = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }",
     infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, wellsCompleted = ?,
     epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, leviCompletions = ?, leviPresCompletions = ?, eowCompletions = ?, eowPresCompletions = ?, sosCompletions = ?,
     sosPresCompletions = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, shatteredThrone = ?, pitOfHeresy = ?, guardianGames = ?, trials = ?,
@@ -283,6 +283,7 @@ function UpdatePlayerDetails(Data, callback) {
     Misc.cleanString(Data.AccountInfo.displayName),
     Data.AccountInfo.totalTime,
     Data.AccountInfo.currentClass,
+    JSON.stringify(Data.AccountInfo.lightLevels),
     Data.Rankings.infamy,
     Data.Rankings.valor,
     Data.Rankings.glory,
@@ -320,7 +321,21 @@ function UpdatePlayerDetails(Data, callback) {
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error updating player from the first scan: (${ Data.AccountInfo.membershipId }), Error: ${ error }`); callback(true); }
-    else { callback(false); }
+    else {
+      //Now check max power and update if needed.
+      db.query(`SELECT * FROM playerInfo WHERE membershipId="${ Data.AccountInfo.membershipId }"`, function(error, rows, fields) {
+        if(!!error) { Log.SaveError(`Error getting players details for max power: (${ Data.AccountInfo.membershipId }), Error: ${ error }`); callback(true); }
+        else {
+          if(rows[0].highestPower < Data.AccountInfo.highestPower) {
+            db.query(`UPDATE playerInfo SET highestPower=${ Data.AccountInfo.highestPower } WHERE membershipId="${ Data.AccountInfo.membershipId }"`, function(error, rows, fields) {
+              if(!!error) { Log.SaveError(`Error updating players max power: (${ Data.AccountInfo.membershipId }), Error: ${ error }`); callback(true); }
+              else { callback(false); }
+            });
+          }
+          else { callback(false); }
+        }
+      });
+    }
   });
 }
 function SetPrivate(membershipId) {

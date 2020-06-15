@@ -188,19 +188,27 @@ function GetAccountInfo(response, clanId) {
   let joinDate = response.playerInfo.joinDate;
   let lastPlayed = new Date(response.playerData.profile.data.dateLastPlayed).getTime();
   let dlcOwned = response.playerData.profile.data.versionsOwned;
-  let highestLight = 0;
+  let highestPower = 0;
   let totalTime = 0;
+  let lightLevels = [];
 
   for(let i in characterIds) {
     //Get users last played character
     if(new Date(characters[characterIds[i]].dateLastPlayed).getTime() > new Date(lastPlayedCharacter.dateLastPlayed).getTime()) { lastPlayedCharacter = characters[characterIds[i]]; }
-    
-    //Get users highest light character
-    if(characters[characterIds[i]].light > highestLight) { highestLight = characters[characterIds[i]].light; }
+
+    //Get users accurate light levels per character
+    lightLevels.push({
+      "id": characterIds[i],
+      "class": Misc.GetClassName(characterIds[i].classType),
+      "light": characters[characterIds[i]].light
+    });
 
     //Get users overall playtime
     totalTime = parseInt(totalTime) + parseInt(characters[characterIds[i]].minutesPlayedTotal);
   }
+    
+  //Get users highest light character
+  for(let i in lightLevels) { if(lightLevels[i].light > highestPower) { highestPower = lightLevels[i].light; } }
 
   return {
     "displayName": displayName,
@@ -208,7 +216,8 @@ function GetAccountInfo(response, clanId) {
     "clanId": clanId,
     "isOnline": isOnline,
     "joinDate": joinDate,
-    "highestCurrrentPower": highestLight,
+    "lightLevels": lightLevels,
+    "highestPower": highestPower,
     "totalTime": totalTime,
     "lastPlayed": lastPlayed,
     "currentClass": Misc.GetClassName(lastPlayedCharacter.classType),
@@ -530,7 +539,26 @@ function SendClanBroadcast(Data, SQLData, type) {
   var BroadcastMessage = null;
   if(type === "name_change") { BroadcastMessage = `The clan name has been changed from ${ SQLData.clan_name } to ${ Data.detail.name }` }
   if(type === "tag_change") { BroadcastMessage = `The clan tag has been changed from ${ SQLData.clan_callsign } to ${ Data.detail.clanInfo.clanCallsign }` }
-  if(type === "level_up") { BroadcastMessage = `${ SQLData.clan_name } has leveled up from level: ${ SQLData.clan_level } to ${ Data.detail.clanInfo.d2ClanProgressions["584850370"].level }` }
+  if(type === "level_up") {
+    var clanPerks = "None";
+
+    if(Data.detail.clanInfo.d2ClanProgressions["584850370"].level === 2) {
+      clanPerks = `Increased public event rewards.`;
+    }
+    else if(Data.detail.clanInfo.d2ClanProgressions["584850370"].level === 3) {
+      clanPerks = `Increased public event rewards.\nCompleteting weekly Hawthorne bounties rewards mod components.`;
+    }
+    else if(Data.detail.clanInfo.d2ClanProgressions["584850370"].level === 4) {
+      clanPerks = `Increased public event rewards.\nCompleteting weekly Hawthorne bounties rewards mod components.\nCompleting clan vendor challenges rewards enhancement cores.`;
+    }
+    else if(Data.detail.clanInfo.d2ClanProgressions["584850370"].level === 5) {
+      clanPerks = `Increased public event rewards.\nCompleteting weekly Hawthorne bounties rewards mod components.\nCompleting clan vendor challenges rewards enhancement cores.\nEarn a bonus trials token when winning trials matches with clanmates.`;
+    }
+    else if(Data.detail.clanInfo.d2ClanProgressions["584850370"].level === 6) {
+      clanPerks = `Increased public event rewards.\nCompleteting weekly Hawthorne bounties rewards mod components.\nCompleting clan vendor challenges rewards enhancement cores.\nEarn a bonus trials token when winning trials matches with clanmates.\nUnlocked an additional weekly bounty from Hawthorne.`;
+    }
+    BroadcastMessage = `${ SQLData.clan_name } has leveled up from level: ${ SQLData.clan_level } to ${ Data.detail.clanInfo.d2ClanProgressions["584850370"].level }\n\n**Clan Perks:**\n${ clanPerks }`;
+  }
   Database.AddNewClanBroadcast(Data, SQLData, "clan", Config.currentSeason, BroadcastMessage, new Date().getTime(), function(isError) {
     if(isError) { console.log("There was an error saving broadcast to awaiting_broadcasts."); }
     else { Log.SaveLog("Clans", `[${ Data.detail.groupId }]: ${ BroadcastMessage }`); }
