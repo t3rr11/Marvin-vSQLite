@@ -38,7 +38,7 @@ function UpdateActivityList() {
     ActivityList.push(`Use ~HELP for Support`);
     ActivityList.push(`Consider Donating? ~Donate`);
     ActivityList.push(`Try ~Trials`);
-    ActivityList.push(`Try ~Guardian Games`);
+    ActivityList.push(`Try ~Power`);
     ActivityList.push(`Try ~Season`);
     var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
     client.user.setActivity(activity);
@@ -160,7 +160,6 @@ function CheckNewSeason() {
   }
   else { NewSeasonDate = Config.newSeasonDate; }
 }
-function GetTimeLeftOnSeason() { return Misc.formatTime(Math.ceil((NewSeasonCountdown._idleStart + NewSeasonCountdown._idleTimeout - Date.now()) / 1000)); }
 function ForceTopGGUpdate(message) { dbl.postStats(client.guilds.size); message.channel.send("Updated stats on Top.GG"); }
 function UpdateBannedUsers() { try { BannedUsers = JSON.parse(fs.readFileSync('./data/banned_users.json').toString()); } catch(err) { console.log("Couldn't parse banned users file."); } }
 function CheckBanned(message) {
@@ -533,6 +532,7 @@ client.on("message", async message => {
         else if(command === "~GLOBAL FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("fractaline", message); } }
         else if(command === "~GLOBAL RESONANCE") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("resonance", message); } }
         else if(command === "~GLOBAL CLAN TIME" || command === "~GLOBAL TIME PLAYED" || command === "~GLOBAL TOTAL TIME" || command === "~GLOBAL TOTALTIME") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("totalTime", message); } }
+        else if(command === "~GLOBAL POWER" || command === "~GLOBAL MAX POWER") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("maxPower", message); } }
         else if(command === "~GLOBAL TRIUMPH SCORE" || command === "~GLOBAL TRIUMPHSCORE") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("triumphScore", message); } }
         else if(command === "~GLOBAL TRIALS WEEKLY WINS" || command === "~GLOBAL TRIALS WINS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("weekly_trials_wins", message); } }
         else if(command === "~GLOBAL TRIALS WEEKLY FLAWLESS" || command === "~GLOBAL TRIALS FLAWLESS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("weekly_trials_flawless", message); } }

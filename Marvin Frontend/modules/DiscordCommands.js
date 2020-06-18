@@ -249,7 +249,7 @@ function Rankings(type, message) {
               var allClanIds = Data.clans.split(",");
               Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, playerData); } }
-                else { message.reply("Sorry! An error occurred, Please try again..."); }
+                else { message.channel.send("Currently your clan is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
               });
             } else { message.reply("No clan set, to set one use: `~Set clan`"); }
           } else { message.reply("Sorry! An error occurred, Please try again..."); }
@@ -264,7 +264,7 @@ function Rankings(type, message) {
               var allClanIds = Data.clans.split(",");
               Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, undefined); } }
-                else { message.reply("Sorry! An error occurred, Please try again..."); }
+                else { message.channel.send("Currently your clan is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
               });
             } else { message.reply("No clan set, to set one use: `~Set clan`"); }
           } else { message.reply("Sorry! An error occurred, Please try again..."); }
@@ -302,7 +302,7 @@ function DisplayRankings(message, type, leaderboards, playerData) {
 
       const embed = new Discord.RichEmbed()
       .setColor(0x0099FF)
-      .setAuthor("Top 10 Overall Infamy Rankings")
+      .setAuthor("Top 10 Seasonal Infamy Rankings")
       .addField("Name", leaderboard.names, true)
       .addField("Infamy", leaderboard.infamy, true)
       .addField("Resets", leaderboard.resets, true)
@@ -1400,6 +1400,35 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     .setTimestamp()
     message.channel.send({embed});
   }
+  else if(type === "maxPower") {
+    var leaderboard = { "names": [], "power": [] };
+    leaderboards.sort(function(a, b) { return b.highestPower - a.highestPower; });
+    top = leaderboards.slice(0, 10);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+      leaderboard.power.push(`${ Misc.AddCommas(top[i].highestPower) }`);
+    }
+
+    try {
+      if(playerData !== null) {
+        var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+        var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+        leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.power.push("", `${ Misc.AddCommas(playerStats.highestPower) }`);
+      }
+      else { leaderboard.names.push("", `~Register to see your rank`); }
+    }
+    catch(err) { }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 10 Highest Power Level")
+    .addField("Name", leaderboard.names, true)
+    .addField("Power", leaderboard.power, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
   else if(type === "seasonal_trials_wins") {
     var leaderboard = { "names": [], "wins": [] };
     leaderboards = leaderboards.filter(e => e.trials !== null);
@@ -2366,7 +2395,7 @@ function DisplayTrials(message, leaderboards, playerData, type) {
 
 //Others
 function GetTrackedItems(message) {
-  const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Fourth Horseman, Heir Apparent";
+  const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Fourth Horseman, Heir Apparent, Khvostov 7G-02";
   const pvpItems = "Luna Howl, Not Forgotten, Redrix Broadsword, Redrix Claymore, Mountain Top, Recluse, Revoker, Randys Throwing Knife, Komodo-4FR, Point of the Stag, Bastion, Felwinter's Lie";
   const gambitItems = "Breakneck, 21% Delirium, Hush, Exit Strategy, Python";
   const others = "Always On Time, A Thousand Wings, SCRAP CF-717-91, Silver Tercel, The Platinum Starling, Harbinger's Echo, Armory Forged Shell";

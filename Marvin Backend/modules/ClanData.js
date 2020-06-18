@@ -226,11 +226,12 @@ function GetAccountInfo(response, clanId) {
 }
 function GetRankings(response) {
   var characterIds = response.playerData.profile.data.characterIds;
-  var infamy = 0; try { infamy = response.playerData.characterProgressions.data[characterIds[0]].progressions["2772425241"].currentProgress; } catch (err) { }
-  var valor = 0; try { valor = response.playerData.characterProgressions.data[characterIds[0]].progressions["3882308435"].currentProgress; } catch (err) { }
+  var infamy = 0; try { infamy = response.playerData.metrics.data.metrics["250859887"].objectiveProgress.progress; } catch (err) { }
+  var valor = 0; try { valor = response.playerData.metrics.data.metrics["2872213304"].objectiveProgress.progress; } catch (err) { }
   var glory = 0; try { glory = response.playerData.characterProgressions.data[characterIds[0]].progressions["2679551909"].currentProgress; } catch (err) { }
   var infamyResets = response.playerData.profileRecords.data.records["3901785488"].objectives[0].progress;
-  var valorResets = response.playerData.profileRecords.data.records["1745319359"].objectives[1].progress;
+  var valorResets = Math.floor(valor / 2000);
+  var infamyResets = Math.floor(infamy / 15000);
   var totalInfamy = parseInt(infamy) + (parseInt('15000') * parseInt(infamyResets));
   var totalValor = parseInt(valor) + (parseInt('2000') * parseInt(valorResets));
   var ibKills = response.playerData.profileRecords.data.records["2023796284"].intervalObjectives[2].progress;
