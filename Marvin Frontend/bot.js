@@ -54,9 +54,10 @@ async function CheckMaintenance() {
     else {
       if(backend_status.APIDisabled) {
         if(APIDisabled === false) {
-          Log.SaveError("The Bungie API is temporarily disabled for maintenance."); APIDisabled = true; }
+          Log.SaveError("The Bungie API is temporarily disabled for maintenance."); APIDisabled = true;
           Database.AddLog(null, "api offline", null, 5, null);
         }
+      }
       else {
         if(APIDisabled === true) {
           Log.SaveError("The Bungie API is back online!"); APIDisabled = false;

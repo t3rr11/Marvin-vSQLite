@@ -232,8 +232,6 @@ function GetRankings(response) {
   var infamyResets = response.playerData.profileRecords.data.records["3901785488"].objectives[0].progress;
   var valorResets = Math.floor(valor / 2000);
   var infamyResets = Math.floor(infamy / 15000);
-  var totalInfamy = parseInt(infamy) + (parseInt('15000') * parseInt(infamyResets));
-  var totalValor = parseInt(valor) + (parseInt('2000') * parseInt(valorResets));
   var ibKills = response.playerData.profileRecords.data.records["2023796284"].intervalObjectives[2].progress;
   var ibWins = response.playerData.profileRecords.data.records["759958308"].intervalObjectives[2].progress;
   var motesCollected = response.playerData.profileRecords.data.records["1767590660"].intervalObjectives[2].progress;
@@ -260,8 +258,8 @@ function GetRankings(response) {
   var seasonal_lighthouseCarries = response.playerData.metrics.data.metrics["610393611"].objectiveProgress.progress;
 
   return {
-    "infamy": totalInfamy,
-    "valor": totalValor,
+    "infamy": infamy,
+    "valor": valor,
     "glory": glory,
     "infamyResets": infamyResets,
     "valorResets": valorResets,

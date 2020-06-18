@@ -373,7 +373,7 @@ function ForceFullScan(callback) {
       db.query(`UPDATE playerInfo SET firstLoad="true"`, function(error, rows, fields) {
         if(!!error) { Log.SaveError(`Error trying to force a rescan, Error: ${ error }`); callback(true); }
         else {
-          AddLog(null, "forced scan", null, `A forced scan has been run. All clans will now be scanned, broadcasts are disabled until done.`, null);
+          AddLog(null, "forced scan", null, 11, null);
           callback(false);
         }
       });
