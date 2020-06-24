@@ -269,10 +269,11 @@ async function SendBroadcast(client, guild, message, broadcast, definitions) {
       .setColor(0xFFE000)
       .setTitle("Clan Broadcast")
       .setDescription(message)
-      .setThumbnail(titleDef.imageUrl)
-      .addField("Obtained by:", titleDef.description)
+      .setThumbnail(encodeURI(titleDef.imageUrl))
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp();
+
+      if(titleDef.description.length > 0){ embed.addField("Obtained by:", titleDef.description) }
   
       try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
       catch(err) { console.log(`Failed to send title broadcast to ${ guild.guild_id } because of ${ err }`); }
