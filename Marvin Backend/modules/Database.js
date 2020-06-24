@@ -8,7 +8,7 @@ const fetch = require("node-fetch");
 //Exports
 module.exports = {
   AddNewBroadcast, AddNewClanBroadcast, AddNewClan, CheckClanMembers, CheckNewBroadcast, SetPrivate,
-  GetClans, GetGuilds, GetPlayers, GetUsers, GetClan, GetPlayerDetails,
+  GetClans, GetGuilds, GetPlayers, GetUsers, GetClan, GetPlayerDetails, GetDefinitions,
   RemoveClan, UpdateClanFirstScan, UpdateClanForcedScan, UpdateClanDetails, UpdatePlayerDetails
 };
 
@@ -32,9 +32,9 @@ function handleDisconnect() {
 handleDisconnect();
 //MySQL Functions
 
-function AddNewBroadcast(data, season, type, broadcast, count, date, callback) {
-  var sql = "INSERT IGNORE INTO awaiting_broadcasts (clanId,displayName,membershipId,season,type,broadcast,count,date) VALUES (?,?,?,?,?,?,?,?)";
-  var inserts = [data.AccountInfo.clanId, data.AccountInfo.displayName, data.AccountInfo.membershipId, season, type, broadcast, count, date];
+function AddNewBroadcast(data, season, type, bName, bHash, count, date, callback) {
+  var sql = "INSERT IGNORE INTO awaiting_broadcasts (clanId,displayName,membershipId,season,type,broadcast,hash,count,date) VALUES (?,?,?,?,?,?,?,?,?)";
+  var inserts = [data.AccountInfo.clanId, data.AccountInfo.displayName, data.AccountInfo.membershipId, season, type, bName, bHash, count, date];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error adding new broadcast, Error: ${ error }`); callback(true); }
@@ -134,6 +134,14 @@ function GetUsers(callback) {
   var users = [];
   db.query(`SELECT * FROM users`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting all users from server: ${ error }`); callback(true); }
+    else { for(var i in rows) { users.push(rows[i]); } callback(false, users); }
+  });
+  return users;
+}
+function GetDefinitions(callback) {
+  var users = [];
+  db.query(`SELECT * FROM definitions`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error getting definitions from server: ${ error }`); callback(true); }
     else { for(var i in rows) { users.push(rows[i]); } callback(false, users); }
   });
   return users;

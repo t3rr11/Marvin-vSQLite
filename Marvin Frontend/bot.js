@@ -27,6 +27,7 @@ var Users = 0;
 var CurrentSeason = 0;
 var NewSeasonCountdown = null;
 var NewSeasonDate = null;
+var Definitions = [];
 
 //Functions
 function UpdateActivityList() {
@@ -81,11 +82,8 @@ async function UpdateClans() {
   //Log status
   Log.SaveDiscordLog(StartupTime, Users, CommandsInput, Config.currentSeason, client);
 
-  await new Promise(resolve => Database.GetClans((isError, Clans) => {
-    ClansLength = Clans.length;
-    CheckForNewlyScannedClans(Clans);
-    resolve(true);
-  }));
+  await new Promise(resolve => Database.GetDefinitions((isError, Data) => { if(!isError) { Definitions = Data; } resolve(true); }) );
+  await new Promise(resolve => Database.GetClans((isError, Clans) => { ClansLength = Clans.length; CheckForNewlyScannedClans(Clans); resolve(true); }));
 }
 function CheckForNewlyScannedClans(Clans) {
   for(var i in Clans) {
@@ -253,7 +251,7 @@ client.on("ready", async () => {
   if(ClansLength === null) {
     //Define variables
     await UpdateClans();
-  
+
     //SetTimeouts
     setInterval(function() { UpdateClans() }, 10000);
     setInterval(() => { dbl.postStats(client.guilds.size); }, 1800000);
@@ -380,33 +378,33 @@ client.on("message", async message => {
 
         //Rankings
         else if(command.startsWith("~DRYSTREAK ")) { if(!CheckBanned(message)) { DiscordCommands.DryStreak(message, command.substr("~DRYSTREAK ".length)); } }
-        else if(command.startsWith("~ITEM ")) { if(!CheckBanned(message)) { DiscordCommands.Rankings("item", message); } }
-        else if(command.startsWith("~TITLE ")) { if(!CheckBanned(message)) { DiscordCommands.Rankings("title", message); } }
+        else if(command.startsWith("~ITEM ")) { if(!CheckBanned(message)) { DiscordCommands.Rankings("item", message, Definitions); } }
+        else if(command.startsWith("~TITLE ")) { if(!CheckBanned(message)) { DiscordCommands.Rankings("title", message, Definitions); } }
         else if(command === "~DRYSTREAK" || command === "~DRYSTREAKS") { if(!CheckBanned(message)) { DiscordCommands.DrystreaksHelp(message); } }
-        else if(command === "~INFAMY") { if(!CheckBanned(message)) { DiscordCommands.Rankings("infamy", message); } }
-        else if(command === "~VALOR") { if(!CheckBanned(message)) { DiscordCommands.Rankings("valor", message); } }
-        else if(command === "~GLORY") { if(!CheckBanned(message)) { DiscordCommands.Rankings("glory", message); } }
-        else if(command === "~IRON BANNER") { if(!CheckBanned(message)) { DiscordCommands.Rankings("ironBanner", message); } }
-        else if(command === "~LEVIATHAN" || command === "~LEVI") { if(!CheckBanned(message)) { DiscordCommands.Rankings("levi", message); } }
-        else if(command === "~PRESTIGELEVIATHAN" || command === "~PRESTIGELEVI" || command === "~PLEVI") { if(!CheckBanned(message)) { DiscordCommands.Rankings("leviPres", message); } }
-        else if(command === "~EATEROFWORLDS" || command === "~EOW") { if(!CheckBanned(message)) { DiscordCommands.Rankings("eow", message); } }
-        else if(command === "~PRESTIGEEATEROFWORLDS" || command === "~PRESTIGEEOW" || command === "~PEOW") { if(!CheckBanned(message)) { DiscordCommands.Rankings("eowPres", message); } }
-        else if(command === "~SPIREOFSTARS" || command === "~SOS") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sos", message); } }
-        else if(command === "~PRESTIGESPIRE" || command === "~PRESTIGESOS" || command === "~PSOS") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sosPres", message); } }
-        else if(command === "~LW" || command === "~LAST WISH") { if(!CheckBanned(message)) { DiscordCommands.Rankings("lastWish", message); } }
-        else if(command === "~SOTP" || command === "~SCOURGE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("scourge", message); } }
-        else if(command === "~COS" || command === "~CROWN") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sorrows", message); } }
-        else if(command === "~GOS" || command === "~GARDEN") { if(!CheckBanned(message)) { DiscordCommands.Rankings("garden", message); } }
-        else if(command === "~MAXPOWER" || command === "~MAX POWER" || command === "~MAX LIGHT" || command === "~MAXLIGHT" || command === "~POWER" || command === "~HIGHEST POWER" || command === "~HIGHESTPOWER") { if(!CheckBanned(message)) { DiscordCommands.Rankings("maxPower", message); } }
-        else if(command === "~SUNDIAL") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sundial", message); } }
-        else if(command === "~FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("fractaline", message); } }
-        else if(command === "~RESONANCE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("resonance", message); } }
-        else if(command === "~TRIUMPH SCORE" || command === "~TRIUMPHSCORE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("triumphScore", message); } }
-        else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME" || command === "~TIME") { if(!CheckBanned(message)) { DiscordCommands.Rankings("totalTime", message); } }
-        else if(command === "~SEASON RANKS" || command === "~SEASONRANKS" || command === "~SEASON RANK" || command === "~SEASONRANK") { if(!CheckBanned(message)) { DiscordCommands.Rankings("seasonRank", message); } }
+        else if(command === "~INFAMY") { if(!CheckBanned(message)) { DiscordCommands.Rankings("infamy", message, Definitions); } }
+        else if(command === "~VALOR") { if(!CheckBanned(message)) { DiscordCommands.Rankings("valor", message, Definitions); } }
+        else if(command === "~GLORY") { if(!CheckBanned(message)) { DiscordCommands.Rankings("glory", message, Definitions); } }
+        else if(command === "~IRON BANNER") { if(!CheckBanned(message)) { DiscordCommands.Rankings("ironBanner", message, Definitions); } }
+        else if(command === "~LEVIATHAN" || command === "~LEVI") { if(!CheckBanned(message)) { DiscordCommands.Rankings("levi", message, Definitions); } }
+        else if(command === "~PRESTIGELEVIATHAN" || command === "~PRESTIGELEVI" || command === "~PLEVI") { if(!CheckBanned(message)) { DiscordCommands.Rankings("leviPres", message, Definitions); } }
+        else if(command === "~EATEROFWORLDS" || command === "~EOW") { if(!CheckBanned(message)) { DiscordCommands.Rankings("eow", message, Definitions); } }
+        else if(command === "~PRESTIGEEATEROFWORLDS" || command === "~PRESTIGEEOW" || command === "~PEOW") { if(!CheckBanned(message)) { DiscordCommands.Rankings("eowPres", message, Definitions); } }
+        else if(command === "~SPIREOFSTARS" || command === "~SOS") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sos", message, Definitions); } }
+        else if(command === "~PRESTIGESPIRE" || command === "~PRESTIGESOS" || command === "~PSOS") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sosPres", message, Definitions); } }
+        else if(command === "~LW" || command === "~LAST WISH") { if(!CheckBanned(message)) { DiscordCommands.Rankings("lastWish", message, Definitions); } }
+        else if(command === "~SOTP" || command === "~SCOURGE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("scourge", message, Definitions); } }
+        else if(command === "~COS" || command === "~CROWN") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sorrows", message, Definitions); } }
+        else if(command === "~GOS" || command === "~GARDEN") { if(!CheckBanned(message)) { DiscordCommands.Rankings("garden", message, Definitions); } }
+        else if(command === "~MAXPOWER" || command === "~MAX POWER" || command === "~MAX LIGHT" || command === "~MAXLIGHT" || command === "~POWER" || command === "~HIGHEST POWER" || command === "~HIGHESTPOWER") { if(!CheckBanned(message)) { DiscordCommands.Rankings("maxPower", message, Definitions); } }
+        else if(command === "~SUNDIAL") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sundial", message, Definitions); } }
+        else if(command === "~FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("fractaline", message, Definitions); } }
+        else if(command === "~RESONANCE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("resonance", message, Definitions); } }
+        else if(command === "~TRIUMPH SCORE" || command === "~TRIUMPHSCORE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("triumphScore", message, Definitions); } }
+        else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME" || command === "~TIME") { if(!CheckBanned(message)) { DiscordCommands.Rankings("totalTime", message, Definitions); } }
+        else if(command === "~SEASON RANKS" || command === "~SEASONRANKS" || command === "~SEASON RANK" || command === "~SEASONRANK") { if(!CheckBanned(message)) { DiscordCommands.Rankings("seasonRank", message, Definitions); } }
         else if(command === "~ITEMS") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedItems(message); } }
         else if(command === "~TITLES") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedTitles(message); } }
-        else if(command === "~TITLES TOTAL" || command === "~THENUMBEROFTITLESTHATIHAVEEARNED") { if(!CheckBanned(message)) { DiscordCommands.Rankings("totalTitles", message); } }
+        else if(command === "~TITLES TOTAL" || command === "~THENUMBEROFTITLESTHATIHAVEEARNED") { if(!CheckBanned(message)) { DiscordCommands.Rankings("totalTitles", message, Definitions); } }
         else if(command.startsWith("~TRIALS ")) {
           if(!CheckBanned(message)) {
             if(command.startsWith("~TRIALS WEEKLY ")) {
@@ -501,7 +499,7 @@ client.on("message", async message => {
           }
         }
         else if(command === "~GUARDIAN GAMES" || command === "~GG") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "guardianGames"); } }
-        else if(command === "~CLASSES") { if(!CheckBanned(message)) { DiscordCommands.Rankings("gg_classes", message); } }
+        else if(command === "~CLASSES") { if(!CheckBanned(message)) { DiscordCommands.Rankings("gg_classes", message, Definitions); } }
 
         //Clan Management
         else if(command.startsWith("~SET BROADCASTS ")) { if(!CheckBanned(message)) { Broadcasts.SetupBroadcasts(message); } }
@@ -526,7 +524,7 @@ client.on("message", async message => {
         else if(command === "~TOGGLE CLAN BROADCASTS" || command === "~TOGGLE CLANS BROADCASTS" || command === "~TOGGLE CLAN BROADCAST" || command === "~TOGGLE CLANS BROADCAST") { if(!CheckBanned(message)) { Broadcasts.ToggleBroadcasts(message, "Clan"); } }
 
         //Globals
-        else if(command.startsWith("~GLOBAL DRYSTREAK ")) { if(!CheckBanned(message)) { DiscordCommands.GlobalDryStreak(message, command.substr("~GLOBAL DRYSTREAK ".length)) } }
+        else if(command.startsWith("~GLOBAL DRYSTREAK ")) { if(!CheckBanned(message)) { DiscordCommands.GlobalDryStreak(message, Definitions, command.substr("~GLOBAL DRYSTREAK ".length)) } }
         else if(command === "~GLOBAL DRYSTREAK" || command === "~GLOBAL DRYSTREAKS") { if(!CheckBanned(message)) { DiscordCommands.DrystreaksHelp(message); } }
         else if(command === "~GLOBAL IRON BANNER" || command === "~GLOBAL IRONBANNER") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("ironBanner", message); } }
         else if(command === "~GLOBAL SEASON RANK" || command === "~GLOBAL SEASON RANKS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("seasonRank", message); } }

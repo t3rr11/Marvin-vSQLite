@@ -236,7 +236,7 @@ async function ForceGuildCheck(client, message) {
 }
 
 //Rankings
-function Rankings(type, message) {
+function Rankings(type, message, definitions) {
   Database.CheckRegistered(message.author.id, function(isError, isFound, Data) {
     if(!isError) {
       if(isFound) {
@@ -248,7 +248,7 @@ function Rankings(type, message) {
               //Get all clan data from playerInfo using clans
               var allClanIds = Data.clans.split(",");
               Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, playerData); } }
+                if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, playerData, definitions); } }
                 else { message.channel.send("Currently your clan is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
               });
             } else { message.reply("No clan set, to set one use: `~Set clan`"); }
@@ -263,7 +263,7 @@ function Rankings(type, message) {
               //Get all clan data from playerInfo using clan_id
               var allClanIds = Data.clans.split(",");
               Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, undefined); } }
+                if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, undefined, definitions); } }
                 else { message.channel.send("Currently your clan is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
               });
             } else { message.reply("No clan set, to set one use: `~Set clan`"); }
@@ -274,7 +274,7 @@ function Rankings(type, message) {
     else { message.reply("Sorry! An error occurred, Please try again..."); }
   });
 }
-function DisplayRankings(message, type, leaderboards, playerData) {
+function DisplayRankings(message, type, leaderboards, playerData, definitions) {
   //PvP
   leaderboards = leaderboards.filter(leader => leader.isPrivate === "false");
   try {
@@ -701,98 +701,104 @@ function DisplayRankings(message, type, leaderboards, playerData) {
     //Items and Titles
     else if(type === "item") {
       var leaderboard = { "names": [] };
-      for(var i in leaderboards) {
-        var items = leaderboards[i].items.split(",");
-        for(j in items) {
+      var itemInput = message.content.substr("~ITEM ".length).toUpperCase();
+      
+      //Rename items
+      if(itemInput === "JOTUNN") { itemInput = "JÖTUNN" }
+      if(itemInput === "FOURTH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+      if(itemInput === "THE 4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+      if(itemInput === "4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+
+      //Find Items
+      var itemToFind = definitions.find(e => e.name.toUpperCase() === itemInput);
+
+      //Item exists in tracking now generate leaderboards
+      if(itemToFind) {
+        for(var i in leaderboards) {
+          var items = leaderboards[i].items.split(",");
+          for(j in items) { if(items[j] === itemToFind.hash) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); } }
+        }
+        if(leaderboard.names.length === 0) {
           var itemToFind = message.content.substr("~ITEM ".length);
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "JOTUNN") { itemToFind = "JÖTUNN" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "ALWAYS ON TIME") { itemToFind = "ALWAYS ON TIME (SPARROW)" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "FOURTH HORSEMAN") { itemToFind = "THE FOURTH HORSEMAN" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "THE 4TH HORSEMAN") { itemToFind = "THE FOURTH HORSEMAN" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "4TH HORSEMAN") { itemToFind = "THE FOURTH HORSEMAN" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "LANTERN SHELL") { itemToFind = "LANTERN SHELL (TRIALS)" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "A THOUSAND WINGS") { itemToFind = "A THOUSAND WINGS (WHISPER SHIP)" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "SCRAP CF-717-91") { itemToFind = "SCRAP CF-717-91 (OUTBREAK SHIP)" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "SILVER TERCEL") { itemToFind = "SILVER TERCEL (DREAMING CITY SPARROW)" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "HARBINGER'S ECHO") { itemToFind = "HARBINGER'S ECHO (SPARROW)" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "HARBINGERS ECHO") { itemToFind = "HARBINGER'S ECHO (SPARROW)" }
-          if(message.content.substr("~ITEM ".length).toUpperCase() === "THE PLATINUM STARLING") { itemToFind = "THE PLATINUM STARLING (SPARROW)" }
-          if(items[j].toUpperCase() === itemToFind.toUpperCase()) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); }
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setDescription("Nobody owns the " + itemToFind.name + " yet! Go be the first!")
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        }
+        else if(leaderboard.names.length === 1) {
+          var itemToFind = message.content.substr("~ITEM ".length);
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setAuthor("The only person to own " + itemToFind.name + " is: ")
+          .setDescription(leaderboard.names[0])
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        }
+        else {
+          var namesRight = leaderboard.names.slice(0, (leaderboard.names.length / 2));
+          var namesLeft = leaderboard.names.slice((leaderboard.names.length / 2), leaderboard.names.length);
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setAuthor("People that own " + itemToFind.name)
+          .addField("Names", namesLeft, true)
+          .addField("Names", namesRight, true)
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
         }
       }
-      if(leaderboard.names.length === 0) {
-        var itemToFind = message.content.substr("~ITEM ".length);
-        const embed = new Discord.RichEmbed()
-        .setColor(0x0099FF)
-        .setDescription("Nobody owns the " + itemToFind + " yet, or we don't track it, you can see a list of items here `~items`")
-        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-        .setTimestamp()
-        message.channel.send({embed});
-      }
-      else if(leaderboard.names.length === 1) {
-        var itemToFind = message.content.substr("~ITEM ".length);
-        const embed = new Discord.RichEmbed()
-        .setColor(0x0099FF)
-        .setAuthor("The only person to own " + itemToFind + " is: ")
-        .setDescription(leaderboard.names[0])
-        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-        .setTimestamp()
-        message.channel.send({embed});
-      }
-      else {
-        var namesRight = leaderboard.names.slice(0, (leaderboard.names.length / 2));
-        var namesLeft = leaderboard.names.slice((leaderboard.names.length / 2), leaderboard.names.length);
-        const embed = new Discord.RichEmbed()
-        .setColor(0x0099FF)
-        .setAuthor("People that own " + message.content.substr("~ITEM ".length))
-        .addField("Names", namesLeft, true)
-        .addField("Names", namesRight, true)
-        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-        .setTimestamp()
-        message.channel.send({embed});
-      }
+      else { message.channel.send("We do not track the item: " + itemInput + " yet, you can see a list of tracked items here `~items` or feel free to request tracking for this item by using `~request Please track x item.`"); }
     }
     else if(type === "title") {
       var leaderboard = { "names": [] };
-      for(var i in leaderboards) {
-        var titles = leaderboards[i].titles.split(",");
-        for(j in titles) {
+      var titleInput = message.content.substr("~TITLE ".length).toUpperCase();
+
+      //Find Items
+      var titleToFind = definitions.find(e => e.name.toUpperCase() === titleInput);
+
+      //Title exists in tracking now generate leaderboards
+      if(titleToFind) {
+        for(var i in leaderboards) {
+          var titles = leaderboards[i].titles.split(",");
+          for(j in titles) { if(titles[j] === titleToFind.hash) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); } }
+        }
+        if(leaderboard.names.length === 0) {
           var titleToFind = message.content.substr("~TITLE ".length);
-          if(titles[j].toUpperCase() === titleToFind.toUpperCase()) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); }
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setDescription("Nobody owns the " + titleToFind.name + " yet, Quick be the first!")
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        }
+        else if(leaderboard.names.length === 1) {
+          var titleToFind = message.content.substr("~TITLE ".length);
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setAuthor("The only person to own " + titleToFind.name + " is: ")
+          .setDescription(leaderboard.names[0])
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        }
+        else {
+          var titleToFind = message.content.substr("~TITLE ".length);
+          var namesRight = leaderboard.names.slice(0, (leaderboard.names.length / 2));
+          var namesLeft = leaderboard.names.slice((leaderboard.names.length / 2), leaderboard.names.length);
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setAuthor("People that own the " + titleToFind.name + " title!")
+          .addField("Names", namesLeft, true)
+          .addField("Names", namesRight, true)
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
         }
       }
-      if(leaderboard.names.length === 0) {
-        var titleToFind = message.content.substr("~TITLE ".length);
-        const embed = new Discord.RichEmbed()
-        .setColor(0x0099FF)
-        .setDescription("Nobody owns the " + titleToFind + " yet, or we don't track it, you can see a list of titles here `~titles`")
-        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-        .setTimestamp()
-        message.channel.send({embed});
-      }
-      else if(leaderboard.names.length === 1) {
-        var titleToFind = message.content.substr("~TITLE ".length);
-        const embed = new Discord.RichEmbed()
-        .setColor(0x0099FF)
-        .setAuthor("The only person to own " + titleToFind + " is: ")
-        .setDescription(leaderboard.names[0])
-        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-        .setTimestamp()
-        message.channel.send({embed});
-      }
-      else {
-        var titleToFind = message.content.substr("~TITLE ".length);
-        var namesRight = leaderboard.names.slice(0, (leaderboard.names.length / 2));
-        var namesLeft = leaderboard.names.slice((leaderboard.names.length / 2), leaderboard.names.length);
-        const embed = new Discord.RichEmbed()
-        .setColor(0x0099FF)
-        .setAuthor("People that own the " + titleToFind + " title!")
-        .addField("Names", namesLeft, true)
-        .addField("Names", namesRight, true)
-        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-        .setTimestamp()
-        message.channel.send({embed});
-      }
+      else { message.channel.send("Nobody owns the " + titleInput + " yet, you can see a list of tracked titles here `~titles` or feel free to request tracking for this title by using `~request Please track the x title.`"); }
     }
 
     //Seasonal
@@ -1960,156 +1966,160 @@ async function ClanRankings(message, type, leaderboards, clans) {
     message.channel.send({embed});
   }
 }
-function GlobalDryStreak(message, item) {
-  if(item === "1000 VOICES") {
-    Database.GetGlobalDryStreak(item, function(isError, isFound, leaderboards) {
-      if(!isError) {
-        Database.GetFromBroadcasts(item, function(isError, isFound, data) {
-          var globalLeaderboard = [];
-          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].lastWishCompletions) }); }
-          for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
-          globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
-          globalLeaderboard = globalLeaderboard.slice(0, 10);
+function GlobalDryStreak(message, definitions, item) {
+  var itemDef = definitions.find(e => e.name.toUpperCase() === item);
+  if(itemDef) {
+    if(item === "1000 VOICES") {
+      Database.GetGlobalDryStreak(itemDef, function(isError, isFound, leaderboards) {
+        if(!isError) {
+          Database.GetFromBroadcasts(itemDef, function(isError, isFound, data) {
+            var globalLeaderboard = [];
+            for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].lastWishCompletions) }); }
+            for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
+            globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
+            globalLeaderboard = globalLeaderboard.slice(0, 10);
 
-          var leaderboard = { "names": [], "completions": [] };
-          for(var i in globalLeaderboard) {
-            leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
-            leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
-          }
+            var leaderboard = { "names": [], "completions": [] };
+            for(var i in globalLeaderboard) {
+              leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
+              leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
+            }
 
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("Top 10 Unluckiest People - 1000 Voices")
-          .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
-          .addField("Name", leaderboard.names, true)
-          .addField("Completions", leaderboard.completions, true)
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        });
-      }
-      else { message.reply("Sorry! An error occurred, Please try again..."); }
-    });
-  }
-  else if(item === "ANARCHY") {
-    Database.GetGlobalDryStreak(item, function(isError, isFound, leaderboards) {
-      if(!isError) {
-        Database.GetFromBroadcasts(item, function(isError, isFound, data) {
-          var globalLeaderboard = [];
-          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
-          for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
-          globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
-          globalLeaderboard = globalLeaderboard.slice(0, 10);
+            const embed = new Discord.RichEmbed()
+            .setColor(0x0099FF)
+            .setAuthor("Top 10 Unluckiest People - 1000 Voices")
+            .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
+            .addField("Name", leaderboard.names, true)
+            .addField("Completions", leaderboard.completions, true)
+            .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+            .setTimestamp()
+            message.channel.send({embed});
+          });
+        }
+        else { message.reply("Sorry! An error occurred, Please try again..."); }
+      });
+    }
+    else if(item === "ANARCHY") {
+      Database.GetGlobalDryStreak(itemDef, function(isError, isFound, leaderboards) {
+        if(!isError) {
+          Database.GetFromBroadcasts(itemDef, function(isError, isFound, data) {
+            var globalLeaderboard = [];
+            for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
+            for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
+            globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
+            globalLeaderboard = globalLeaderboard.slice(0, 10);
 
-          var leaderboard = { "names": [], "completions": [] };
-          for(var i in globalLeaderboard) {
-            leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
-            leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
-          }
+            var leaderboard = { "names": [], "completions": [] };
+            for(var i in globalLeaderboard) {
+              leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
+              leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
+            }
 
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("Top 10 Unluckiest People - Anarchy")
-          .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
-          .addField("Name", leaderboard.names, true)
-          .addField("Completions", leaderboard.completions, true)
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        });
-      }
-      else { message.reply("Sorry! An error occurred, Please try again..."); }
-    });
-  }
-  else if(item === "ALWAYS ON TIME") {
-    Database.GetGlobalDryStreak(item, function(isError, isFound, leaderboards) {
-      if(!isError) {
-        Database.GetFromBroadcasts(item, function(isError, isFound, data) {
-          var globalLeaderboard = [];
-          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
-          for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
-          globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
-          globalLeaderboard = globalLeaderboard.slice(0, 10);
+            const embed = new Discord.RichEmbed()
+            .setColor(0x0099FF)
+            .setAuthor("Top 10 Unluckiest People - Anarchy")
+            .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
+            .addField("Name", leaderboard.names, true)
+            .addField("Completions", leaderboard.completions, true)
+            .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+            .setTimestamp()
+            message.channel.send({embed});
+          });
+        }
+        else { message.reply("Sorry! An error occurred, Please try again..."); }
+      });
+    }
+    else if(item === "ALWAYS ON TIME") {
+      Database.GetGlobalDryStreak(itemDef, function(isError, isFound, leaderboards) {
+        if(!isError) {
+          Database.GetFromBroadcasts(itemDef, function(isError, isFound, data) {
+            var globalLeaderboard = [];
+            for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
+            for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
+            globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
+            globalLeaderboard = globalLeaderboard.slice(0, 10);
 
-          var leaderboard = { "names": [], "completions": [] };
-          for(var i in globalLeaderboard) {
-            leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
-            leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
-          }
+            var leaderboard = { "names": [], "completions": [] };
+            for(var i in globalLeaderboard) {
+              leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
+              leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
+            }
 
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("Top 10 Unluckiest People - Always on Time")
-          .setDescription("This does not count switches, so the people here might have just never got the chest. It also does not looted clears, just clears total. It's more of an estimate.")
-          .addField("Name", leaderboard.names, true)
-          .addField("Completions", leaderboard.completions, true)
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        });
-      }
-      else { message.reply("Sorry! An error occurred, Please try again..."); }
-    });
-  }
-  else if(item === "TARRABAH") {
-    Database.GetGlobalDryStreak(item, function(isError, isFound, leaderboards) {
-      if(!isError) {
-        Database.GetFromBroadcasts(item, function(isError, isFound, data) {
-          var globalLeaderboard = [];
-          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].sorrowsCompletions) }); }
-          for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
-          globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
-          globalLeaderboard = globalLeaderboard.slice(0, 10);
+            const embed = new Discord.RichEmbed()
+            .setColor(0x0099FF)
+            .setAuthor("Top 10 Unluckiest People - Always on Time")
+            .setDescription("This does not count switches, so the people here might have just never got the chest. It also does not looted clears, just clears total. It's more of an estimate.")
+            .addField("Name", leaderboard.names, true)
+            .addField("Completions", leaderboard.completions, true)
+            .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+            .setTimestamp()
+            message.channel.send({embed});
+          });
+        }
+        else { message.reply("Sorry! An error occurred, Please try again..."); }
+      });
+    }
+    else if(item === "TARRABAH") {
+      Database.GetGlobalDryStreak(itemDef, function(isError, isFound, leaderboards) {
+        if(!isError) {
+          Database.GetFromBroadcasts(itemDef, function(isError, isFound, data) {
+            var globalLeaderboard = [];
+            for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].sorrowsCompletions) }); }
+            for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
+            globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
+            globalLeaderboard = globalLeaderboard.slice(0, 10);
 
-          var leaderboard = { "names": [], "completions": [] };
-          for(var i in globalLeaderboard) {
-            leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
-            leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
-          }
+            var leaderboard = { "names": [], "completions": [] };
+            for(var i in globalLeaderboard) {
+              leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
+              leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
+            }
 
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("Top 10 Unluckiest People - Tarrabah")
-          .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
-          .addField("Name", leaderboard.names, true)
-          .addField("Completions", leaderboard.completions, true)
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        });
-      }
-      else { message.reply("Sorry! An error occurred, Please try again..."); }
-    });
-  }
-  else if(item === "LUXURIOUS TOAST") {
-    Database.GetGlobalDryStreak(item, function(isError, isFound, leaderboards) {
-      if(!isError) {
-        Database.GetFromBroadcasts(item, function(isError, isFound, data) {
-          var globalLeaderboard = [];
-          for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].sosCompletions + leaderboards[i].sosPresCompletions) }); }
-          for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
-          globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
-          globalLeaderboard = globalLeaderboard.slice(0, 10);
+            const embed = new Discord.RichEmbed()
+            .setColor(0x0099FF)
+            .setAuthor("Top 10 Unluckiest People - Tarrabah")
+            .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
+            .addField("Name", leaderboard.names, true)
+            .addField("Completions", leaderboard.completions, true)
+            .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+            .setTimestamp()
+            message.channel.send({embed});
+          });
+        }
+        else { message.reply("Sorry! An error occurred, Please try again..."); }
+      });
+    }
+    else if(item === "LUXURIOUS TOAST") {
+      Database.GetGlobalDryStreak(itemDef, function(isError, isFound, leaderboards) {
+        if(!isError) {
+          Database.GetFromBroadcasts(itemDef, function(isError, isFound, data) {
+            var globalLeaderboard = [];
+            for(var i in leaderboards) { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "completions": Misc.AddCommas(leaderboards[i].sosCompletions + leaderboards[i].sosPresCompletions) }); }
+            for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
+            globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
+            globalLeaderboard = globalLeaderboard.slice(0, 10);
 
-          var leaderboard = { "names": [], "completions": [] };
-          for(var i in globalLeaderboard) {
-            leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
-            leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
-          }
+            var leaderboard = { "names": [], "completions": [] };
+            for(var i in globalLeaderboard) {
+              leaderboard.names.push(globalLeaderboard[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }));
+              leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
+            }
 
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("Top 10 Unluckiest People - Luxurious Toast")
-          .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
-          .addField("Name", leaderboard.names, true)
-          .addField("Completions", leaderboard.completions, true)
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        });
-      }
-      else { message.reply("Sorry! An error occurred, Please try again..."); }
-    });
+            const embed = new Discord.RichEmbed()
+            .setColor(0x0099FF)
+            .setAuthor("Top 10 Unluckiest People - Luxurious Toast")
+            .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
+            .addField("Name", leaderboard.names, true)
+            .addField("Completions", leaderboard.completions, true)
+            .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+            .setTimestamp()
+            message.channel.send({embed});
+          });
+        }
+        else { message.reply("Sorry! An error occurred, Please try again..."); }
+      });
+    }
+    else { DrystreaksHelp(message) }
   }
   else { DrystreaksHelp(message) }
 }
@@ -2123,31 +2133,31 @@ function DryStreak(message, item) {
             //Get all clan data from playerInfo using clans
             var allClanIds = Data.clans.split(",");
             if(item.toUpperCase() == "1000 VOICES") {
-              Database.GetClanDryStreaks(allClanIds, "1000 Voices", function(isError, isFound, leaderboards) {
+              Database.GetClanDryStreaks(allClanIds, 199171385, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayDryStreak(message, "1000 Voices", leaderboards, playerData, allClanIds); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
             else if(item.toUpperCase() == "ANARCHY") {
-              Database.GetClanDryStreaks(allClanIds, "Anarchy", function(isError, isFound, leaderboards) {
+              Database.GetClanDryStreaks(allClanIds, 2220014607, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayDryStreak(message, "Anarchy", leaderboards, playerData, allClanIds); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
             else if(item.toUpperCase() == "ALWAYS ON TIME") {
-              Database.GetClanDryStreaks(allClanIds, "Always on Time", function(isError, isFound, leaderboards) {
+              Database.GetClanDryStreaks(allClanIds, 1903459810, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayDryStreak(message, "Always on Time", leaderboards, playerData, allClanIds); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
             else if(item.toUpperCase() == "TARRABAH") {
-              Database.GetClanDryStreaks(allClanIds, "Tarrabah", function(isError, isFound, leaderboards) {
+              Database.GetClanDryStreaks(allClanIds, 2329697053, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayDryStreak(message, "Tarrabah", leaderboards, playerData, allClanIds); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
             else if(item.toUpperCase() == "LUXURIOUS TOAST") {
-              Database.GetClanDryStreaks(allClanIds, "Luxurious Toast", function(isError, isFound, leaderboards) {
+              Database.GetClanDryStreaks(allClanIds, 1866399776, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayDryStreak(message, "Luxurious Toast", leaderboards, playerData, allClanIds); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });

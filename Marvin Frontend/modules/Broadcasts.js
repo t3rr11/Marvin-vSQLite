@@ -190,7 +190,7 @@ async function SendBroadcast(client, broadcast) {
   }
   else if(BroadcastType === "title") {
     //If the broadcast is a title, then set the message as seen below.
-    BroadcastMessage = `${ broadcast.displayName } has obtained the ${ broadcast.broadcast } title!` 
+    BroadcastMessage = `${ broadcast.displayName } has obtained the ${ broadcast.broadcast } title!`
   }
   else if(BroadcastType === "clan") { BroadcastMessage = broadcast.broadcast; }
   else if(BroadcastType === "other") { BroadcastMessage = broadcast.broadcast; }

@@ -11,6 +11,7 @@ let ClanData = require(__dirname + '/modules/ClanData.js');
 var Users = [];
 var Players = [];
 var Clans = [];
+var Definitions = [];
 var StartupTime = new Date().getTime();
 var CommandsInput = 0;
 var ClanScans = 0;
@@ -35,10 +36,11 @@ async function CheckScanSpeedChange() {
 }
 
 
-async function UpdateBackendStatus() {
-  await new Promise(resolve => Database.GetClans((isError, Data) => { Clans = Data; resolve(true); }) );
-  await new Promise(resolve => Database.GetUsers((isError, Data) => { Users = Data; resolve(true); }) );
-  await new Promise(resolve => Database.GetPlayers((isError, Data) => { Players = Data; resolve(true); }) );
+async function UpdateLocalData() {
+  await new Promise(resolve => Database.GetClans((isError, Data) => { if(!isError) { Clans = Data; } resolve(true); }) );
+  await new Promise(resolve => Database.GetUsers((isError, Data) => { if(!isError) { Users = Data; } resolve(true); }) );
+  await new Promise(resolve => Database.GetPlayers((isError, Data) => { if(!isError) { Players = Data; } resolve(true); }) );
+  await new Promise(resolve => Database.GetDefinitions((isError, Data) => { if(!isError) { Definitions = Data; } resolve(true); }) );
 
   Log.SaveBackendStatus(ClanScans, ScanLength, LastScanTime, StartupTime, ScanSpeed, APIDisabled);
 }
@@ -47,7 +49,7 @@ async function StartUp() {
   //Startup checks
   Log.SaveErrorCounter(null);
   await CheckMaintenance();
-  await UpdateBackendStatus();
+  await UpdateLocalData();
 
   //Define variables
   var id = -1; //The current id value that the scanner is scanning.
@@ -56,6 +58,16 @@ async function StartUp() {
   var processingClans = [];
   var startTime = new Date().getTime();
   LastScanTime = new Date().getTime();
+
+  async function CheckProcessingClans() {
+    for(let i in processingClans) {
+      var clan = processingClans[i];
+      if((((new Date() - new Date(clan.added)) / 1000) / 60) > 10) {
+        processingClans.splice(processingClans.indexOf(processingClans.find(e => e.clan_id === clan.clan_id)), 1);
+        console.log(`${ clan.clan_id } has been removed from the Queue due to timeout. (${ Math.floor(((new Date() - new Date(clan.added)) / 1000) / 60) } mins)`);
+      }
+    }
+  }
 
   //Clan scanner function
   clanScanner = async function() {
@@ -108,7 +120,7 @@ async function StartUp() {
     if(id < trackedClans.length) {
       var processingData = { "guild_id": trackedClans[id].guild_id, "clan_id": trackedClans[id].clan_id, "added": new Date().getTime() }
       processingClans.push(processingData);
-      try { await ClanData.CheckClanMembers(trackedClans[id]).then(function(clan_id) { processingClans.splice( processingClans.indexOf(processingClans.find(e => e.clan_id === clan_id)), 1); }); ClanScans++; }
+      try { await ClanData.CheckClanMembers(trackedClans[id], Definitions).then(function(clan_id) { processingClans.splice(processingClans.indexOf(processingClans.find(e => e.clan_id === clan_id)), 1); }); ClanScans++; }
       catch (err) {
         if(err.type === "invalid-json") { }
         else if(err.errno && err.errno === "ETIMEDOUT") { }
@@ -119,10 +131,15 @@ async function StartUp() {
       if(!APIDisabled) {
         if((new Date().getTime() - new Date(LastScanTime).getTime()) > 1800000) {
           Log.SaveError("I stopped scanning for 30 minutes, so i have automatically reset.");
+          Log.SaveLog("Info", "I stopped scanning for 30 minutes, so i have automatically reset.");
+          console.log(`processingClans.length: ${ processingClans.length }`);
+          console.log(`Math.round(ScanSpeed * 0.6): ${ Math.round(ScanSpeed * 0.6) }`);
+          console.log(`processingClans:`);
+          console.log(processingClans);
           processingClans = [];
           restartTracking();
         }
-        else if(processingClans.length < Math.round(ScanSpeed * 0.6)) {
+        else if(processingClans.length <= Math.round(ScanSpeed * 0.6)) {
           if((new Date().getTime() - new Date(LastScanTime).getTime()) > 5000) {
             restartTracking();
           }
@@ -138,8 +155,9 @@ async function StartUp() {
 
 	//SetTimeouts
 	setInterval(function() { CheckMaintenance() }, 1000 * 60 * 5);
-	setInterval(function() { UpdateBackendStatus() }, 1000 * 60 * 1);
+	setInterval(function() { UpdateLocalData() }, 1000 * 60 * 1);
 	setInterval(function() { CheckScanSpeedChange() }, 1000 * 60 * 1);
+	setInterval(function() { CheckProcessingClans() }, 1000 * 60 * 1);
   setInterval(function() { Log.SaveBackendStatus(ClanScans, ScanLength, LastScanTime, StartupTime, ProcessingClans, ScanSpeed, APIDisabled) }, 10000);
 
   //Start Up Console Log

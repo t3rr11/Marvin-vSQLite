@@ -5,6 +5,7 @@ const Config = require("../../Combined/configs/config.json");
 const Backend_Config = require("../../Combined/configs/backend_config.json");
 const fetch = require("node-fetch");
 const Database = require("./Database");
+var Definitions = [];
 var id = 0;
 
 //Exports
@@ -13,8 +14,9 @@ module.exports = { CheckClanMembers, GetClanMembers, GetClanDetails };
 //Functions
 const flagEnum = (state, value) => !!(state & value);
 function GetItemState(state) { return { none: flagEnum(state, 0), notAcquired: flagEnum(state, 1), obscured: flagEnum(state, 2), invisible: flagEnum(state, 4), cannotAffordMaterialRequirements: flagEnum(state, 8), inventorySpaceUnavailable: flagEnum(state, 16), uniquenessViolation: flagEnum(state, 32), purchaseDisabled: flagEnum(state, 64) }; }
-async function CheckClanMembers(trackedClan) {
+async function CheckClanMembers(trackedClan, definitions) {
   //Get current clan members.
+  Definitions = definitions;
   var ClanMembers = [];
   var CurrentClanMembers = await GetClanMembers(trackedClan.clan_id);
   var ClanDetails = null;
@@ -88,6 +90,7 @@ async function CheckClanMembers(trackedClan) {
     else { Log.SaveError(`${ trackedClan.clan_id } failed to grab clan details as a server error occured.`); }
     resolve(true);
   }));
+
   return trackedClan.clan_id;
 }
 async function GetClanMembers(clan_id) {
@@ -321,93 +324,15 @@ function GetRaids(response) {
   }
 }
 function GetItems(response) {
-  var itemList = [
-    { "name": "1000 Voices", "collectibleHash": 199171385 },
-    { "name": "Luna Howl", "collectibleHash": 3260604718 },
-    { "name": "Not Forgotten", "collectibleHash": 3260604717 },
-    { "name": "Redrix Broadsword", "collectibleHash": 1111219481 },
-    { "name": "Redrix Claymore", "collectibleHash": 4274523516 },
-    { "name": "Breakneck", "collectibleHash": 1666039008 },
-    { "name": "Mountain Top", "collectibleHash": 4047371119 },
-    { "name": "Le Monarque", "collectibleHash": 3573051804 },
-    { "name": "Jötunn", "collectibleHash": 3584311877 },
-    { "name": "Anarchy", "collectibleHash": 2220014607 },
-    { "name": "Thorn", "collectibleHash": 4009683574 },
-    { "name": "Recluse", "collectibleHash": 2335550020 },
-    { "name": "Last Word", "collectibleHash": 3074058273 },
-    { "name": "Izanagis Burden", "collectibleHash": 24541428 },
-    { "name": "Arbalest", "collectibleHash": 2036397919 },
-    { "name": "Hush", "collectibleHash": 1670904512 },
-    { "name": "Wendigo GL3", "collectibleHash": 3830703103 },
-    { "name": "Tarrabah", "collectibleHash": 2329697053 },
-    { "name": "Revoker", "collectibleHash": 3066162258 },
-    { "name": "Lumina", "collectibleHash": 2924632392 },
-    { "name": "Bad Juju", "collectibleHash": 4207100358 },
-    { "name": "Xenophage", "collectibleHash": 1258579677 },
-    { "name": "Divinity", "collectibleHash": 1988948484 },
-    { "name": "Komodo-4FR", "collectibleHash": 4116184726 },
-    { "name": "Python", "collectibleHash": 3972149937 },
-    { "name": "Buzzard", "collectibleHash": 2011258732 },
-    { "name": "Loaded Question", "collectibleHash": 3810740723 },
-    { "name": "Whisper of the Worm", "collectibleHash": 3875807583 },
-    { "name": "Outbreak Perfected", "collectibleHash": 2500286745 },
-    { "name": "Legend of Acrius", "collectibleHash": 199171389 },
-    { "name": "Oxygen SR3", "collectibleHash": 543982652 },
-    { "name": "21% Delirium", "collectibleHash": 1639266456 },
-    { "name": "Edgewise", "collectibleHash": 853534062 },
-    { "name": "Exit Strategy", "collectibleHash": 1510655351 },
-    { "name": "Randys Throwing Knife", "collectibleHash": 1303705556 },
-    { "name": "Wish-Ender", "collectibleHash": 1660030044 },
-    { "name": "Leviathans Breath", "collectibleHash": 3552855013 },
-    { "name": "Devils Ruin", "collectibleHash": 2190071629 },
-    { "name": "Bastion", "collectibleHash": 3207791447 },
-    { "name": "Always on Time (Sparrow)", "collectibleHash": 1903459810 },
-    { "name": "Luxurious Toast", "collectibleHash": 1866399776 },
-    { "name": "The Fourth Horseman", "collectibleHash": 2318862156 },
-    { "name": "Lantern Shell (Trials)", "collectibleHash": 3127711519 },
-    { "name": "Point of the Stag", "collectibleHash": 1135136071 },
-    { "name": "A Thousand Wings (Whisper Ship)", "collectibleHash": 3142437750 },
-    { "name": "SCRAP CF-717-91 (Outbreak Ship)", "collectibleHash": 1840126886 },
-    { "name": "Silver Tercel (Dreaming City Sparrow)", "collectibleHash": 1469913807 },
-    { "name": "Heir Apparent", "collectibleHash": 2842076592 },
-    { "name": "Felwinter's Lie", "collectibleHash": 3371544734 },
-    { "name": "The Platinum Starling (Sparrow)", "collectibleHash": 39133431 },
-    { "name": "Harbinger's Echo (Sparrow)", "collectibleHash": 1469913803 },
-    { "name": "Armory Forged Shell", "collectibleHash": 3531075476 },
-    { "name": "Khvostov 7G-02", "collectibleHash": 3686153571 }
-  ];
-  let disabledItems = [];
-
+  var itemList = Definitions.filter(e => e.type === "item");
   var items = [];
-  for(var i in itemList) {
-    if(GetItemState(response.playerData.profileCollectibles.data.collectibles[itemList[i].collectibleHash].state).notAcquired === false) {
-      items.push(itemList[i].name)
-    }
-  }
-  return { "items": items };
+  for(var i in itemList) { if(GetItemState(response.playerData.profileCollectibles.data.collectibles[itemList[i].hash].state).notAcquired === false) { items.push(itemList[i].hash) } }
+  return { items };
 }
 function GetTitles(response) {
-  var titleList = [
-    { "name": "Wayfarer", "recordHash": 2757681677 },
-    { "name": "Dredgen", "recordHash": 3798931976 },
-    { "name": "Unbroken", "recordHash": 3369119720 },
-    { "name": "Chronicler", "recordHash": 1754983323 },
-    { "name": "Cursebreaker", "recordHash": 1693645129 },
-    { "name": "Rivensbane", "recordHash": 2182090828 },
-    { "name": "Blacksmith", "recordHash": 2053985130 },
-    { "name": "Reckoner", "recordHash": 1313291220 },
-    { "name": "MMXIX", "recordHash": 2254764897 },
-    { "name": "Shadow", "recordHash": 1883929036 },
-    { "name": "Undying", "recordHash": 2707428411 },
-    { "name": "Enlightened", "recordHash": 3387213440 },
-    { "name": "Harbinger", "recordHash": 3793754396 },
-    { "name": "Savior", "recordHash": 2460356851 },
-    { "name": "Almighty", "recordHash": 2860165064 },
-    { "name": "Flawless", "recordHash": 2945528800 },
-    { "name": "Conqueror", "recordHash": 1983630873 }
-  ];
+  var titleList = Definitions.filter(e => e.type === "title");
   var titles = [];
-  for(var i in titleList) { if(response.playerData.profileRecords.data.records[titleList[i].recordHash].objectives[0].complete) { titles.push(titleList[i].name) } }
+  for(var i in titleList) { if(response.playerData.profileRecords.data.records[titleList[i].hash].objectives[0].complete) { titles.push(titleList[i].hash) } }
   return { titles };
 }
 function GetSeasonal(response) {
@@ -501,10 +426,15 @@ function CheckItems(Data, SQLData) {
 
     if(foundData.length !== 0) {
       for(var i = 0; i < foundData.length; i++) {
-        if(foundData[i] === "1000 Voices") { SendBroadcast(Data, "item", foundData[i], Data.Raids.lastWish); }
-        else if(foundData[i] === "Anarchy" || foundData[i] === "Always on Time") { SendBroadcast(Data, "item", foundData[i], Data.Raids.scourge); }
-        else if(foundData[i] === "Tarrabah") { SendBroadcast(Data, "item", foundData[i], Data.Raids.sorrows); }
-        else { SendBroadcast(Data, "item", foundData[i], -1); }
+        var itemData = Definitions.find(e => e.hash == foundData[i]);
+        if(itemData) {
+          if(JSON.parse(itemData.broadcast_enabled)) {
+            if(itemData.hash === "199171385") { SendBroadcast(Data, "item", itemData, Data.Raids.lastWish == 0 ? 1 : Data.Raids.lastWish); } // 1000 Voices
+            else if (itemData.hash === "2220014607") { SendBroadcast(Data, "item", itemData, Data.Raids.scourge == 0 ? 1 : Data.Raids.scourge); } // Anarchy
+            else if (itemData.hash === "2329697053") { SendBroadcast(Data, "item", itemData, Data.Raids.sorrows == 0 ? 1 : Data.Raids.sorrows); } // Tarrabah
+            else { SendBroadcast(Data, "item", itemData, -1); } //Everything else
+          }
+        }
       }
     }
   }
@@ -516,21 +446,21 @@ function CheckTitles(Data, SQLData) {
     var foundData = newData.filter(item => !prevData.includes(item));
     if(foundData.length !== 0) {
       for(var i = 0; i < foundData.length; i++) {
-        SendBroadcast(Data, "title", foundData[i], -1);
+        var titleData = Definitions.find(e => e.hash == foundData[i]);
+        if(titleData) { if(JSON.parse(titleData.broadcast_enabled)) { SendBroadcast(Data, "title", titleData, -1); } }
       }
     }
   }
 }
 
 //Send broadcasts
-function SendBroadcast(data, type, broadcast, count) {
-  Database.AddNewBroadcast(data, Config.currentSeason, type, broadcast, count, new Date().getTime(), function(isError) {
+function SendBroadcast(data, type, bData, count) {
+  Database.AddNewBroadcast(data, Config.currentSeason, type, bData.name, bData.hash, count, new Date().getTime(), function(isError) {
     if(isError) { console.log("There was an error saving broadcast to awaiting_broadcasts."); }
     else {
       let BroadcastMessage = null;
-      if(type === "item") { if(count === -1) { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained ${ broadcast }`; } else { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained ${ broadcast } in ${ count } ${ count > 1 ? "raids!" : "raid!" }` } }
-      else if(type === "title") { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained the ${ broadcast } title!` }
-      else if(type === "other") { BroadcastMessage = broadcast; }
+      if(type === "item") { if(count === -1) { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained ${ bData.name }`; } else { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained ${ bData.name } in ${ count } ${ count > 1 ? "raids!" : "raid!" }` } }
+      else if(type === "title") { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained the ${ bData.name } title!` }
       Log.SaveLog("Clans", `[${ data.AccountInfo.clanId }]: ${ BroadcastMessage }`);
     }
   });

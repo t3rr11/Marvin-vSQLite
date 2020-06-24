@@ -13,7 +13,7 @@ module.exports = {
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
   ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking,
-  AddLog, GetLogDesc
+  AddLog, GetLogDesc, GetDefinitions
 };
 
 //MySQL Connection
@@ -95,31 +95,31 @@ function GetUsers(callback) {
   });
   return users;
 }
-function GetGlobalDryStreak(item, callback) {
+function GetGlobalDryStreak(itemDef, callback) {
   var sql = "SELECT * FROM playerInfo WHERE (items NOT LIKE ?) AND (clanId NOT LIKE '')";
-  var inserts = ['%' + item + '%'];
+  var inserts = ['%' + itemDef.hash + '%'];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error getting drystreak leaderboards for ${ item } Error: ${ error }`); callback(true); }
+    if(!!error) { Log.SaveError(`Error getting drystreak leaderboards for ${ itemDef.name } Error: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
 }
-function GetClanDryStreaks(clanIds, item, callback) {
+function GetClanDryStreaks(clanIds, hash, callback) {
   var query = ""; for(var i in clanIds) { if(i == 0) { query = `clanId="${ clanIds[i] }"` } else { query = `${ query } OR clanId="${ clanIds[i] }"` } }
   var sql = `SELECT * FROM playerInfo WHERE (items NOT LIKE ?) AND (${ query })`;
-  var inserts = ['%' + item + '%'];
+  var inserts = ['%' + hash + '%'];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error getting drystreak leaderboards for ${ item } Error: ${ error }`); callback(true); }
+    if(!!error) { Log.SaveError(`Error getting drystreak leaderboards for ${ hash } Error: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
 }
-function GetFromBroadcasts(item, callback) {
-  var sql = "SELECT * FROM broadcasts WHERE broadcast LIKE ?";
-  var inserts = ['%' + item + '%'];
+function GetFromBroadcasts(itemDef, callback) {
+  var sql = "SELECT * FROM broadcasts WHERE hash LIKE ? OR broadcast LIKE ?";
+  var inserts = ['%' + itemDef.hash + '%', '%' + itemDef.name + '%'];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error getting broadcasts for ${ item } Error: ${ error }`); callback(true); }
+    if(!!error) { Log.SaveError(`Error getting broadcasts for ${ itemDef.name } Error: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
 }
@@ -169,6 +169,14 @@ function GetClanDetailsViaAuthor(data, callback) {
     if(!!error) { Log.SaveError(`Error getting guild details using discord user data, ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(false, false); } }
   });
+}
+function GetDefinitions(callback) {
+  var users = [];
+  db.query(`SELECT * FROM definitions`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error getting definitions from server: ${ error }`); callback(true); }
+    else { for(var i in rows) { users.push(rows[i]); } callback(false, users); }
+  });
+  return users;
 }
 
 //Checks
@@ -297,14 +305,14 @@ function AddNewGuild(message, clanData, callback) {
   });
 }
 function AddBroadcast(broadcast) {
-  var sql = "INSERT INTO broadcasts (clanId,displayName,membershipId,season,type,broadcast,count,date) VALUES (?,?,?,?,?,?,?,?)";
-  var inserts = [broadcast.clanId, broadcast.displayName, broadcast.membershipId, broadcast.season, broadcast.type, broadcast.broadcast, broadcast.count, broadcast.date];
+  var sql = "INSERT INTO broadcasts (clanId,displayName,membershipId,season,type,broadcast,hash,count,date) VALUES (?,?,?,?,?,?,?,?,?)";
+  var inserts = [broadcast.clanId, broadcast.displayName, broadcast.membershipId, broadcast.season, broadcast.type, broadcast.broadcast, broadcast.hash, broadcast.count, broadcast.date];
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error adding new broadcast into broadcasts, Error: ${ error }`); }
     else {
-      var sql = "DELETE FROM awaiting_broadcasts WHERE membershipId=? AND season=? AND broadcast=?";
-      var inserts = [broadcast.membershipId, broadcast.season, broadcast.broadcast];
+      var sql = "DELETE FROM awaiting_broadcasts WHERE membershipId=? AND season=? AND broadcast=? AND hash=?";
+      var inserts = [broadcast.membershipId, broadcast.season, broadcast.broadcast, broadcast.hash];
       sql = db.format(sql, inserts);
       db.query(sql, function(error, rows, fields) {
         if(!!error) { Log.SaveError(`Error deleteing broadcast from awaiting_broadcast, Error: ${ error }`); }
@@ -560,7 +568,7 @@ function AddLog(message, type, command, description, related) {
   if(message !== null) {
     if(message.author) {
       var fullusername = `${message.author.username}#${message.author.discriminator}`;
-      var inserts = [type, message.author.id, fullusername, command, message.guild.id, Misc.cleanString(message.guild.name), description, related, thisDate];
+      var inserts = [type, message.author.id, Misc.cleanString(fullusername), command, message.guild.id, Misc.cleanString(message.guild.name), description, related, thisDate];
       sql = db.format(sql, inserts);
     }
     else {
