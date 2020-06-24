@@ -108,7 +108,7 @@ function CheckForBroadcasts() {
       if(broadcasts[i].type === "clan") {
         await new Promise(resolve =>
           Database.CheckNewClanBroadcast(broadcasts[i].clanId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
-            if(!isFound) { Broadcasts.SendBroadcast(client, broadcasts[i]); }
+            if(!isFound) { Broadcasts.ProcessBroadcast(client, broadcasts[i], Definitions); }
             else { Database.RemoveAwaitingClanBroadcast(broadcasts[i]); }
             resolve(true);
           })
@@ -117,7 +117,7 @@ function CheckForBroadcasts() {
       else {
         await new Promise(resolve =>
           Database.CheckNewBroadcast(broadcasts[i].membershipId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
-            if(!isFound) { Broadcasts.SendBroadcast(client, broadcasts[i]); }
+            if(!isFound) { Broadcasts.ProcessBroadcast(client, broadcasts[i], Definitions); }
             else { Database.RemoveAwaitingBroadcast(broadcasts[i]); }
             resolve(true);
           })
