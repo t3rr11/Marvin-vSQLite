@@ -231,13 +231,26 @@ async function SendBroadcast(client, guild, message, broadcast, definitions) {
 
     //Check if broadcasts are enabled on that item.
     if(JSON.parse(itemDef.broadcast_enabled)) {
-      embed = new Discord.RichEmbed()
-      .setColor(0xFFE000)
-      .setTitle("Clan Broadcast")
-      .setDescription(message)
-      .setThumbnail(encodeURI(itemDef.imageUrl))
-      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-      .setTimestamp();
+      
+      //Change the embed based on the type of item
+      if(itemDef.advanced_type === "emblem") {
+        embed = new Discord.RichEmbed()
+        .setColor(0xFFE000)
+        .setTitle("Clan Broadcast")
+        .setDescription(message)
+        .setImage(encodeURI(itemDef.imageUrl))
+        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+        .setTimestamp();
+      }
+      else {
+        embed = new Discord.RichEmbed()
+        .setColor(0xFFE000)
+        .setTitle("Clan Broadcast")
+        .setDescription(message)
+        .setThumbnail(encodeURI(itemDef.imageUrl))
+        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+        .setTimestamp();
+      }
   
       if(itemDef.description.length > 0){ embed.addField("How to obtain:", itemDef.description) }
   

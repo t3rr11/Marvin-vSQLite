@@ -517,7 +517,7 @@ client.on("message", async message => {
         else if(command === "~TRACKED CLANS" || command === "~CLANS TRACKED") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedClans(message); } }
         else if(command === "~REAUTH") { if(!CheckBanned(message)) { DiscordCommands.RenewLeadership(message); } }
         else if(command === "~CLANINFO" || command === "~CLAN INFO") { if(!CheckBanned(message)) { DiscordCommands.ClanInfo(message); } }
-        else if(command === "~CONFIG BROADCASTS" || command === "~CONFIGURE BROADCASTS") { if(!CheckBanned(message)) { Broadcasts.ConfigureBroadcasts(message); } }
+        else if(command === "~CONFIG BROADCASTS" || command === "~CONFIGURE BROADCASTS" || command === "~MANAGE BROADCASTS") { if(!CheckBanned(message)) { Broadcasts.ConfigureBroadcasts(message); } }
         else if(command === "~TOGGLE BROADCASTS") { if(!CheckBanned(message)) { DiscordCommands.BroadcastsHelp(message); } }
         else if(command === "~TOGGLE ITEM BROADCASTS" || command === "~TOGGLE ITEMS BROADCASTS" || command === "~TOGGLE ITEM BROADCAST" || command === "~TOGGLE ITEMS BROADCAST") { if(!CheckBanned(message)) { Broadcasts.ToggleBroadcasts(message, "Item"); } }
         else if(command === "~TOGGLE TITLE BROADCASTS" || command === "~TOGGLE TITLES BROADCASTS" || command === "~TOGGLE TITLE BROADCAST" || command === "~TOGGLE TITLES BROADCAST") { if(!CheckBanned(message)) { Broadcasts.ToggleBroadcasts(message, "Title"); } }

@@ -136,6 +136,7 @@ function BroadcastsHelp(message) {
   .setDescription("By default clan broadcasts are disabled, To enable this you can set a broadcasts channel.")
   .addField("Broadcasts Commands", `
   \`~Set broadcasts #channelName\`
+  \`~Manage broadcasts\` or \`~Configure broadcasts\`
   \`~Remove broadcasts\`
   \`~Filter example\` - To add items or titles to blacklist
   \`~Whitelist example\` - To add items or titles to the whitelist.
@@ -719,7 +720,6 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
           for(j in items) { if(items[j] === itemToFind.hash) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); } }
         }
         if(leaderboard.names.length === 0) {
-          var itemToFind = message.content.substr("~ITEM ".length);
           const embed = new Discord.RichEmbed()
           .setColor(0x0099FF)
           .setDescription("Nobody owns the " + itemToFind.name + " yet! Go be the first!")
@@ -728,7 +728,6 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
           message.channel.send({embed});
         }
         else if(leaderboard.names.length === 1) {
-          var itemToFind = message.content.substr("~ITEM ".length);
           const embed = new Discord.RichEmbed()
           .setColor(0x0099FF)
           .setAuthor("The only person to own " + itemToFind.name + " is: ")
@@ -766,7 +765,6 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
           for(j in titles) { if(titles[j] === titleToFind.hash) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); } }
         }
         if(leaderboard.names.length === 0) {
-          var titleToFind = message.content.substr("~TITLE ".length);
           const embed = new Discord.RichEmbed()
           .setColor(0x0099FF)
           .setDescription("Nobody owns the " + titleToFind.name + " yet, Quick be the first!")
@@ -775,7 +773,6 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
           message.channel.send({embed});
         }
         else if(leaderboard.names.length === 1) {
-          var titleToFind = message.content.substr("~TITLE ".length);
           const embed = new Discord.RichEmbed()
           .setColor(0x0099FF)
           .setAuthor("The only person to own " + titleToFind.name + " is: ")
@@ -2408,7 +2405,7 @@ function GetTrackedItems(message) {
   const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Fourth Horseman, Heir Apparent, Khvostov 7G-02";
   const pvpItems = "Luna Howl, Not Forgotten, Redrix Broadsword, Redrix Claymore, Mountain Top, Recluse, Revoker, Randys Throwing Knife, Komodo-4FR, Point of the Stag, Bastion, Felwinter's Lie";
   const gambitItems = "Breakneck, 21% Delirium, Hush, Exit Strategy, Python";
-  const others = "Always On Time, A Thousand Wings, SCRAP CF-717-91, Silver Tercel, The Platinum Starling, Harbinger's Echo, Armory Forged Shell";
+  const others = "Always On Time, A Thousand Wings, SCRAP CF-717-91, Silver Tercel, The Platinum Starling, Harbinger's Echo, Luxurious Toast, Armory Forged Shell, Prophetic Visionary";
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked items!")
