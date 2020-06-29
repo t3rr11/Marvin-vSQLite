@@ -9,10 +9,16 @@ const Database = require('./Database.js');
 
 async function Register(message, discord_id, username) {
   if(!isNaN(username)) {
-    await GetMbmDataFromId(username).then(async function(membershipData) {
-      if(membershipData.membershipId) { FinishRegistration(message, discord_id, username, membershipData); }
-      else { message.reply('Failed to find membershipId for: ' + membershipData); console.log(membershipData); }
-    });
+    if(!username.toString().startsWith("765")) {
+      await GetMbmDataFromId(username).then(async function(membershipData) {
+        if(membershipData.membershipId) { FinishRegistration(message, discord_id, username, membershipData); }
+        else {
+          message.reply(`Could not find a user with that ID, This has been logged, just check and make sure it starts with: 46116860\*\*\*\*\*\*\*`);
+          Log.SaveError(`Could not find a user with the ID: ${ username }, Error: ${ JSON.stringify(membershipData) }`);
+        }
+      });
+    }
+    else { message.reply('This is your Steam ID not your Membership ID, Please follow these steps to get your Membership ID: \n\n1. Goto https://guardianstats.com and login there. \n2. Then if required choose a platform. \n3. If not then just click your name next to the setting wheel which will reveal your Membership ID.'); }
   }
   else {
     await GetMbmId(encodeURIComponent(username)).then(async function(membershipData) {
@@ -26,7 +32,7 @@ async function Register(message, discord_id, username) {
         try { FinishRegistration(message, discord_id, username, membershipData); }
         catch (err) {
           message.reply('Sorry an error has occured, this has been logged!');
-          Log.SaveLog("Error", membershipData + " - " + err);
+          Log.SaveError("Error", membershipData + " - " + err);
           console.log(membershipData);
         }
       }
