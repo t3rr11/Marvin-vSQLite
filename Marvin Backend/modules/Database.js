@@ -283,7 +283,7 @@ function UpdatePlayerDetails(Data, callback) {
     clanId = ?, displayName = ?, timePlayed = ?, currentClass = ?, lightLevels = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }",
     infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, wellsCompleted = ?,
     epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, leviCompletions = ?, leviPresCompletions = ?, eowCompletions = ?, eowPresCompletions = ?, sosCompletions = ?,
-    sosPresCompletions = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, shatteredThrone = ?, pitOfHeresy = ?, guardianGames = ?, trials = ?,
+    sosPresCompletions = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, totalRaids = ?, shatteredThrone = ?, pitOfHeresy = ?, guardianGames = ?, trials = ?,
     lieCommQuest = ?, lastPlayed = ?, isPrivate = "false", firstLoad = "false"
   WHERE membershipId = ?`;
   var inserts = [
@@ -318,6 +318,7 @@ function UpdatePlayerDetails(Data, callback) {
     Data.Raids.scourge,
     Data.Raids.sorrows,
     Data.Raids.garden,
+    Data.Raids.totalRaids,
     JSON.stringify(Data.Others.shatteredThrone),
     JSON.stringify(Data.Others.pitOfHeresy),
     JSON.stringify(Data.Others.guardianGames),

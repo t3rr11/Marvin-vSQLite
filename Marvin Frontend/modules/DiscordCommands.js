@@ -65,7 +65,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Clans Help Menu")
     .setDescription("Here is a list of clan commands! Example: `~Set Clan`")
-    .addField("Commands", "`~Broadcasts Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`, `~Delete Clan`")
+    .addField("Commands", "`~Broadcasts Help`, `~Tracked Clans`, `~Set Clan`, `~Add Clan`, `~Remove Clan`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -782,7 +782,6 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
           message.channel.send({embed});
         }
         else {
-          var titleToFind = message.content.substr("~TITLE ".length);
           var namesRight = leaderboard.names.slice(0, (leaderboard.names.length / 2));
           var namesLeft = leaderboard.names.slice((leaderboard.names.length / 2), leaderboard.names.length);
           const embed = new Discord.RichEmbed()
@@ -1196,6 +1195,35 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       .setAuthor("Top 10 Title Collectors")
       .addField("Name", leaderboard.names, true)
       .addField("Score", leaderboard.titles, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "totalRaids") {
+      var leaderboard = { "names": [], "raids": [] };
+      leaderboards.sort(function(a, b) { return b.totalRaids - a.totalRaids; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.raids.push(`${ Misc.AddCommas(top[i].totalRaids) }`);
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+          leaderboard.raids.push("", `${ playerStats.totalRaids }`);
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Total Raid Completions")
+      .addField("Name", leaderboard.names, true)
+      .addField("Raids", leaderboard.raids, true)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp()
       message.channel.send({embed});

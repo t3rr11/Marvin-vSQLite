@@ -313,6 +313,9 @@ function GetRaids(response) {
   //For some reason leviCompetions also count prestige completions, they need to be removed;
   leviCompletions = leviCompletions - leviPresCompletions;
 
+  //Calulate total raids
+  var totalRaids = leviCompletions + leviPresCompletions + eowCompletions + eowPresCompletions + sosCompletions + sosPresCompletions + lastWishCompletions + scourgeCompletions + sorrowsCompletions + gardenCompletions;
+
   return {
     "levi": { "normal": leviCompletions, "prestige": leviPresCompletions },
     "eow": { "normal": eowCompletions, "prestige": eowPresCompletions },
@@ -321,6 +324,7 @@ function GetRaids(response) {
     "scourge": scourgeCompletions,
     "sorrows": sorrowsCompletions,
     "garden": gardenCompletions,
+    "totalRaids": totalRaids
   }
 }
 function GetItems(response) {

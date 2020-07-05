@@ -52,7 +52,7 @@ async function RegisterClan(message) {
               }
               else { message.reply("Sorry we failed to set clan, please try again!"); }
             }
-            else { message.reply("This clan already has a registered clan, if you wish to add another to the tracking use `~Add clan`, or if you have changed clan use `~Delete clan` first."); }
+            else { message.reply("This clan already has a registered clan, if you wish to add another to the tracking use `~Add clan`, or if you have changed clan use `~Remove clan` first."); }
           }
           else { Log.SaveError("Failed to set clan"); message.reply("An error has occured... This has been logged, sorry about that!"); }
         });

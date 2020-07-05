@@ -395,6 +395,7 @@ client.on("message", async message => {
         else if(command === "~SOTP" || command === "~SCOURGE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("scourge", message, Definitions); } }
         else if(command === "~COS" || command === "~CROWN") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sorrows", message, Definitions); } }
         else if(command === "~GOS" || command === "~GARDEN") { if(!CheckBanned(message)) { DiscordCommands.Rankings("garden", message, Definitions); } }
+        else if(command === "~RAIDS TOTAL" || command === "~TOTAL RAIDS") { if(!CheckBanned(message)) { DiscordCommands.Rankings("totalRaids", message, Definitions); } }
         else if(command === "~MAXPOWER" || command === "~MAX POWER" || command === "~MAX LIGHT" || command === "~MAXLIGHT" || command === "~POWER" || command === "~HIGHEST POWER" || command === "~HIGHESTPOWER") { if(!CheckBanned(message)) { DiscordCommands.Rankings("maxPower", message, Definitions); } }
         else if(command === "~SUNDIAL") { if(!CheckBanned(message)) { DiscordCommands.Rankings("sundial", message, Definitions); } }
         else if(command === "~FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("fractaline", message, Definitions); } }
