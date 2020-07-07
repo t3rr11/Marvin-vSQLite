@@ -199,27 +199,40 @@ async function ProcessBroadcast(client, broadcast, definitions) {
   //Check to see if broadcasts are enabled. Usually disabled for debugging.
   if(Config.enableBroadcasts) {
     //Loop through guilds and find guilds where the clan_id matches those guilds tracked clans.
-    Database.GetGuilds(function(isError, Guilds) {
+    Database.GetClan(broadcast.clanId, function(isError, isFound, data) {
+      var clanData = data;
       if(!isError) {
-        for(var i in Guilds) {
-          var clans = Guilds[i].clans.split(',');
-          for(var j in clans) {
-            if(clans[j] === broadcast.clanId) {
-              //Check to see if they have broadcasts enabled. If they have broadcasts disabled it will return null.
-              if(Guilds[i].broadcasts_channel !== "null") { SendBroadcast(client, Guilds[i], BroadcastMessage, broadcast, definitions); }
+        if(isFound) {
+          Database.GetGuilds(function(isError, Guilds) {
+            if(!isError) {
+              for(var i in Guilds) {
+                var clans = Guilds[i].clans.split(',');
+                for(var j in clans) {
+                  if(clans[j] === broadcast.clanId) {
+                    //Check to see if they have broadcasts enabled. If they have broadcasts disabled it will return null.
+                    if(Guilds[i].broadcasts_channel !== "null") { SendBroadcast(client, Guilds[i], BroadcastMessage, broadcast, definitions, clanData); }
+                  }
+                }
+              }
             }
-          }
+          });
         }
       }
     });
   }
-  Database.AddBroadcast(broadcast);
+
+  //Check if broadcast has a hash assosiated to it, if so check if that hash has broadcasting enabled.
+  if(broadcast.hash.length !== 0) {
+    var checkBroadcast = definitions.find(e => e.hash === broadcast.hash);
+    if(JSON.parse(checkBroadcast.broadcast_enabled)) { Database.AddBroadcast(broadcast); }
+  }
+  else { Database.AddBroadcast(broadcast); }
 }
-async function SendBroadcast(client, guild, message, broadcast, definitions) {
+async function SendBroadcast(client, guild, message, broadcast, definitions, clanData) {
   //Make simple broadcast embed.
   let embed = new Discord.RichEmbed()
   .setColor(0xFFE000)
-  .setTitle("Clan Broadcast")
+  .setTitle(`Clan Broadcast - ${ clanData.clan_name }`)
   .setDescription(message)
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp();
@@ -236,7 +249,7 @@ async function SendBroadcast(client, guild, message, broadcast, definitions) {
       if(itemDef.advanced_type === "emblem") {
         embed = new Discord.RichEmbed()
         .setColor(0xFFE000)
-        .setTitle("Clan Broadcast")
+        .setTitle(`Clan Broadcast - ${ clanData.clan_name }`)
         .setDescription(message)
         .setImage(encodeURI(itemDef.imageUrl))
         .setFooter(Config.defaultFooter, Config.defaultLogoURL)
@@ -245,7 +258,7 @@ async function SendBroadcast(client, guild, message, broadcast, definitions) {
       else {
         embed = new Discord.RichEmbed()
         .setColor(0xFFE000)
-        .setTitle("Clan Broadcast")
+        .setTitle(`Clan Broadcast - ${ clanData.clan_name }`)
         .setDescription(message)
         .setThumbnail(encodeURI(itemDef.imageUrl))
         .setFooter(Config.defaultFooter, Config.defaultLogoURL)

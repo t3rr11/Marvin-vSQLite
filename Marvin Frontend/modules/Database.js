@@ -12,8 +12,8 @@ module.exports = {
   CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, 
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
-  ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking,
-  AddLog, GetLogDesc, GetDefinitions
+  ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, ClearAwaitingBroadcasts, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking,
+  AddLog, GetLogDesc, GetDefinitions, AddHashToDefinition
 };
 
 //MySQL Connection
@@ -171,12 +171,12 @@ function GetClanDetailsViaAuthor(data, callback) {
   });
 }
 function GetDefinitions(callback) {
-  var users = [];
-  db.query(`SELECT * FROM definitions`, function(error, rows, fields) {
+  var defs = [];
+  db.query(`SELECT * FROM definitions WHERE tracking_enabled="true" AND hash!=0`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting definitions from server: ${ error }`); callback(true); }
-    else { for(var i in rows) { users.push(rows[i]); } callback(false, users); }
+    else { for(var i in rows) { defs.push(rows[i]); } callback(false, defs); }
   });
-  return users;
+  return defs;
 }
 
 //Checks
@@ -318,6 +318,12 @@ function AddBroadcast(broadcast) {
         if(!!error) { Log.SaveError(`Error deleteing broadcast from awaiting_broadcast, Error: ${ error }`); }
       });
     }
+  });
+}
+function AddHashToDefinition(hash, callback) {
+  db.query(`UPDATE definitions SET hash=${ hash } WHERE name="Ruinous Effigy"`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error adding hash to definition, Error: ${ error }`); callback(true); }
+    else { callback(false); }
   });
 }
 
@@ -584,3 +590,9 @@ function AddLog(message, type, command, description, related) {
   db.query(sql, function(error, rows, fields) { if(!!error) { Log.SaveError(`Error trying to add log to database, Error: ${ error }`); } });
 }
 function GetLogDesc(id) { try { return LogDesc.find(e => e.id === id); } catch (err) { return `Unknown ID: ${ id }` } }
+function ClearAwaitingBroadcasts() {
+  db.query(`DELETE FROM awaiting_broadcasts`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error deleting awaited broadcasts, Error: ${ error }`); }
+    else { Log.SaveLog("Warning", `Awaiting Broadcasts have been deleted as there was more than 10.`); }
+  });
+}

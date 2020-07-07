@@ -330,13 +330,25 @@ function GetRaids(response) {
 function GetItems(response) {
   var itemList = Definitions.filter(e => e.type === "item");
   var items = [];
-  for(var i in itemList) { if(GetItemState(response.playerData.profileCollectibles.data.collectibles[itemList[i].hash].state).notAcquired === false) { items.push(itemList[i].hash) } }
+  for(var i in itemList) {
+    if(response.playerData.profileCollectibles.data.collectibles[itemList[i].hash]) {
+      if(GetItemState(response.playerData.profileCollectibles.data.collectibles[itemList[i].hash].state).notAcquired === false) {
+        items.push(itemList[i].hash);
+      }
+    }
+  }
   return { items };
 }
 function GetTitles(response) {
   var titleList = Definitions.filter(e => e.type === "title");
   var titles = [];
-  for(var i in titleList) { if(response.playerData.profileRecords.data.records[titleList[i].hash].objectives[0].complete) { titles.push(titleList[i].hash) } }
+  for(var i in titleList) {
+    if(response.playerData.profileRecords.data.records[titleList[i].hash]) {
+      if(response.playerData.profileRecords.data.records[titleList[i].hash].objectives[0].complete) {
+        titles.push(titleList[i].hash);
+      }
+    }
+  }
   return { titles };
 }
 function GetSeasonal(response) {
@@ -346,12 +358,18 @@ function GetSeasonal(response) {
   var season9Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["3256821400"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["2140885848"].level; season9Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
   var season10Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["2926321498"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["1470619782"].level; season10Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
   var season11Rank = "0"; try { var seasonRankBefore = response.playerData.characterProgressions.data[characterIds[0]].progressions["1627914615"].level; var seasonRankAfter = response.playerData.characterProgressions.data[characterIds[0]].progressions["4021269753"].level; season11Rank = seasonRankBefore + seasonRankAfter; } catch (err) { }
+  var dailyXP = "0"; try { dailyXP = response.playerData.characterProgressions.data[characterIds[0]].progressions["3810510634"].dailyProgress; } catch (err) { }
+  var weeklyXP = "0"; try { weeklyXP = response.playerData.characterProgressions.data[characterIds[0]].progressions["3810510634"].weeklyProgress; } catch (err) { }
+  var overallXP = "0"; try { overallXP = response.playerData.characterProgressions.data[characterIds[0]].progressions["3810510634"].currentProgress; } catch (err) { }
+  var powerBonus = "0"; try { powerBonus = response.playerData.characterProgressions.data[characterIds[0]].progressions["3810510634"].level; } catch (err) { }
 
   //Sundial
   var sundialCompletions = response.playerData.profileRecords.data.records["3801239892"].objectives[0].progress;
 
   return {
     "seasonRank": season11Rank,
+    "xp": { "dailyXP": dailyXP, "weeklyXP": weeklyXP, "overallXP": overallXP },
+    "powerBonus": powerBonus,
     "sundial": sundialCompletions
   }
 }

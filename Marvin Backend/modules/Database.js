@@ -139,12 +139,12 @@ function GetUsers(callback) {
   return users;
 }
 function GetDefinitions(callback) {
-  var users = [];
-  db.query(`SELECT * FROM definitions`, function(error, rows, fields) {
+  var defs = [];
+  db.query(`SELECT * FROM definitions WHERE tracking_enabled="true" AND hash!=0`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting definitions from server: ${ error }`); callback(true); }
-    else { for(var i in rows) { users.push(rows[i]); } callback(false, users); }
+    else { for(var i in rows) { defs.push(rows[i]); } callback(false, defs); }
   });
-  return users;
+  return defs;
 }
 function GetClan(clan_id, callback) {
   db.query(`SELECT * FROM clans WHERE clan_id="${ clan_id }"`, function(error, rows, fields) {
@@ -280,8 +280,8 @@ function UpdatePlayerDetails(Data, callback) {
   var sql = `
   UPDATE playerInfo
   SET
-    clanId = ?, displayName = ?, timePlayed = ?, currentClass = ?, lightLevels = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }",
-    infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, sundialCompletions = ?, wellsCompleted = ?,
+    clanId = ?, displayName = ?, timePlayed = ?, currentClass = ?, lightLevels = ?, xp = ?, infamy = ?, valor = ?, glory = ?, triumphScore = ?, items = "${ Data.Items.items }", titles = "${ Data.Titles.titles }",
+    infamyResets = ?, valorResets = ?, motesCollected = ?, ibKills = ?, ibWins = ?, seasonRank = ?, powerBonus = ?, sundialCompletions = ?, wellsCompleted = ?,
     epsCompleted = ?, menageireEncounters = ?, menageireRunes = ?, joinDate = ?, leviCompletions = ?, leviPresCompletions = ?, eowCompletions = ?, eowPresCompletions = ?, sosCompletions = ?,
     sosPresCompletions = ?, lastWishCompletions = ?, scourgeCompletions = ?, sorrowsCompletions = ?, gardenCompletions = ?, totalRaids = ?, shatteredThrone = ?, pitOfHeresy = ?, guardianGames = ?, trials = ?,
     lieCommQuest = ?, lastPlayed = ?, isPrivate = "false", firstLoad = "false"
@@ -292,6 +292,7 @@ function UpdatePlayerDetails(Data, callback) {
     Data.AccountInfo.totalTime,
     Data.AccountInfo.currentClass,
     JSON.stringify(Data.AccountInfo.lightLevels),
+    JSON.stringify(Data.Seasonal.xp),
     Data.Rankings.infamy,
     Data.Rankings.valor,
     Data.Rankings.glory,
@@ -302,6 +303,7 @@ function UpdatePlayerDetails(Data, callback) {
     Data.Rankings.ibKills,
     Data.Rankings.ibWins,
     Data.Seasonal.seasonRank,
+    Data.Seasonal.powerBonus,
     Data.Seasonal.sundial,
     Data.Others.wellsRankings,
     Data.Others.epRankings,

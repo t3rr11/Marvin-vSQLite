@@ -104,25 +104,31 @@ function CheckForNewlyScannedClans(Clans) {
 }
 function CheckForBroadcasts() {
   Database.GetNewBroadcasts(async function (isError, isFound, broadcasts) {
-    for(var i in broadcasts) {
-      if(broadcasts[i].type === "clan") {
-        await new Promise(resolve =>
-          Database.CheckNewClanBroadcast(broadcasts[i].clanId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
-            if(!isFound) { Broadcasts.ProcessBroadcast(client, broadcasts[i], Definitions); }
-            else { Database.RemoveAwaitingClanBroadcast(broadcasts[i]); }
-            resolve(true);
-          })
-        );
+    //This is a catch for broadcasts, if there is more than 10 then something went wrong, catch it and delete them.
+    if(broadcasts) {
+      if(broadcasts.length < 10) {
+        for(var i in broadcasts) {
+          if(broadcasts[i].type === "clan") {
+            await new Promise(resolve =>
+              Database.CheckNewClanBroadcast(broadcasts[i].clanId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
+                if(!isFound) { Broadcasts.ProcessBroadcast(client, broadcasts[i], Definitions); }
+                else { Database.RemoveAwaitingClanBroadcast(broadcasts[i]); }
+                resolve(true);
+              })
+            );
+          }
+          else {
+            await new Promise(resolve =>
+              Database.CheckNewBroadcast(broadcasts[i].membershipId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
+                if(!isFound) { Broadcasts.ProcessBroadcast(client, broadcasts[i], Definitions); }
+                else { Database.RemoveAwaitingBroadcast(broadcasts[i]); }
+                resolve(true);
+              })
+            );
+          }
+        }
       }
-      else {
-        await new Promise(resolve =>
-          Database.CheckNewBroadcast(broadcasts[i].membershipId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
-            if(!isFound) { Broadcasts.ProcessBroadcast(client, broadcasts[i], Definitions); }
-            else { Database.RemoveAwaitingBroadcast(broadcasts[i]); }
-            resolve(true);
-          })
-        );
-      }
+      else { Database.ClearAwaitingBroadcasts(); }
     }
   });
 }
@@ -245,6 +251,15 @@ function ViewBans(message) {
     .setTimestamp();
   message.channel.send({embed});
 }
+function AddHash(message, hash) {
+  Database.AddHashToDefinition(hash, function(isError) {
+    if(!isError) { message.channel.send("Hash added successfully, Thank you."); }
+    else { message.channel.send("Uhh Terrii fudged up and it didn't work, He'll cry in the morning."); }
+  });
+  Database.ForceFullScan(function(isError) {
+    if(isError) { message.channel.send("Failed to force a full rescan. If this happens uhh use the panic command: `~addhash 0`. I'll fix in the morning."); }
+  });
+}
 
 //Discord Client Code
 client.on("ready", async () => {
@@ -346,6 +361,10 @@ client.on("message", async message => {
           else {
             message.reply("Test what? I do not understand.");
           }
+        }
+        else if(command.startsWith("~ADDHASH")) {
+          if(message.author.id === "194972321168097280" || message.author.id === "289210933501493258") { AddHash(message, command.substr("~ADDHASH ".length)); }
+          else { message.channel.send("Uhh no.. You cannot add items like this. Only permitted people can use this command."); }
         }
 
         //Help menu
