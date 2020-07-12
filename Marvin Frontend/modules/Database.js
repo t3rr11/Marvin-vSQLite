@@ -8,7 +8,7 @@ const fetch = require("node-fetch");
 
 //Exports
 module.exports = {
-  GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetUsers, GetGlobalDryStreak, GetClanDryStreaks, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
+  GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetPlayer, GetUsers, GetGlobalDryStreak, GetClanDryStreaks, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
   CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, 
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
@@ -86,6 +86,12 @@ function GetPlayers(callback) {
     else { for(var i in rows) { players.push(rows[i]); } callback(false, players); }
   });
   return players;
+}
+function GetPlayer(membershipId, callback) {
+  db.query(`SELECT * FROM playerInfo WHERE membershipId="${ membershipId }"`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error getting player details for: ${ membershipId }, ${ error }`); callback(true); }
+    else { if(rows.length > 0) { callback(false, true, rows[0]); } else { callback(false, false); } }
+  });
 }
 function GetUsers(callback) {
   var users = [];

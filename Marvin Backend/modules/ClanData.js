@@ -453,6 +453,7 @@ function CheckItems(Data, SQLData) {
           if(JSON.parse(itemData.broadcast_enabled)) {
             if(itemData.hash === "199171385") { SendBroadcast(Data, "item", itemData, Data.Raids.lastWish == 0 ? 1 : Data.Raids.lastWish); } // 1000 Voices
             else if (itemData.hash === "2220014607") { SendBroadcast(Data, "item", itemData, Data.Raids.scourge == 0 ? 1 : Data.Raids.scourge); } // Anarchy
+            else if (itemData.hash === "1903459810") { SendBroadcast(Data, "item", itemData, Data.Raids.scourge); } // Always On Time
             else if (itemData.hash === "2329697053") { SendBroadcast(Data, "item", itemData, Data.Raids.sorrows == 0 ? 1 : Data.Raids.sorrows); } // Tarrabah
             else { SendBroadcast(Data, "item", itemData, -1); } //Everything else
           }

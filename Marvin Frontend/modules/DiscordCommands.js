@@ -243,17 +243,23 @@ function Rankings(type, message, definitions) {
       if(isFound) {
         var playerData = Data;
         //Give personalised response if user has registered
-        Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
+        Database.GetPlayer(playerData.membershipId, function(isError, isFound, Data) {
           if(!isError) {
-            if(isFound) {
-              //Get all clan data from playerInfo using clans
-              var allClanIds = Data.clans.split(",");
-              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, playerData, definitions); } }
-                else { message.channel.send("Currently your clan is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
-              });
-            } else { message.reply("No clan set, to set one use: `~Set clan`"); }
-          } else { message.reply("Sorry! An error occurred, Please try again..."); }
+            var playerInfo = Data;
+            Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
+              if(!isError) {
+                if(isFound) {
+                  //Get all clan data from playerInfo using clans
+                  var allClanIds = Data.clans.split(",");
+                  Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+                    if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, playerData, playerInfo, definitions); } }
+                    else { message.channel.send("Currently your clan is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
+                  });
+                } else { message.reply("No clan set, to set one use: `~Set clan`"); }
+              } else { message.reply("Sorry! An error occurred, Please try again..."); }
+            });
+          }
+          else { message.reply("Sorry! An error occurred, Please try again..."); }
         });
       }
       else {
@@ -264,7 +270,7 @@ function Rankings(type, message, definitions) {
               //Get all clan data from playerInfo using clan_id
               var allClanIds = Data.clans.split(",");
               Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, undefined, definitions); } }
+                if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, undefined, undefined, definitions); } }
                 else { message.channel.send("Currently your clan is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
               });
             } else { message.reply("No clan set, to set one use: `~Set clan`"); }
@@ -275,7 +281,7 @@ function Rankings(type, message, definitions) {
     else { message.reply("Sorry! An error occurred, Please try again..."); }
   });
 }
-function DisplayRankings(message, type, leaderboards, playerData, definitions) {
+function DisplayRankings(message, type, leaderboards, playerData, playerInfo, definitions) {
   //PvP
   leaderboards = leaderboards.filter(leader => leader.isPrivate === "false");
   try {
@@ -292,10 +298,17 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.infamy.push("", Misc.AddCommas(playerStats.infamy));
-          leaderboard.resets.push("", playerStats.infamyResets);
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.infamy.push("", Misc.AddCommas(playerStats.infamy));
+            leaderboard.resets.push("", playerStats.infamyResets);
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.infamy.push("", Misc.AddCommas(playerInfo.infamy));
+            leaderboard.resets.push("", playerInfo.infamyResets);
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -324,10 +337,17 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.valor.push("", Misc.AddCommas(playerStats.valor));
-          leaderboard.resets.push("", playerStats.valorResets);
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.valor.push("", Misc.AddCommas(playerStats.valor));
+            leaderboard.resets.push("", playerStats.valorResets);
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.valor.push("", Misc.AddCommas(playerInfo.valor));
+            leaderboard.resets.push("", playerInfo.valorResets);
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -355,9 +375,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.glory.push("", Misc.AddCommas(playerStats.glory));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.glory.push("", Misc.AddCommas(playerStats.glory));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.glory.push("", Misc.AddCommas(playerInfo.glory));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -385,10 +411,17 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.ibKills.push("", Misc.AddCommas(playerStats.ibKills));
-          leaderboard.ibWins.push("", Misc.AddCommas(playerStats.ibWins));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.ibKills.push("", Misc.AddCommas(playerStats.ibKills));
+            leaderboard.ibWins.push("", playerStats.ibWins);
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.ibKills.push("", Misc.AddCommas(playerInfo.ibKills));
+            leaderboard.ibWins.push("", playerInfo.ibWins);
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -418,9 +451,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.leviCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.leviCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.leviCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -448,9 +487,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.leviPresCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.leviPresCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.leviPresCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -478,9 +523,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.eowCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.eowCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.eowCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -507,9 +558,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.eowPresCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.eowPresCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.eowPresCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -536,9 +593,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.sosCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.sosCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.sosCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -565,9 +628,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.sosPresCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.sosPresCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.sosPresCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -594,9 +663,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.lastWishCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.lastWishCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.lastWishCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -623,9 +698,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.scourgeCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.scourgeCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.scourgeCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -652,9 +733,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.sorrowsCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.sorrowsCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.sorrowsCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -681,9 +768,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.gardenCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.gardenCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.gardenCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -810,9 +903,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.rank.push("", Misc.AddCommas(playerStats.seasonRank));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.rank.push("", Misc.AddCommas(playerStats.seasonRank));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.rank.push("", Misc.AddCommas(playerInfo.seasonRank));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -839,9 +938,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.completions.push("", Misc.AddCommas(playerStats.sundialCompletions));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerStats.sundialCompletions));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(playerInfo.sundialCompletions));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -852,64 +957,6 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       .setAuthor("Top 10 Sundial Completions")
       .addField("Name", leaderboard.names, true)
       .addField("Completions", leaderboard.completions, true)
-      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-      .setTimestamp()
-      message.channel.send({embed});
-    }
-    else if(type === "fractaline") {
-      var leaderboard = { "names": [], "donations": [] };
-      leaderboards.sort(function(a, b) { return b.fractalineDonated - a.fractalineDonated; });
-      top = leaderboards.slice(0, 10);
-      for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-        leaderboard.donations.push(Misc.AddCommas(top[i].fractalineDonated));
-      }
-
-      try {
-        if(playerData !== null) {
-          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.donations.push("", Misc.AddCommas(playerStats.fractalineDonated));
-        }
-        else { leaderboard.names.push("", `~Register to see your rank`); }
-      }
-      catch(err) { }
-
-      const embed = new Discord.RichEmbed()
-      .setColor(0x0099FF)
-      .setAuthor("Top 10 Fractaline Donations")
-      .addField("Name", leaderboard.names, true)
-      .addField("Fractaline", leaderboard.donations, true)
-      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-      .setTimestamp()
-      message.channel.send({embed});
-    }
-    else if(type === "resonance") {
-      var leaderboard = { "names": [], "resonance": [] };
-      leaderboards.sort(function(a, b) { return b.resonance - a.resonance; });
-      top = leaderboards.slice(0, 10);
-      for(var i in top) {
-        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-        leaderboard.resonance.push(Misc.AddCommas((top[i].resonance * 100) + 200));
-      }
-
-      try {
-        if(playerData !== null) {
-          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.resonance.push("", Misc.AddCommas((playerStats.resonance * 100) + 200));
-        }
-        else { leaderboard.names.push("", `~Register to see your rank`); }
-      }
-      catch(err) { }
-
-      const embed = new Discord.RichEmbed()
-      .setColor(0x0099FF)
-      .setAuthor("Top 10 Resonance Power")
-      .addField("Name", leaderboard.names, true)
-      .addField("Resonance", leaderboard.resonance, true)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp()
       message.channel.send({embed});
@@ -926,9 +973,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.power.push("", Misc.AddCommas(playerStats.highestPower));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.power.push("", Misc.AddCommas(playerStats.highestPower));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.power.push("", Misc.AddCommas(playerInfo.highestPower));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -1124,9 +1177,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.score.push("", Misc.AddCommas(playerStats.triumphScore));
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.score.push("", Misc.AddCommas(playerStats.triumphScore));
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.score.push("", Misc.AddCommas(playerInfo.triumphScore));
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -1153,9 +1212,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.time.push("", `${ Misc.AddCommas(Math.round(playerStats.timePlayed/60)) } Hrs`);
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.time.push("", `${ Misc.AddCommas(Math.round(playerStats.timePlayed/60)) } Hrs`);
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.time.push("", `${ Misc.AddCommas(Math.round(playerInfo.timePlayed/60)) } Hrs`);
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -1182,9 +1247,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.titles.push("", `${ playerStats.titles.split(",").length }`);
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.titles.push("", `${ playerStats.titles.split(",").length }`);
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.titles.push("", `${ playerInfo.titles.split(",").length }`);
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }
@@ -1211,9 +1282,15 @@ function DisplayRankings(message, type, leaderboards, playerData, definitions) {
       try {
         if(playerData !== null) {
           var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
-          var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
-          leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
-          leaderboard.raids.push("", `${ playerStats.totalRaids }`);
+          if(playerstats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.raids.push("", `${ playerStats.totalRaids }`);
+          }
+          else {
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.raids.push("", `${ playerInfo.totalRaids }`);
+          }
         }
         else { leaderboard.names.push("", `~Register to see your rank`); }
       }

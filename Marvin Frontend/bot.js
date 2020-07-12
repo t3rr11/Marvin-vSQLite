@@ -531,6 +531,7 @@ client.on("message", async message => {
         else if(command.startsWith("~WHITELIST ")) { if(!CheckBanned(message)) { Broadcasts.AddToWhitelist(message, default_command.substr("~WHITELIST ".length)); } }
         else if(command.startsWith("~ADD CLAN")) { if(!CheckBanned(message)) { ManageClans.AddClan(message, command.substr("~ADD CLAN ".length)); } }
         else if(command.startsWith("~REMOVE CLAN")) { if(!CheckBanned(message)) { ManageClans.RemoveClan(message, command.substr("~REMOVE CLAN ".length)); } }
+        else if(command.startsWith("~DELETE CLAN")) { if(!CheckBanned(message)) { ManageClans.RemoveClan(message, command.substr("~DELETE CLAN ".length)); } }
         else if(command.startsWith("~TRANSFER ")) { if(!CheckBanned(message)) { DiscordCommands.TransferLeadership(message); } }
         else if(command === "~BROADCASTS HELP") { if(!CheckBanned(message)) { DiscordCommands.BroadcastsHelp(message); } }
         else if(command === "~REMOVE BROADCASTS") { if(!CheckBanned(message)) { Broadcasts.RemoveBroadcasts(message); } }
