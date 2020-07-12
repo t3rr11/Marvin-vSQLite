@@ -1395,7 +1395,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 10 Global Season Rank")
+    .setAuthor("Top 10 Global Triumph Score")
     .addField("Name", leaderboard.names, true)
     .addField("Score", leaderboard.score, true)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)

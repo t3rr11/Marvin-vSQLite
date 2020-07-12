@@ -363,7 +363,10 @@ client.on("message", async message => {
           }
         }
         else if(command.startsWith("~ADDHASH")) {
-          if(message.author.id === "194972321168097280" || message.author.id === "289210933501493258") { AddHash(message, command.substr("~ADDHASH ".length)); }
+          if(message.author.id === "194972321168097280" || message.author.id === "289210933501493258") {
+            //AddHash(message, command.substr("~ADDHASH ".length));
+            message.reply("Command is disabled at the moment.");
+          }
           else { message.channel.send("Uhh no.. You cannot add items like this. Only permitted people can use this command."); }
         }
 
