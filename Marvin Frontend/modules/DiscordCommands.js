@@ -794,7 +794,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
 
     //Items and Titles
     else if(type === "item") {
-      var leaderboard = { "names": [] };
+      var leaderboard = [];
       var itemInput = message.content.substr("~ITEM ".length).toUpperCase();
       
       //Rename items
@@ -802,50 +802,62 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       if(itemInput === "FOURTH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
       if(itemInput === "THE 4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
       if(itemInput === "4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+      if(itemInput === "1K VOICES") { itemInput = "1000 VOICES" }
 
       //Find Items
       var itemToFind = definitions.find(e => e.name.toUpperCase() === itemInput);
 
       //Item exists in tracking now generate leaderboards
       if(itemToFind) {
-        for(var i in leaderboards) {
-          var items = leaderboards[i].items.split(",");
-          for(j in items) { if(items[j] === itemToFind.hash) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); } }
-        }
-        if(leaderboard.names.length === 0) {
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setDescription("Nobody owns the " + itemToFind.name + " yet! Go be the first!")
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
-        else if(leaderboard.names.length === 1) {
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("The only person to own " + itemToFind.name + " is: ")
-          .setDescription(leaderboard.names[0])
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
-        else {
-          var namesRight = leaderboard.names.slice(0, (leaderboard.names.length / 2));
-          var namesLeft = leaderboard.names.slice((leaderboard.names.length / 2), leaderboard.names.length);
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("People that own " + itemToFind.name)
-          .addField("Names", namesLeft, true)
-          .addField("Names", namesRight, true)
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
+        Database.GetFromBroadcasts(itemToFind, function(isError, isFound, Data) {
+          //Store broadcasts
+          var broadcasts = [];
+          if(!isError) { broadcasts = Data; }
+
+          for(var i in leaderboards) {
+            var items = leaderboards[i].items.split(",");
+            var broadcast = broadcasts.find(e => e.membershipId == leaderboards[i].membershipId);
+            for(j in items) {
+              if(items[j] === itemToFind.hash) {
+                leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ broadcast ? (broadcast.count != "-1" ? `(${ broadcast.count } Raids, ` : "(") : "" }${ broadcast ? `${ new Date(broadcast.date).toLocaleDateString('en-GB') })` : "" }`)
+              }
+            }
+          }
+          if(leaderboard.length === 0) {
+            const embed = new Discord.RichEmbed()
+            .setColor(0x0099FF)
+            .setDescription("Nobody owns the " + itemToFind.name + " yet! Go be the first!")
+            .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+            .setTimestamp()
+            message.channel.send({embed});
+          }
+          else if(leaderboard.length === 1) {
+            const embed = new Discord.RichEmbed()
+            .setColor(0x0099FF)
+            .setAuthor("The only person to own " + itemToFind.name + " is: ")
+            .setDescription(leaderboard[0])
+            .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+            .setTimestamp()
+            message.channel.send({embed});
+          }
+          else {
+            var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
+            var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
+            let embed = new Discord.RichEmbed();
+            embed.setColor(0x0099FF)
+            embed.setAuthor("People that own " + itemToFind.name);
+            embed.addField("Names", namesLeft, true);
+            embed.addField("Names", namesRight, true);
+            embed.setFooter(Config.defaultFooter, Config.defaultLogoURL);
+            embed.setTimestamp();
+            message.channel.send({embed});
+          }
+        });
       }
       else { message.channel.send("We do not track the item: " + itemInput + " yet, you can see a list of tracked items here `~items` or feel free to request tracking for this item by using `~request Please track x item.`"); }
     }
     else if(type === "title") {
-      var leaderboard = { "names": [] };
+      var leaderboard = [];
       var titleInput = message.content.substr("~TITLE ".length).toUpperCase();
 
       //Find Items
@@ -853,39 +865,50 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
 
       //Title exists in tracking now generate leaderboards
       if(titleToFind) {
-        for(var i in leaderboards) {
-          var titles = leaderboards[i].titles.split(",");
-          for(j in titles) { if(titles[j] === titleToFind.hash) { leaderboard.names.push(leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })); } }
-        }
-        if(leaderboard.names.length === 0) {
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setDescription("Nobody owns the " + titleToFind.name + " yet, Quick be the first!")
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
-        else if(leaderboard.names.length === 1) {
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("The only person to own " + titleToFind.name + " is: ")
-          .setDescription(leaderboard.names[0])
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
-        else {
-          var namesRight = leaderboard.names.slice(0, (leaderboard.names.length / 2));
-          var namesLeft = leaderboard.names.slice((leaderboard.names.length / 2), leaderboard.names.length);
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("People that own the " + titleToFind.name + " title!")
-          .addField("Names", namesLeft, true)
-          .addField("Names", namesRight, true)
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
+        Database.GetFromBroadcasts(titleToFind, function(isError, isFound, Data) {
+          //Store broadcasts
+          var broadcasts = [];
+          if(!isError) { broadcasts = Data; }
+
+          for(var i in leaderboards) {
+            var titles = leaderboards[i].titles.split(",");
+            var broadcast = broadcasts.find(e => e.membershipId == leaderboards[i].membershipId);
+            for(j in titles) {
+              if(titles[j] === titleToFind.hash) {
+                leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ broadcast ? `(${ new Date(broadcast.date).toLocaleDateString('en-GB') })` : "" }`)
+              }
+            }
+          }
+          if(leaderboard.length === 0) {
+            const embed = new Discord.RichEmbed()
+            .setColor(0x0099FF)
+            .setDescription("Nobody owns the " + titleToFind.name + " yet, Quick be the first!")
+            .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+            .setTimestamp()
+            message.channel.send({embed});
+          }
+          else if(leaderboard.length === 1) {
+            const embed = new Discord.RichEmbed()
+            .setColor(0x0099FF)
+            .setAuthor("The only person to own " + titleToFind.name + " is: ")
+            .setDescription(leaderboard[0])
+            .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+            .setTimestamp()
+            message.channel.send({embed});
+          }
+          else {
+            var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
+            var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
+            const embed = new Discord.RichEmbed()
+            .setColor(0x0099FF)
+            .setAuthor("People that own the " + titleToFind.name + " title!")
+            .addField("Names", namesLeft, true)
+            .addField("Names", namesRight, true)
+            .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+            .setTimestamp()
+            message.channel.send({embed});
+          }
+        });
       }
       else { message.channel.send("Nobody owns the " + titleInput + " yet, you can see a list of tracked titles here `~titles` or feel free to request tracking for this title by using `~request Please track the x title.`"); }
     }
