@@ -385,6 +385,7 @@ client.on("message", async message => {
             else if(command === "~HELP TRIALS") { DiscordCommands.Help(message, "trials"); }
             else if(command === "~HELP BROADCASTS") { DiscordCommands.BroadcastsHelp(message); }
             else if(command === "~HELP OTHERS" || command === "~HELP OTHER") { DiscordCommands.Help(message, "others"); }
+            else if(command === "~HELP DUNGEONS" || command === "~HELP DUNGEON") { DiscordCommands.Help(message, "dungeons"); }
             else { message.reply("I am unsure of that help command, type `~help` to see them all."); }
           }
         }
@@ -397,6 +398,7 @@ client.on("message", async message => {
         else if(command === "~GLOBALS" || command === "~GLOBAL") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "globals"); } }
         else if(command === "~TRIALS" || command === "~GLOBAL TRIALS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "trials"); } }
         else if(command === "~OTHERS" || command === "~OTHER") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "others"); } }
+        else if(command === "~DUNGEONS" || command === "~DUNGEON") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "dungeons"); } }
 
         //Rankings
         else if(command.startsWith("~DRYSTREAK ")) { if(!CheckBanned(message)) { DiscordCommands.DryStreak(message, command.substr("~DRYSTREAK ".length)); } }
@@ -523,6 +525,12 @@ client.on("message", async message => {
         }
         else if(command === "~GUARDIAN GAMES" || command === "~GG") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "guardianGames"); } }
         else if(command === "~CLASSES") { if(!CheckBanned(message)) { DiscordCommands.Rankings("gg_classes", message, Definitions); } }
+        else if(command === "~SHATTERED THRONE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("st_dungeon", message, Definitions); } }
+        else if(command === "~SHATTERED THRONE FLAWLESS" || command === "~FLAWLESS SHATTERED THRONE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("st_flawless_dungeon", message, Definitions); } }
+        else if(command === "~PIT OF HERESY" || command === "~PIT") { if(!CheckBanned(message)) { DiscordCommands.Rankings("pit_dungeon", message, Definitions); } }
+        else if(command === "~PIT OF HERESY FLAWLESS" || command === "~FLAWLESS PIT OF HERESY" || command === "~FLAWLESS PIT" || command === "~PIT FLAWLESS") { if(!CheckBanned(message)) { DiscordCommands.Rankings("pit_flawless_dungeon", message, Definitions); } }
+        else if(command === "~PROPHECY" || command === "~PROHECY") { if(!CheckBanned(message)) { DiscordCommands.Rankings("prophecy_dungeon", message, Definitions); } }
+        else if(command === "~PROPHECY FLAWLESS" || command === "~FLAWLESS PROPHECY") { if(!CheckBanned(message)) { DiscordCommands.Rankings("prophecy_flawless_dungeon", message, Definitions); } }
 
         //Clan Management
         else if(command.startsWith("~SET BROADCASTS ")) { if(!CheckBanned(message)) { Broadcasts.SetupBroadcasts(message); } }

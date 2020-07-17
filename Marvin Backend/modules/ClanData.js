@@ -375,29 +375,29 @@ function GetSeasonal(response) {
 }
 function GetOthers(response) {
   var characterIds = response.playerData.profile.data.characterIds;
-  var menageire = response.playerData.profileRecords.data.records["1363982253"].objectives[0].progress;
-  var runes = response.playerData.profileRecords.data.records["2422246600"].objectives[0].progress;
-  var triumphScore = "0"; try { triumphScore = response.playerData.profileRecords.data.score; } catch (err) { }
-  var wellsCompleted = "0"; try { wellsCompleted = response.playerData.profileRecords.data.records["819775261"].objectives[0].progress; } catch (err) { }
-  var epsCompleted = "0"; try { epsCompleted = response.playerData.profileRecords.data.records["3350489579"].objectives[0].progress; } catch (err) { }
+  var menageire = 0; try { menageire = response.playerData.profileRecords.data.records["1363982253"].objectives[0].progress; } catch (err) { }
+  var runes = 0; try { runes = response.playerData.profileRecords.data.records["2422246600"].objectives[0].progress; } catch (err) { }
+  var triumphScore = 0; try { triumphScore = response.playerData.profileRecords.data.score; } catch (err) { }
+  var wellsCompleted = 0; try { wellsCompleted = response.playerData.profileRecords.data.records["819775261"].objectives[0].progress; } catch (err) { }
+  var epsCompleted = 0; try { epsCompleted = response.playerData.profileRecords.data.records["3350489579"].objectives[0].progress; } catch (err) { }
 
   //Shattered Throne
-  var sT_completed = "0"; try { sT_completed = response.playerData.profileRecords.data.records["2314271318"].objectives[0].progress; } catch (err) { }
-  var sT_flawless = "0"; try { sT_flawless = response.playerData.profileRecords.data.records["2029263931"].objectives[0].progress; } catch (err) { }
-  var sT_solo = "0"; try { sT_solo = response.playerData.profileRecords.data.records["851701008"].objectives[0].progress; } catch (err) { }
-  var sT_solo_flawless = "0"; try { sT_solo_flawless = response.playerData.profileRecords.data.records["1290451257"].objectives[0].progress; } catch (err) { }
+  var st_completions = 0; try { st_completions = response.playerData.metrics.data.metrics["1339818929"].objectiveProgress.progress; } catch (err) { }
+  var st_flawless_completions = 0; try { st_flawless_completions = response.playerData.metrics.data.metrics["761318885"].objectiveProgress.progress; } catch (err) { }
 
   //Pit Of Heresy
-  var pOH_completed = "0"; try { pOH_completed = response.playerData.profileRecords.data.records["3217987680"].objectives[0].progress; } catch (err) { }
-  var pOH_flawless = "0"; try { pOH_flawless = response.playerData.profileRecords.data.records["3279886460"].objectives[0].progress; } catch (err) { }
-  var pOH_solo = "0"; try { pOH_solo = response.playerData.profileRecords.data.records["376114010"].objectives[0].progress; } catch (err) { }
-  var pOH_solo_flawless = "0"; try { pOH_solo_flawless = response.playerData.profileRecords.data.records["2615277024"].objectives[0].progress; } catch (err) { }
+  var pit_completions = 0; try { pit_completions = response.playerData.metrics.data.metrics["1451729471"].objectiveProgress.progress; } catch (err) { }
+  var pit_flawless_completions = 0; try { pit_flawless_completions = response.playerData.metrics.data.metrics["310888283"].objectiveProgress.progress; } catch (err) { }
+
+  //Prophecy
+  var prophecy_completions = 0; try { prophecy_completions = response.playerData.metrics.data.metrics["3719033237"].objectiveProgress.progress; } catch (err) { }
+  var prophecy_flawless_completions = 0; try { prophecy_flawless_completions = response.playerData.metrics.data.metrics["146137481"].objectiveProgress.progress; } catch (err) { }
 
   //Guardian Games
-  var GG_Laurels = "0"; try { GG_Laurels = response.playerData.profileRecords.data.records["379624208"].objectives[0].progress; } catch (err) { }
-  var GG_Medals = "0"; try { GG_Medals = response.playerData.profileRecords.data.records["3800989613"].objectives[0].progress; } catch (err) { }
-  var GG_RumbleSupers = "0"; try { GG_RumbleSupers = response.playerData.profileRecords.data.records["3672040342"].objectives[0].progress; } catch (err) { }
-  var GG_Triumphs = "0"; try { GG_Triumphs = response.playerData.profileRecords.data.records["3199735617"].objectives[0].progress; } catch (err) { }
+  var GG_Laurels = 0; try { GG_Laurels = response.playerData.profileRecords.data.records["379624208"].objectives[0].progress; } catch (err) { }
+  var GG_Medals = 0; try { GG_Medals = response.playerData.profileRecords.data.records["3800989613"].objectives[0].progress; } catch (err) { }
+  var GG_RumbleSupers = 0; try { GG_RumbleSupers = response.playerData.profileRecords.data.records["3672040342"].objectives[0].progress; } catch (err) { }
+  var GG_Triumphs = 0; try { GG_Triumphs = response.playerData.profileRecords.data.records["3199735617"].objectives[0].progress; } catch (err) { }
 
   //Lie Quest
   var lieCommQuest = { "EDZ": 0, "MOON": 0, "IO": 0 };
@@ -411,8 +411,9 @@ function GetOthers(response) {
     "triumphScore": triumphScore,
     "wellsRankings": wellsCompleted,
     "epRankings": epsCompleted,
-    "shatteredThrone": { "completed": sT_completed, "flawless": sT_flawless, "solo": sT_solo, "solo_flawless": sT_solo_flawless },
-    "pitOfHeresy": { "completed": pOH_completed, "flawless": pOH_flawless, "solo": pOH_solo, "solo_flawless": pOH_solo_flawless },
+    "shatteredThrone": { "completions": st_completions, "flawless": st_flawless_completions },
+    "pitOfHeresy": { "completions": pit_completions, "flawless": pit_flawless_completions },
+    "prophecy": { "completions": prophecy_completions, "flawless": prophecy_flawless_completions },
     "guardianGames": { "laurels": GG_Laurels, "medals": GG_Medals, "rumble_super_kills": GG_RumbleSupers, "triumphs": GG_Triumphs },
     "lieCommQuest": { "EDZ": lieCommQuest.EDZ, "MOON": lieCommQuest.MOON, "IO": lieCommQuest.IO }
   }

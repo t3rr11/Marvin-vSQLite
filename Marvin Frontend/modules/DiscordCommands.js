@@ -28,6 +28,16 @@ function Help(message, type) {
     .setTimestamp()
     message.channel.send({embed});
   }
+  else if(type === "dungeons") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Dungeons Help Menu")
+    .setDescription("Here is a list of dungeon commands! Example: `~Pit of Heresy`")
+    .addField("Commands", "`~Shattered Throne`, `~Shattered Throne Flawless`, `~Pit of Heresy`, `~Pit of Heresy Flawless`, `~Prophecy`, `~Prophecy Flawless`")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
   else if(type === "raids") {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
@@ -122,7 +132,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Hey there! I am Marvin.")
     .setDescription("I have so many commands now i've had to split them up here is a list of my help commands! Example: `~Help Rankings`")
-    .addField("Categories", "`Rankings`, `Raids`, `Items`, `Titles`, `Seasonal`, `Preseasonal`, `Clan`, `Globals`, `Drystreaks`, `Trials`, `Others`")
+    .addField("Categories", "`Rankings`, `Dungeons`, `Raids`, `Items`, `Titles`, `Seasonal`, `Preseasonal`, `Clan`, `Globals`, `Drystreaks`, `Trials`, `Others`")
     .addField("Request", "If you wish to request something or would like to give feedback use the request command like this: `~request I would like to see Marvin track season ranks!`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
@@ -1182,6 +1192,242 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
         Hunters: ${ Misc.AddCommas(laurels.Hunter) }
         Warlocks: ${ Misc.AddCommas(laurels.Warlock) }
       `)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+
+    //Dungeons
+    else if(type === "st_dungeon") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards = leaderboards.filter(e => JSON.parse(e.shatteredThrone) !== null);
+      leaderboards.sort(function(a, b) { return JSON.parse(b.shatteredThrone)["completions"] - JSON.parse(a.shatteredThrone)["completions"]; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        var amount = Misc.AddCommas(JSON.parse(top[i].shatteredThrone)["completions"]);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(amount));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            var amount = Misc.AddCommas(JSON.parse(playerStats.shatteredThrone)["completions"]);
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+          else {
+            var amount = Misc.AddCommas(JSON.parse(playerStats.shatteredThrone)["completions"]);
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Shattered Throne Completions")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "st_flawless_dungeon") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards = leaderboards.filter(e => JSON.parse(e.shatteredThrone) !== null);
+      leaderboards.sort(function(a, b) { return JSON.parse(b.shatteredThrone)["flawless"] - JSON.parse(a.shatteredThrone)["flawless"]; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        var amount = Misc.AddCommas(JSON.parse(top[i].shatteredThrone)["flawless"]);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(amount));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            var amount = Misc.AddCommas(JSON.parse(playerStats.shatteredThrone)["flawless"]);
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+          else {
+            var amount = Misc.AddCommas(JSON.parse(playerStats.shatteredThrone)["flawless"]);
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Shattered Throne Flawless Completions")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "pit_dungeon") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards = leaderboards.filter(e => JSON.parse(e.pitOfHeresy) !== null);
+      leaderboards.sort(function(a, b) { return JSON.parse(b.pitOfHeresy)["completions"] - JSON.parse(a.pitOfHeresy)["completions"]; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        var amount = Misc.AddCommas(JSON.parse(top[i].pitOfHeresy)["completions"]);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(amount));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            var amount = Misc.AddCommas(JSON.parse(playerStats.pitOfHeresy)["completions"]);
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+          else {
+            var amount = Misc.AddCommas(JSON.parse(playerStats.pitOfHeresy)["completions"]);
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Pit Of Heresy Completions")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "pit_flawless_dungeon") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards = leaderboards.filter(e => JSON.parse(e.pitOfHeresy) !== null);
+      leaderboards.sort(function(a, b) { return JSON.parse(b.pitOfHeresy)["flawless"] - JSON.parse(a.pitOfHeresy)["flawless"]; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        var amount = Misc.AddCommas(JSON.parse(top[i].pitOfHeresy)["flawless"]);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(amount));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            var amount = Misc.AddCommas(JSON.parse(playerStats.pitOfHeresy)["flawless"]);
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+          else {
+            var amount = Misc.AddCommas(JSON.parse(playerStats.pitOfHeresy)["flawless"]);
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Pit Of Heresy Flawless Completions")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "prophecy_dungeon") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards = leaderboards.filter(e => JSON.parse(e.prophecy) !== null);
+      leaderboards.sort(function(a, b) { return JSON.parse(b.prophecy)["completions"] - JSON.parse(a.prophecy)["completions"]; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        var amount = Misc.AddCommas(JSON.parse(top[i].prophecy)["completions"]);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(amount));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            var amount = Misc.AddCommas(JSON.parse(playerStats.prophecy)["completions"]);
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+          else {
+            var amount = Misc.AddCommas(JSON.parse(playerStats.prophecy)["completions"]);
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Prophecy Completions")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
+      .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+      .setTimestamp()
+      message.channel.send({embed});
+    }
+    else if(type === "prophecy_flawless_dungeon") {
+      var leaderboard = { "names": [], "completions": [] };
+      leaderboards = leaderboards.filter(e => JSON.parse(e.prophecy) !== null);
+      leaderboards.sort(function(a, b) { return JSON.parse(b.prophecy)["flawless"] - JSON.parse(a.prophecy)["flawless"]; });
+      top = leaderboards.slice(0, 10);
+      for(var i in top) {
+        var amount = Misc.AddCommas(JSON.parse(top[i].prophecy)["flawless"]);
+        leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+        leaderboard.completions.push(Misc.AddCommas(amount));
+      }
+
+      try {
+        if(playerData !== null) {
+          var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
+          if(playerStats) {
+            var rank = leaderboards.indexOf(leaderboards.find(e => e.membershipId === playerData.membershipId));
+            var amount = Misc.AddCommas(JSON.parse(playerStats.prophecy)["flawless"]);
+            leaderboard.names.push("", `${ rank+1 }: ${ playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+          else {
+            var amount = Misc.AddCommas(JSON.parse(playerStats.prophecy)["flawless"]);
+            leaderboard.names.push("", `${ playerInfo.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`);
+            leaderboard.completions.push("", Misc.AddCommas(amount));
+          }
+        }
+        else { leaderboard.names.push("", `~Register to see your rank`); }
+      }
+      catch(err) { }
+
+      const embed = new Discord.RichEmbed()
+      .setColor(0x0099FF)
+      .setAuthor("Top 10 Prophecy Flawless Completions")
+      .addField("Name", leaderboard.names, true)
+      .addField("Completions", leaderboard.completions, true)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
       .setTimestamp()
       message.channel.send({embed});
@@ -2543,11 +2789,11 @@ function GetTrackedItems(message) {
   message.channel.send({embed});
 }
 function GetTrackedTitles(message) {
-  const titles = "Wayfarer, Dredgen, Unbroken, Chronicler, Cursebreaker, Rivensbane, Blacksmith, Reckoner, MMXIX, Shadow, Undying, Enlightened, Harbinger, Savior, Almighty, Flawless, Conqueror";
+  const titles = "Wayfarer, Dredgen, Unbroken, Chronicler, Cursebreaker, Rivensbane, Blacksmith, Reckoner, MMXIX, Shadow, Undying, Enlightened, Harbinger, Savior, Almighty, Flawless S10, Flawless S11, Conqueror S10, Conqueror S11";
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked titles!")
-  .setDescription("To view who owns a specific title use the command like this: `~Title Savior`\n\n**Titles** \n" + titles + "\n\n" + "**Extra** \n If you want to see who has the most titles within the tracked clans of this discord use: `~titles total`")
+  .setDescription("To view who owns a specific title use the command like this: `~Title Flawless S10`\n\n**Titles** \n" + titles + "\n\n" + "**Extra** \n If you want to see who has the most titles within the tracked clans of this discord use: `~titles total`")
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});
