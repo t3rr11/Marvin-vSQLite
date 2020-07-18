@@ -1231,6 +1231,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       const embed = new Discord.RichEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Shattered Throne Completions")
+      .setDescription("Due to the way this metric is tracked it is character based. This leaderboard reflects just 1 character. I've put in a ticket to get this fixed, until then the other dungeon leaderboards work fine.")
       .addField("Name", leaderboard.names, true)
       .addField("Completions", leaderboard.completions, true)
       .setFooter(Config.defaultFooter, Config.defaultLogoURL)
