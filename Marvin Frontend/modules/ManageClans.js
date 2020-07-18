@@ -21,7 +21,11 @@ async function GetClanIDFromMbmID(mbmType, mbmId) {
   }
   else if(request.ok) {
     //Everything is ok, request was returned to sender.
-    return { 'id': response.Response.results[0].group.groupId, 'name': response.Response.results[0].group.name };
+    const group = response.Response.results[0].group;
+    if(id !== undefined) {
+      return { 'id': group.groupId, 'name': group.name };
+    }
+    else { return "No Clan" }
   }
   else {
     //Error in request ahhhhh!
@@ -39,7 +43,7 @@ async function RegisterClan(message) {
             if(!isFound) {
               const Clan = await GetClanIDFromMbmID(playerData.platform, playerData.membershipId);
               if(Clan.id !== undefined) {
-                if(Clan !== "Error") {
+                if(Clan !== "No Clan") {
                   Database.AddNewGuild(message, Clan, function(isError) {
                     if(!isError) {
                       Log.SaveLog("Clans", "Clan Added: " + Clan.name + " (" + Clan.id + ")");
@@ -48,9 +52,9 @@ async function RegisterClan(message) {
                     else { message.reply("Sorry we failed to set clan, please try again!"); }
                   });
                 }
-                else { message.reply("Sorry we failed to set clan, please try again!"); console.log(Clan); }
+                else { message.reply("So you are apparently not in a clan? Was there a mistake in registering your username. Make sure it's you. If you are unsure try registering with a Membership ID instead, to see these steps type `~register help`."); }
               }
-              else { message.reply("Sorry we failed to set clan, please try again!"); }
+              else { message.reply("Sorry we failed to set clan, please try again!"); console.log(Clan); }
             }
             else { message.reply("This clan already has a registered clan, if you wish to add another to the tracking use `~Add clan`, or if you have changed clan use `~Remove clan` first."); }
           }
