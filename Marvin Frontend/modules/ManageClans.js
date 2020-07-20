@@ -50,7 +50,7 @@ async function RegisterClan(message) {
               if(Clan !== "No Clan") {
                 Database.AddNewGuild(message, Clan, function(isError) {
                   if(!isError) {
-                    Log.SaveLog("Clans", "Clan Added: " + Clan.name + " (" + Clan.id + ")");
+                    Log.SaveLog("Clans", `Clan Added: ${ Clan.name } (${ Clan.id })`);
                     message.channel.send(`${ Clan.name } has been successfully registered to this server! If this is the first time registering it may take a few minutes to grab your clans data for the first time.`);
                   }
                   else { message.reply("Sorry we failed to set clan, please try again!"); }
@@ -85,7 +85,7 @@ function AddClan(message, clan_id) {
                       clans.push(clan_id);
                       Database.AddClanToGuild(message.guild.id, clans, function(isError) {
                         if(!isError) {
-                          console.log(`Added ${ Clan.name } to the tracking for ${ message.guild.id }`);
+                          Log.SaveLog("Clans", `Clan Added: ${ Clan.name } (${ Clan.id }) to the tracking for ${ message.guild.id }`);
                           message.channel.send(`${ Clan.name } has been succesfully added and will start to be tracked for this server! If this is the first time, it may take a few minutes to load the data for the first time. Please wait.`);
                         }
                         else { message.reply(`There was an error trying to add clan. Sorry please try again.`); }
