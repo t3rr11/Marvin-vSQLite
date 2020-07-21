@@ -23,7 +23,7 @@ function Help(message, type) {
     .setColor(0x0099FF)
     .setAuthor("Rankings Help Menu")
     .setDescription("Here is a list of ranking commands! Example: `~Iron Banner`")
-    .addField("Commands", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Max Power`, `~Triumph Score`, `~Time Played`, `~Season Rank`, `~Clanrank Fractaline`, `~Clanrank Resonance`")
+    .addField("Commands", "`~Valor`, `~Glory`, `~Infamy`, `~Iron Banner`, `~Max Power`, `~Triumph Score`, `~Time Played`, `~Season Rank`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
@@ -127,12 +127,25 @@ function Help(message, type) {
     .setTimestamp()
     message.channel.send({embed});
   }
+  else if(type === "clanwars") {
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Clanwars Help Menu")
+    .setDescription("Here is a list of Clanwars commands! Example: `~Clanwars Time`")
+    .addField("Rankings", "~Clanwars Valor\n~Clanwars Glory\n~Clanwars Infamy")
+    .addField("Raids", "~Clanwars Levi\n~Clanwars pLevi\n~Clanwars Eow\n~Clanwars pEow\n~Clanwars Sos\n~Clanwars pSos\n~Clanwars Last Wish\n~Clanwars Scourge\n~Clanwars Crown\n~Clanwars Garden")
+    .addField("Dungeons", "~Clanwars Pit\n~Clanwars Prophecy")
+    .addField("Others", "~Clanwars Season Rank\n~Clanwars Triumph Score\n~Clanwars Time\n~Clanwars Sundial")
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
   else {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
     .setAuthor("Hey there! I am Marvin.")
     .setDescription("I have so many commands now i've had to split them up here is a list of my help commands! Example: `~Help Rankings`")
-    .addField("Categories", "`Rankings`, `Dungeons`, `Raids`, `Items`, `Titles`, `Seasonal`, `Preseasonal`, `Clan`, `Globals`, `Drystreaks`, `Trials`, `Others`")
+    .addField("Categories", "`Rankings`, `~Clanwars`, `Dungeons`, `Raids`, `Items`, `Titles`, `Seasonal`, `Preseasonal`, `Clan`, `Globals`, `Drystreaks`, `Trials`, `Others`")
     .addField("Request", "If you wish to request something or would like to give feedback use the request command like this: `~request I would like to see Marvin track season ranks!`")
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
@@ -2260,8 +2273,8 @@ function DisplayInhouseClanRankings(type, message) {
                           totals.gardenCompletions += leaderboards[j].gardenCompletions;
                           totals.seasonRank += leaderboards[j].seasonRank;
                           totals.sundial += leaderboards[j].sundialCompletions;
-                          totals.pitCompletions += JSON.parse(leaderboards[j].pitOfHeresy).completions;
-                          totals.prophecyCompletions += JSON.parse(leaderboards[j].prophecy).completions;
+                          try { totals.pitCompletions += isNaN(JSON.parse(leaderboards[j].pitOfHeresy).completions) ? 0 : JSON.parse(leaderboards[j].pitOfHeresy).completions; } catch (err) { }
+                          try { totals.prophecyCompletions += isNaN(JSON.parse(leaderboards[j].prophecy).completions) ? 0 : JSON.parse(leaderboards[j].prophecy).completions; } catch (err) { }
                           totals.triumphScore += leaderboards[j].triumphScore;
                           totals.totalTime += leaderboards[j].timePlayed;
                           totals.totalRaids += (leaderboards[j].leviCompletions + leaderboards[j].leviPresCompletions + leaderboards[j].eowCompletions + leaderboards[j].eowPresCompletions + leaderboards[j].sosCompletions + leaderboards[j].sosPresCompletions);
