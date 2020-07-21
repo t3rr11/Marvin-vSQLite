@@ -386,6 +386,7 @@ client.on("message", async message => {
             else if(command === "~HELP BROADCASTS") { DiscordCommands.BroadcastsHelp(message); }
             else if(command === "~HELP OTHERS" || command === "~HELP OTHER") { DiscordCommands.Help(message, "others"); }
             else if(command === "~HELP DUNGEONS" || command === "~HELP DUNGEON") { DiscordCommands.Help(message, "dungeons"); }
+            else if(command === "~HELP CLANWARS" || command === "~HELP CLANWARS") { DiscordCommands.Help(message, "clanwars"); }
             else { message.reply("I am unsure of that help command, type `~help` to see them all."); }
           }
         }
@@ -399,6 +400,8 @@ client.on("message", async message => {
         else if(command === "~TRIALS" || command === "~GLOBAL TRIALS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "trials"); } }
         else if(command === "~OTHERS" || command === "~OTHER") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "others"); } }
         else if(command === "~DUNGEONS" || command === "~DUNGEON") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "dungeons"); } }
+        else if(command === "~CLANWARS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "clanwars"); } }
+        else if(command === "~CLAN WARS") { if(!CheckBanned(message)) { message.reply("The command is used without a space: `~Clanwars`. It's for stability issues sorry."); } }
 
         //Rankings
         else if(command.startsWith("~DRYSTREAK ")) { if(!CheckBanned(message)) { DiscordCommands.DryStreak(message, command.substr("~DRYSTREAK ".length)); } }
@@ -579,9 +582,33 @@ client.on("message", async message => {
         else if(command === "~GLOBAL MEDALS" || command === "~GLOBAL GG LAURELS") { if(!CheckBanned(message)) { DiscordCommands.GlobalRankings("gg_medals", message); } }
         else if(command === "~THE LIE" || command === "~FELWINTERS" || command === "~FELWINTERS LIE") { if(!CheckBanned(message)) { message.channel.send("This community event has ended, this command will be removed soon. Thanks for participating!") } }
 
-        //Clan Global Rankings
-        else if(command === "~CLANRANK FRACTALINE") { if(!CheckBanned(message)) { DiscordCommands.DisplayClanRankings("fractaline", message); } }
-        else if(command === "~CLANRANK RESONANCE") { if(!CheckBanned(message)) { DiscordCommands.DisplayClanRankings("resonance", message); } }
+        //Clan Wars Rankings
+        else if(command.startsWith("~CLAN WARS")) { if(!CheckBanned(message)) { message.reply("The command is used without a space: `~Clanwars`. It's for stability issues sorry."); } }
+        else if(command.startsWith("~CLANWARS ")) {
+          if(!CheckBanned(message)) {
+            if(command === "~CLANWARS INFAMY") { DiscordCommands.DisplayInhouseClanRankings("infamy", message); }
+            else if(command === "~CLANWARS VALOR") { DiscordCommands.DisplayInhouseClanRankings("valor", message); }
+            else if(command === "~CLANWARS GLORY") { DiscordCommands.DisplayInhouseClanRankings("glory", message); }
+            else if(command === "~CLANWARS LEVIATHAN" || command === "~CLANWARS LEVI") { DiscordCommands.DisplayInhouseClanRankings("levi", message); }
+            else if(command === "~CLANWARS PRESTIGE LEVIATHAN" || command === "~CLANWARS PRESTIGE LEVI" || command === "~CLANWARS PLEVI") { DiscordCommands.DisplayInhouseClanRankings("leviPres", message); }
+            else if(command === "~CLANWARS EATER OF WORLDS" || command === "~CLANWARS EATER" || command === "~CLANWARS EOW") { DiscordCommands.DisplayInhouseClanRankings("eow", message); }
+            else if(command === "~CLANWARS PRESTIGE EATER OF WORLDS" || command === "~CLANWARS PRESTIGE EATER" || command === "~CLANWARS PEOW") { DiscordCommands.DisplayInhouseClanRankings("eowPres", message); }
+            else if(command === "~CLANWARS SPIRE OF STARS" || command === "~CLANWARS SPIRE" || command === "~CLANWARS SOS") { DiscordCommands.DisplayInhouseClanRankings("sos", message); }
+            else if(command === "~CLANWARS PRESTIGE SPIRE OF STARS" || command === "~CLANWARS PRESTIGE SPIRE" || command === "~CLANWARS PSOS") { DiscordCommands.DisplayInhouseClanRankings("sosPres", message); }
+            else if(command === "~CLANWARS LAST WISH") { DiscordCommands.DisplayInhouseClanRankings("lastWish", message); }
+            else if(command === "~CLANWARS SCOURGE OF THE PAST" || command === "~CLANWARS SCOURGE") { DiscordCommands.DisplayInhouseClanRankings("scourge", message); }
+            else if(command === "~CLANWARS CROWN OF SORROWS" || command === "~CLANWARS CROWN") { DiscordCommands.DisplayInhouseClanRankings("sorrows", message); }
+            else if(command === "~CLANWARS GARDEN OF SALVATION" || command === "~CLANWARS GARDEN") { DiscordCommands.DisplayInhouseClanRankings("garden", message); }
+            else if(command === "~CLANWARS SEASON RANK") { DiscordCommands.DisplayInhouseClanRankings("seasonRank", message); }
+            else if(command === "~CLANWARS SUNDIAL") { DiscordCommands.DisplayInhouseClanRankings("sundial", message); }
+            else if(command === "~CLANWARS PIT OF HERESY" || command === "~CLANWARS PIT") { DiscordCommands.DisplayInhouseClanRankings("pit_dungeon", message); }
+            else if(command === "~CLANWARS PROPHECY") { DiscordCommands.DisplayInhouseClanRankings("prophecy_dungeon", message); }
+            else if(command === "~CLANWARS TRIUMPH SCORE") { DiscordCommands.DisplayInhouseClanRankings("triumphScore", message); }
+            else if(command === "~CLANWARS TIME" || command === "~CLANWARS TIME PLAYED" || command === "~CLANWARS TOTAL TIME") { DiscordCommands.DisplayInhouseClanRankings("totalTime", message); }
+            else if(command === "~CLANWARS RAIDS" || command === "~CLANWARS TOTAL RAIDS") { DiscordCommands.DisplayInhouseClanRankings("totalRaids", message); }
+            else { DiscordCommands.Help(message, "clanwars"); }
+          }
+        }
 
         //Other
         else { related = false; message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete(2000) }).catch(); }

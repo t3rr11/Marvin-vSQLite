@@ -13,7 +13,7 @@ module.exports = {
   Help, BroadcastsHelp, DrystreaksHelp, Request,
   GlobalRankings, Rankings, TrialsRankings, GlobalDryStreak, GetTrackedItems, DryStreak, GetTrackedClans,
   Profile, GetTrackedTitles, ForceFullScan, ForceGuildCheck, ToggleWhitelist, RenewLeadership, TransferLeadership,
-  DisplayClanRankings, Trials, ClanInfo
+  DisplayClanRankings, DisplayInhouseClanRankings, Trials, ClanInfo
 };
 
 //Important
@@ -2202,6 +2202,88 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     message.channel.send({embed});
   }
 }
+function DisplayInhouseClanRankings(type, message) {
+  Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
+    if(!isError) {
+      if(isFound) {
+        //Get all clan data from playerInfo using clan_id
+        var allClanIds = Data.clans.split(",");
+        Database.GetClans(async function(isError, clans) {
+          clans = clans.filter(e => allClanIds.includes(e.clan_id));
+          if(!isError) {
+            Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+              if(!isError) {
+                if(isFound) {
+                  //Create leaderboards
+                  var clanLeaderboards = [];
+                  for(var i in clans) {
+                    //Find related clans
+                    if(!clanLeaderboards.find(e => e.clan_id === clans[i].clan_id)) {
+                      //Make totals leaderboard
+                      var totals = {
+                        infamy: 0,
+                        valor: 0,
+                        glory: 0,
+                        leviCompletions: 0,
+                        leviPresCompletions: 0,
+                        eowCompletions: 0,
+                        eowPresCompletions: 0,
+                        sosCompletions: 0,
+                        sosPresCompletions: 0,
+                        lastWishCompletions: 0,
+                        scourgeCompletions: 0,
+                        sorrowsCompletions: 0,
+                        gardenCompletions: 0,
+                        seasonRank: 0,
+                        sundial: 0,
+                        pitCompletions: 0,
+                        prophecyCompletions: 0,
+                        triumphScore: 0,
+                        totalTime: 0,
+                        totalRaids: 0
+                      }
+                      for(var j in leaderboards) {
+                        if(leaderboards[j].clanId === clans[i].clan_id) {
+                          //Add each individual players stats to the total leaderboard for that clan
+                          totals.infamy += leaderboards[j].infamy;
+                          totals.valor += leaderboards[j].valor;
+                          totals.glory += leaderboards[j].glory;
+                          totals.leviCompletions += leaderboards[j].leviCompletions;
+                          totals.leviPresCompletions += leaderboards[j].leviPresCompletions;
+                          totals.eowCompletions += leaderboards[j].eowCompletions;
+                          totals.eowPresCompletions += leaderboards[j].eowPresCompletions;
+                          totals.sosCompletions += leaderboards[j].sosCompletions;
+                          totals.sosPresCompletions += leaderboards[j].sosPresCompletions;
+                          totals.lastWishCompletions += leaderboards[j].lastWishCompletions;
+                          totals.scourgeCompletions += leaderboards[j].scourgeCompletions;
+                          totals.sorrowsCompletions += leaderboards[j].sorrowsCompletions;
+                          totals.gardenCompletions += leaderboards[j].gardenCompletions;
+                          totals.seasonRank += leaderboards[j].seasonRank;
+                          totals.sundial += leaderboards[j].sundialCompletions;
+                          totals.pitCompletions += JSON.parse(leaderboards[j].pitOfHeresy).completions;
+                          totals.prophecyCompletions += JSON.parse(leaderboards[j].prophecy).completions;
+                          totals.triumphScore += leaderboards[j].triumphScore;
+                          totals.totalTime += leaderboards[j].timePlayed;
+                          totals.totalRaids += (leaderboards[j].leviCompletions + leaderboards[j].leviPresCompletions + leaderboards[j].eowCompletions + leaderboards[j].eowPresCompletions + leaderboards[j].sosCompletions + leaderboards[j].sosPresCompletions);
+                        }
+                      }
+                      //Finished with that clan, push to clan leaderboard
+                      clanLeaderboards.push({ "clan_id": clans[i].clan_id, "clan_name": clans[i].clan_name, "totals": totals });
+                    }
+                  }
+                  //Data has finished being collected, now send to clan rankings.
+                  ClanRankings(message, type, clanLeaderboards);
+                }
+              }
+              else { message.channel.send("Currently your clan(s) is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
+            });
+          }
+          else { message.reply("Error getting all clans. Ooopsie. It has been logged."); Log.SaveError("Failed to get all clans for clanwars rankings"); }
+        });
+      } else { message.reply("No clan set, to set one use: `~Set clan`"); }
+    } else { message.reply("Sorry! An error occurred, Please try again..."); }
+  });
+}
 function DisplayClanRankings(type, message) {
   Database.GetClans(async function(isError, clans) {
     if(!isError) {
@@ -2222,117 +2304,399 @@ function DisplayClanRankings(type, message) {
             }
           }
           //Data is collected, now send to clan rankings.
-          ClanRankings(message, type, clanLeaderboards, clans)
+          ClanRankings(message, type, clanLeaderboards, clans);
         }
         else { message.reply("Sorry! An error occurred, Please try again..."); }
       });
     }
   });
 }
-async function ClanRankings(message, type, leaderboards, clans) {
-  if(type === "fractaline") {
+async function ClanRankings(message, type, leaderboards) {
+  //Pvp
+  if(type === "infamy") {
     var leaderboard = { "names": [], "data": [] };
-    leaderboards.sort(function(a, b) { return b.fractalineDonated - a.fractalineDonated; });
-    top = leaderboards.slice(0, 10);
+    leaderboards.sort(function(a, b) { return b.totals.infamy - a.totals.infamy; });
+    top = leaderboards.slice(0, 25);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
-      leaderboard.data.push(Misc.AddCommas(top[i].fractalineDonated));
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.infamy));
     }
-
-    //Get guild clan rankings
-    await new Promise(resolve =>
-      Database.GetGuild(message.guild.id, async function(isError, isFound, guild) {
-        if(!isError) {
-          if(isFound) {
-            var clans = guild.clans.split(","); leaderboard.names.push(""); leaderboard.data.push(""); var tempData = [];
-            for(var i in clans) {
-              await new Promise(resolve =>
-                Database.GetClan(clans[i], function(isError, isFound, clan) {
-                  if(!isError) {
-                    if(isFound) {
-                      var clanStats = leaderboards.find(e => e.clan_id === clan.clan_id);
-                      var rank = leaderboards.indexOf(leaderboards.find(e => e.clan_id === clan.clan_id));
-                      tempData.push({ "name": `${ rank+1 }: ${ clanStats.clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`, "data": clanStats.fractalineDonated });
-                    }
-                  }
-                  resolve(true);
-                })
-              );
-            }
-            tempData.sort(function(a, b) { return b.data - a.data; });
-            for(var i in tempData) {
-              leaderboard.names.push(tempData[i].name);
-              leaderboard.data.push(Misc.AddCommas(tempData[i].data));
-            }
-          }
-          else { leaderboard.names.push("", `~Addclan to see your clans rank`); }
-        }
-        else { message.channel.send("An error occurred... Please try again?"); }
-        resolve(true);
-      })
-    );
-
-    //Get a global amount of fractaline donated.
-    var totalFractalineDonated = 0;
-    for(var i in leaderboards) { totalFractalineDonated = totalFractalineDonated + leaderboards[i].fractalineDonated; }
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 10 Clans for Fractaline Donations")
-    .setDescription(`Total fractaline donated from the Marvin community: ${ Misc.AddCommas(totalFractalineDonated) }`)
+    .setAuthor("Top 25 Clan Wars Rankings for Infamy")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
-    .addField("Fractaline Donated", leaderboard.data, true)
+    .addField("Infamy", leaderboard.data, true)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
   }
-  else if(type === "resonance") {
+  else if(type === "valor") {
     var leaderboard = { "names": [], "data": [] };
-    leaderboards.sort(function(a, b) { return b.resonance - a.resonance; });
-    top = leaderboards.slice(0, 10);
+    leaderboards.sort(function(a, b) { return b.totals.valor - a.totals.valor; });
+    top = leaderboards.slice(0, 25);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
-      leaderboard.data.push(Misc.AddCommas(top[i].resonance * 100));
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.valor));
     }
-
-    //Get guild clan rankings
-    await new Promise(resolve =>
-      Database.GetGuild(message.guild.id, async function(isError, isFound, guild) {
-        if(!isError) {
-          if(isFound) {
-            var clans = guild.clans.split(","); leaderboard.names.push(""); leaderboard.data.push(""); var tempData = [];
-            for(var i in clans) {
-              await new Promise(resolve =>
-                Database.GetClan(clans[i], function(isError, isFound, clan) {
-                  if(!isError) {
-                    if(isFound) {
-                      var clanStats = leaderboards.find(e => e.clan_id === clan.clan_id);
-                      var rank = leaderboards.indexOf(leaderboards.find(e => e.clan_id === clan.clan_id));
-                      tempData.push({ "name": `${ rank+1 }: ${ clanStats.clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`, "data": clanStats.resonance });
-                    }
-                  }
-                  resolve(true);
-                })
-              );
-            }
-            tempData.sort(function(a, b) { return b.data - a.data; });
-            for(var i in tempData) {
-              leaderboard.names.push(tempData[i].name);
-              leaderboard.data.push(Misc.AddCommas(tempData[i].data * 100));
-            }
-          }
-          else { leaderboard.names.push("", `~Addclan to see your clans rank`); }
-        }
-        else { message.channel.send("An error occurred... Please try again?"); }
-        resolve(true);
-      })
-    );
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 10 Most Resonant Clans")
+    .setAuthor("Top 25 Clan Wars Rankings for Valor")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
-    .addField("Resonance", leaderboard.data, true)
+    .addField("Valor", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "glory") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.glory - a.totals.glory; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.glory));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Glory")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Glory", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+
+  //Raids
+  else if(type === "levi") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.leviCompletions - a.totals.leviCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.leviCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Normal: Leviathan")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "leviPres") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.leviPresCompletions - a.totals.leviPresCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.leviPresCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Prestige: Leviathan")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "eow") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.eowCompletions - a.totals.eowCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.eowCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Normal: Eater of Worlds")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "eowPres") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.eowPresCompletions - a.totals.eowPresCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.eowPresCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Prestige: Eater of Worlds")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "sos") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.sosCompletions - a.totals.sosCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.sosCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Normal: Spire of Stars")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "sosPres") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.sosPresCompletions - a.totals.sosPresCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.sosPresCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Prestige: Spire of Stars")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "lastWish") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.lastWishCompletions - a.totals.lastWishCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.lastWishCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Last Wish")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "scourge") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.scourgeCompletions - a.totals.scourgeCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.scourgeCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Scourge of the Past")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "sorrows") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.sorrowsCompletions - a.totals.sorrowsCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.sorrowsCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Crown of Sorrows")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "garden") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.gardenCompletions - a.totals.gardenCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.gardenCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Garden of Salvation")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+
+  //Seasonal
+  else if(type === "seasonRank") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.seasonRank - a.totals.seasonRank; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.seasonRank));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Combined Season Ranks")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Season Ranks", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "sundial") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.sundial - a.totals.sundial; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.sundial));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Sundial Completions")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+
+  //Dungeons
+  else if(type === "pit_dungeon") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.pitCompletions - a.totals.pitCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.pitCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Pit of Heresy Completions")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "prophecy_dungeon") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.prophecyCompletions - a.totals.prophecyCompletions; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.prophecyCompletions));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Prophecy Completions")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Completions", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+
+  //Others
+  else if(type === "triumphScore") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.triumphScore - a.totals.triumphScore; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.triumphScore));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Triumph Score")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Score", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "totalTime") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.totalTime - a.totals.totalTime; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(`${ Misc.AddCommas(Math.round(top[i].totals.totalTime/60)) } Hrs`);
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Time Played")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Time Played", leaderboard.data, true)
+    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+    .setTimestamp()
+    message.channel.send({embed});
+  }
+  else if(type === "totalRaids") {
+    var leaderboard = { "names": [], "data": [] };
+    leaderboards.sort(function(a, b) { return b.totals.totalRaids - a.totals.totalRaids; });
+    top = leaderboards.slice(0, 25);
+    for(var i in top) {
+      leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
+      leaderboard.data.push(Misc.AddCommas(top[i].totals.totalRaids));
+    }
+
+    const embed = new Discord.RichEmbed()
+    .setColor(0x0099FF)
+    .setAuthor("Top 25 Clan Wars Rankings for Total Raid Completions")
+    .setDescription("This leaderboard is comprised of all tracked clans for this server.")
+    .addField("Name", leaderboard.names, true)
+    .addField("Score", leaderboard.data, true)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
     .setTimestamp()
     message.channel.send({embed});
