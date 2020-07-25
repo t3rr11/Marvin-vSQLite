@@ -26,9 +26,19 @@ async function expressUpdatePOSTRequest(req, res, name, sql) {
 
 async function expressGETRequest(req, res, name, sql) {
   Log.SaveLog("Request", `GET Request; From: ${ req.headers["x-forwarded-for"] } to: ${ name }`);
+  const timeStart = new Date().getTime();
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); res.status(200).send({ error: "Failed" }); }
-    else { if(rows.length > 0) { res.status(200).send({ error: null, data: rows }) } else { res.status(200).send({ error: "No data found" }) } }
+    else {
+      if(rows.length > 0) {
+        const ttf = `${ (Math.round(new Date().getTime() - timeStart) / 1000).toFixed(2) }s`;
+        console.log(ttf);
+        res.status(200).send({ error: null, ttf: ttf, data: rows });
+      }
+      else {
+        res.status(200).send({ error: "No data found" })
+      }
+    }
   });
 }
 

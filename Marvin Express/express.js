@@ -6,9 +6,11 @@ const fs = require('fs');
 const cors = require("cors")
 const express = require('express');
 const bodyParser = require('body-parser');
+const compression = require('compression')
 var app = express();
 
 app.use(cors());
+app.use(compression());
 app.use(bodyParser.json({ extended: true }));
 
 module.exports = { app };
