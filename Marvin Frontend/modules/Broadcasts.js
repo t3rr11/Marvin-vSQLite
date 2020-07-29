@@ -193,6 +193,7 @@ async function ProcessBroadcast(client, broadcast, definitions) {
     BroadcastMessage = `${ broadcast.displayName } has obtained the ${ broadcast.broadcast } title!`
   }
   else if(BroadcastType === "clan") { BroadcastMessage = broadcast.broadcast; }
+  else if(BroadcastType === "triumph") { BroadcastMessage = broadcast.broadcast; }
   else if(BroadcastType === "other") { BroadcastMessage = broadcast.broadcast; }
   else { Log.SaveError(`New broadcast type found, but we are unsure of what to do with it. Type: ${ BroadcastType }`); }
 
@@ -316,6 +317,10 @@ async function SendBroadcast(client, guild, message, broadcast, definitions, cla
   else if(broadcast.type === "catalyst" && guild.enable_broadcasts_catalysts === "true") {
     try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
     catch(err) { console.log(`Failed to send catalyst broadcast to ${ guild.guild_id } because of ${ err }`); }
+  }
+  else if(broadcast.type === "triumph" && guild.enable_broadcasts_triumphs === "true") {
+    try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
+    catch(err) { console.log(`Failed to send triumph broadcast to ${ guild.guild_id } because of ${ err }`); }
   }
   else if(broadcast.type === "other" && guild.enable_broadcasts_others === "true") {
     try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }

@@ -935,6 +935,107 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       else { message.channel.send("Nobody owns the " + titleInput + " yet, you can see a list of tracked titles here `~titles` or feel free to request tracking for this title by using `~request Please track the x title.`"); }
     }
+    else if(type === "notItem") {
+      var leaderboard = [];
+      var itemInput = message.content.substr("~!ITEM ".length).toUpperCase();
+      
+      //Rename items
+      if(itemInput === "JOTUNN") { itemInput = "JÖTUNN" }
+      if(itemInput === "FOURTH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+      if(itemInput === "THE 4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+      if(itemInput === "4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+      if(itemInput === "1K VOICES") { itemInput = "1000 VOICES" }
+
+      //Find Items
+      var itemToFind = definitions.find(e => e.name.toUpperCase() === itemInput);
+
+      //Item exists in tracking now generate leaderboards
+      if(itemToFind) {
+        for(var i in leaderboards) {
+          var items = leaderboards[i].items.split(",");
+          if(!items.find(e => e === itemToFind.hash)) {
+            leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`)
+          }
+        }
+        if(leaderboard.length === 0) {
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setDescription("Everybody owns the " + itemToFind.name + "! Wowsers!")
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        }
+        else if(leaderboard.length === 1) {
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setAuthor("The only person who does not own the " + itemToFind.name + " is: ")
+          .setDescription(leaderboard[0])
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        }
+        else {
+          var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
+          var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
+          let embed = new Discord.RichEmbed();
+          embed.setColor(0x0099FF)
+          embed.setAuthor("People that do not own " + itemToFind.name);
+          embed.addField("Names", namesLeft, true);
+          embed.addField("Names", namesRight, true);
+          embed.setFooter(Config.defaultFooter, Config.defaultLogoURL);
+          embed.setTimestamp();
+          message.channel.send({embed});
+        }
+      }
+      else { message.channel.send("We do not track the item: " + itemInput + " yet, you can see a list of tracked items here `~items` or feel free to request tracking for this item by using `~request Please track x item.`"); }
+    }
+    else if(type === "notTitle") {
+      var leaderboard = [];
+      var titleInput = message.content.substr("~!TITLE ".length).toUpperCase();
+
+      //Find Items
+      var titleToFind = definitions.find(e => e.name.toUpperCase() === titleInput);
+
+      if(titleToFind) {
+        //Title exists in tracking now generate leaderboards
+        for(var i in leaderboards) {
+          var titles = leaderboards[i].titles.split(",");
+          if(!titles.find(e => e === titleToFind.hash)) {
+            leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`)
+          }
+        }
+        if(leaderboard.length === 0) {
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setDescription("Everybody owns the " + titleToFind.name + "!, Wowsers!")
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        }
+        else if(leaderboard.length === 1) {
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setAuthor("The only person who does not own the " + titleToFind.name + " is: ")
+          .setDescription(leaderboard[0])
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        }
+        else {
+          var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
+          var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
+          const embed = new Discord.RichEmbed()
+          .setColor(0x0099FF)
+          .setAuthor("People that do not own the " + titleToFind.name + " title!")
+          .addField("Names", namesLeft, true)
+          .addField("Names", namesRight, true)
+          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+          .setTimestamp()
+          message.channel.send({embed});
+        }
+      }
+      else { message.channel.send("Nobody owns the " + titleInput + " yet, you can see a list of tracked titles here `~titles` or feel free to request tracking for this title by using `~request Please track the x title.`"); }
+    }
 
     //Seasonal
     else if(type === "seasonRank") {

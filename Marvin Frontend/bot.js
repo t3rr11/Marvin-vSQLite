@@ -407,6 +407,8 @@ client.on("message", async message => {
         else if(command.startsWith("~DRYSTREAK ")) { if(!CheckBanned(message)) { DiscordCommands.DryStreak(message, command.substr("~DRYSTREAK ".length)); } }
         else if(command.startsWith("~ITEM ")) { if(!CheckBanned(message)) { DiscordCommands.Rankings("item", message, Definitions); } }
         else if(command.startsWith("~TITLE ")) { if(!CheckBanned(message)) { DiscordCommands.Rankings("title", message, Definitions); } }
+        else if(command.startsWith("~!ITEM ")) { if(!CheckBanned(message)) { DiscordCommands.Rankings("notItem", message, Definitions); } }
+        else if(command.startsWith("~!TITLE ")) { if(!CheckBanned(message)) { DiscordCommands.Rankings("notTitle", message, Definitions); } }
         else if(command === "~DRYSTREAK" || command === "~DRYSTREAKS") { if(!CheckBanned(message)) { DiscordCommands.DrystreaksHelp(message); } }
         else if(command === "~INFAMY") { if(!CheckBanned(message)) { DiscordCommands.Rankings("infamy", message, Definitions); } }
         else if(command === "~VALOR") { if(!CheckBanned(message)) { DiscordCommands.Rankings("valor", message, Definitions); } }
