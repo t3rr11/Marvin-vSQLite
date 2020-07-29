@@ -146,6 +146,7 @@ function ProcessPlayerData(response, clanId, firstScan, forcedScan) {
   const Items = GetItems(response);
   const Titles = GetTitles(response);
   const Seasonal = GetSeasonal(response);
+  const Triumphs = GetTriumphs(response);
   const Others = GetOthers(response);
   
   //Compare data
@@ -154,27 +155,28 @@ function ProcessPlayerData(response, clanId, firstScan, forcedScan) {
       if(isFound) {
         if(SQLData.firstLoad !== "true") {
           //Update details after announcing broadcasts. Toggle this is test broadcasts as they will stop updating.
-          Database.UpdatePlayerDetails({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Others }, function(isError) {
+          Database.UpdatePlayerDetails({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Triumphs, Others }, function(isError) {
             if(isError) { var text = `Error in grabbing account information for ${ AccountInfo.displayName } (${ AccountInfo.membershipId })`; console.log(text); Log.SaveError(text); }
             else {
               //Do broadcast checks
               if(firstScan == "false" && forcedScan == "false") {
-                CheckItems({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Others }, SQLData);
-                CheckTitles({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Others }, SQLData);
+                CheckItems({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Triumphs, Others }, SQLData);
+                CheckTitles({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Triumphs, Others }, SQLData);
+                CheckTriumphs({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Triumphs, Others }, SQLData);
               }
             }
           });
         }
         else {
           //If an account is found but results are default, then update them here without broadcasting, this usually happen if the bot crashes and never finished the creation process.
-          Database.UpdatePlayerDetails({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Others }, function(isError) {
+          Database.UpdatePlayerDetails({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Triumphs, Others }, function(isError) {
             if(isError) { var text = `Error in grabbing account information for ${ AccountInfo.displayName } (${ AccountInfo.membershipId })`; console.log(text); Log.SaveError(text); }
           });
         }
       }
       else {
         //If no account is found it will create a default account, this is where you update the details.
-        Database.UpdatePlayerDetails({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Others }, function(isError) {
+        Database.UpdatePlayerDetails({ AccountInfo, Rankings, Raids, Items, Titles, Seasonal, Triumphs, Others }, function(isError) {
           if(isError) { var text = `Error in grabbing account information for ${ AccountInfo.displayName } (${ AccountInfo.membershipId })`; console.log(text); Log.SaveError(text); }
         });
       }
@@ -418,6 +420,11 @@ function GetOthers(response) {
     "lieCommQuest": { "EDZ": lieCommQuest.EDZ, "MOON": lieCommQuest.MOON, "IO": lieCommQuest.IO }
   }
 }
+function GetTriumphs(response) {
+  return {
+
+  }
+}
 
 //Check for clan broadcasts
 function ProcessClanData(ClanDetails, PreviousClanDetails, MembersToScan) {
@@ -476,6 +483,9 @@ function CheckTitles(Data, SQLData) {
     }
   }
 }
+function CheckTriumphs(Data, SQLData) {
+  
+}
 
 //Send broadcasts
 function SendBroadcast(data, type, bData, count) {
@@ -485,6 +495,7 @@ function SendBroadcast(data, type, bData, count) {
       let BroadcastMessage = null;
       if(type === "item") { if(count === -1) { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained ${ bData.name }`; } else { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained ${ bData.name } in ${ count } ${ count > 1 ? "raids!" : "raid!" }` } }
       else if(type === "title") { BroadcastMessage = `${ data.AccountInfo.displayName } has obtained the ${ bData.name } title!` }
+      else if(type === "triumph") { BroadcastMessage = `${ data.AccountInfo.displayName } has completed the Triumph: ${ bData.name } (${ bData.hash })` }
       Log.SaveLog("Clans", `[${ data.AccountInfo.clanId }]: ${ BroadcastMessage }`);
     }
   });
