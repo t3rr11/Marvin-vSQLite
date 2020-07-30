@@ -2427,10 +2427,13 @@ function DisplayClanRankings(type, message) {
 }
 async function ClanRankings(message, type, leaderboards) {
   //Pvp
+  var leaderboardSize = leaderboards.length;
+  if(leaderboardSize > 50) { leaderboardSize = 50; }
+  
   if(type === "infamy") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.infamy - a.totals.infamy; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, leaderboardSize);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.infamy));
@@ -2438,7 +2441,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Infamy")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Infamy`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Infamy", leaderboard.data, true)
@@ -2449,7 +2452,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "valor") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.valor - a.totals.valor; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.valor));
@@ -2457,7 +2460,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Valor")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Valor`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Valor", leaderboard.data, true)
@@ -2468,7 +2471,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "glory") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.glory - a.totals.glory; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.glory));
@@ -2476,7 +2479,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Glory")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Glory`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Glory", leaderboard.data, true)
@@ -2489,7 +2492,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "levi") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.leviCompletions - a.totals.leviCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.leviCompletions));
@@ -2497,7 +2500,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Normal: Leviathan")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Normal: Leviathan`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2508,7 +2511,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "leviPres") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.leviPresCompletions - a.totals.leviPresCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.leviPresCompletions));
@@ -2516,7 +2519,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Prestige: Leviathan")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Prestige: Leviathan`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2527,7 +2530,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "eow") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.eowCompletions - a.totals.eowCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.eowCompletions));
@@ -2535,7 +2538,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Normal: Eater of Worlds")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Normal: Eater of Worlds`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2546,7 +2549,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "eowPres") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.eowPresCompletions - a.totals.eowPresCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.eowPresCompletions));
@@ -2554,7 +2557,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Prestige: Eater of Worlds")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Prestige: Eater of Worlds`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2565,7 +2568,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "sos") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.sosCompletions - a.totals.sosCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.sosCompletions));
@@ -2573,7 +2576,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Normal: Spire of Stars")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Normal: Spire of Stars`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2584,7 +2587,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "sosPres") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.sosPresCompletions - a.totals.sosPresCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.sosPresCompletions));
@@ -2592,7 +2595,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Prestige: Spire of Stars")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Prestige: Spire of Stars`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2603,7 +2606,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "lastWish") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.lastWishCompletions - a.totals.lastWishCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.lastWishCompletions));
@@ -2611,7 +2614,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Last Wish")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Last Wish`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2622,7 +2625,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "scourge") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.scourgeCompletions - a.totals.scourgeCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.scourgeCompletions));
@@ -2630,7 +2633,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Scourge of the Past")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Scourge of the Past`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2641,7 +2644,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "sorrows") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.sorrowsCompletions - a.totals.sorrowsCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.sorrowsCompletions));
@@ -2649,7 +2652,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Crown of Sorrows")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Crown of Sorrows`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2660,7 +2663,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "garden") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.gardenCompletions - a.totals.gardenCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.gardenCompletions));
@@ -2668,7 +2671,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Garden of Salvation")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Garden of Salvation`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2681,7 +2684,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "seasonRank") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.seasonRank - a.totals.seasonRank; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.seasonRank));
@@ -2689,7 +2692,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Combined Season Ranks")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Combined Season Ranks`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Season Ranks", leaderboard.data, true)
@@ -2700,7 +2703,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "sundial") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.sundial - a.totals.sundial; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.sundial));
@@ -2708,7 +2711,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Sundial Completions")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Sundial Completions`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2721,7 +2724,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "pit_dungeon") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.pitCompletions - a.totals.pitCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.pitCompletions));
@@ -2729,7 +2732,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Pit of Heresy Completions")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Pit of Heresy Completions`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2740,7 +2743,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "prophecy_dungeon") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.prophecyCompletions - a.totals.prophecyCompletions; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.prophecyCompletions));
@@ -2748,7 +2751,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Prophecy Completions")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Prophecy Completions`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.data, true)
@@ -2761,7 +2764,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "triumphScore") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.triumphScore - a.totals.triumphScore; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.triumphScore));
@@ -2769,7 +2772,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Triumph Score")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Triumph Score`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Score", leaderboard.data, true)
@@ -2780,7 +2783,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "totalTime") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.totalTime - a.totals.totalTime; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(`${ Misc.AddCommas(Math.round(top[i].totals.totalTime/60)) } Hrs`);
@@ -2788,7 +2791,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Time Played")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Time Played`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Time Played", leaderboard.data, true)
@@ -2799,7 +2802,7 @@ async function ClanRankings(message, type, leaderboards) {
   else if(type === "totalRaids") {
     var leaderboard = { "names": [], "data": [] };
     leaderboards.sort(function(a, b) { return b.totals.totalRaids - a.totals.totalRaids; });
-    top = leaderboards.slice(0, 25);
+    top = leaderboards.slice(0, 50);
     for(var i in top) {
       leaderboard.names.push(`${parseInt(i)+1}: ${ top[i].clan_name.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x })  }`);
       leaderboard.data.push(Misc.AddCommas(top[i].totals.totalRaids));
@@ -2807,7 +2810,7 @@ async function ClanRankings(message, type, leaderboards) {
 
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
-    .setAuthor("Top 25 Clan Wars Rankings for Total Raid Completions")
+    .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Total Raid Completions`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
     .addField("Name", leaderboard.names, true)
     .addField("Score", leaderboard.data, true)
