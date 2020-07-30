@@ -109,7 +109,11 @@ function CheckNewBroadcast(data, season, type, broadcast, count, date, callback)
 function GetClans(callback) {
   var buildClans = [];
   db.query(`SELECT * FROM clans WHERE isTracking="true"`, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error getting all registered clans from server: ${ error }`); callback(true); }
+    if(!!error) {
+      Log.SaveError(`Error getting all registered clans from server: ${ error }`);
+      handleDisconnect();
+      callback(true);
+    }
     else { for(var i in rows) { buildClans.push(rows[i]); } callback(false, buildClans); }
   });
   return buildClans;
