@@ -281,6 +281,7 @@ client.on("ready", async () => {
     Log.SaveError(`Bot lost connection to discord, It has been reconnected now, but in order to avoid spam broadcasts the startup funciton has been cancelled, As the bot has already started.`);
     Database.AddLog(null, "error", null, 3, null);
   }
+  DiscordCommands.GuildCheck(client);
 });
 
 client.on("guildCreate", guild => {
