@@ -110,8 +110,11 @@ function getDefaultChannel(guild) {
    .first();
 }
 function cleanString(input) {
-  var output = "";
-  for(var i=0; i<input.length; i++) { if (input.charCodeAt(i) <= 127) { output += input.charAt(i); } }
-  return output;
+  if(input) {
+    var output = "";
+    for(var i=0; i<input.length; i++) { if (input.charCodeAt(i) <= 127) { output += input.charAt(i); } }
+    return output;
+  }
+  else { return "Undefined" }
 }
 function capitalize(string) { return string.charAt(0).toUpperCase() + string.slice(1); }
