@@ -3278,7 +3278,7 @@ function GetTrackedItems(message) {
   message.channel.send({embed});
 }
 function GetTrackedTitles(message) {
-  const titles = "Wayfarer, Dredgen, Unbroken, Chronicler, Cursebreaker, Rivensbane, Blacksmith, Reckoner, MMXIX, Shadow, Undying, Enlightened, Harbinger, Savior, Almighty, Flawless S10, Flawless S11, Conqueror S10, Conqueror S11";
+  const titles = "Wayfarer, Dredgen, Unbroken, Chronicler, Cursebreaker, Rivensbane, Blacksmith, Reckoner, MMXIX, Shadow, Undying, Enlightened, Harbinger, Savior, Almighty, Flawless S10, Flawless S11, Conqueror S10, Conqueror S11, MMXX";
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked titles!")

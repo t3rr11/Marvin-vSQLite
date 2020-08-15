@@ -1,5 +1,6 @@
 //Required Libraraies
 const Discord = require('discord.js');
+const { Permissions } = require('discord.js');
 const fs = require('fs');
 const client = new Discord.Client();
 const DBL = require("dblapi.js");
@@ -331,6 +332,7 @@ client.on("message", async message => {
   if(message.author.bot) return;
   if(message.guild) {
     if(message.guild.id === "110373943822540800" || message.guild.id === "264445053596991498") return;
+    if(!message.member.guild.me.permissionsIn(message.channel.id).has('SEND_MESSAGES')) return;
     if(command.startsWith("~") && ignoredCommands.filter(f => command.startsWith(f)).length === 0 && !command.endsWith("~")) {
       try {
         if(command.startsWith("~REGISTER ")) { if(!CheckBanned(message)) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)) } else { message.reply("To register please use: Use: `~Register example` example being your steam name.") } } }
@@ -614,7 +616,10 @@ client.on("message", async message => {
         }
 
         //Other
-        else { related = false; message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete(2000) }).catch(); }
+        else {
+          related = false;
+          message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete(2000) }).catch();
+        }
 
         //Try save log to file
         try { Log.SaveLog("Command", 'User: ' + message.member.user.tag + ', Command: ' + command); CommandsInput++; }
@@ -626,8 +631,6 @@ client.on("message", async message => {
       }
       catch (err) {
         console.log(err);
-        try { message.reply("Missing permissions."); }
-        catch (err) { Log.SaveError("Failed to send permissions message due to missing permissions... Duh."); }
         Log.SaveError("Failed to send message due to missing permissions.");
       }
     }
@@ -635,5 +638,9 @@ client.on("message", async message => {
   else { message.reply("This bots features can only be used in a server. Sorry about that!"); }
 });
 
-client.on('error', async error => { console.log(error.message); });
+client.on('error', async error => {
+  if(error.message === "Missing Permissions") { console.log(`${ error.message }`); }
+  else { console.log(error); }
+});
+
 client.login(Config.token);
