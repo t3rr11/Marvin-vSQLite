@@ -113,7 +113,7 @@ async function GetClanMembers(clan_id) {
 async function GetClanMemberData(playerInfo, retried) {
   try {
     const headers = { headers: { "X-API-Key": Backend_Config.apiKey, "Content-Type": "application/json" } };
-    const request = await fetch(`https://bungie.net/Platform/Destiny2/${ playerInfo.membershipType }/Profile/${ playerInfo.membership_Id }/?components=100,200,202,204,800,900,1100`, headers);
+    const request = await fetch(`https://bungie.net/Platform/Destiny2/${ playerInfo.membershipType }/Profile/${ playerInfo.membership_Id }/?components=100,200,202,800,900,1100`, headers);
     const response = await request.json();
     if(request.ok && response.ErrorCode && response.ErrorCode !== 1) {
       if(!retried) { GrabClanMemberCharacterData(playerInfo, true); }

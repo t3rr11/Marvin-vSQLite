@@ -108,24 +108,30 @@ function CheckForBroadcasts() {
     //This is a catch for broadcasts, if there is more than 10 then something went wrong, catch it and delete them.
     if(broadcasts) {
       if(broadcasts.length < 10) {
+        //This array will hold the broadcasts processed from the awaiting_broadcasts list. This is to avoid sending duplicate broadcasts in the same scan.
+        var processed_broadcasts = [];
         for(var i in broadcasts) {
-          if(broadcasts[i].type === "clan") {
-            await new Promise(resolve =>
-              Database.CheckNewClanBroadcast(broadcasts[i].clanId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
-                if(!isFound) { Broadcasts.ProcessBroadcast(client, broadcasts[i], Definitions); }
-                else { Database.RemoveAwaitingClanBroadcast(broadcasts[i]); }
-                resolve(true);
-              })
-            );
-          }
-          else {
-            await new Promise(resolve =>
-              Database.CheckNewBroadcast(broadcasts[i].membershipId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
-                if(!isFound) { Broadcasts.ProcessBroadcast(client, broadcasts[i], Definitions); }
-                else { Database.RemoveAwaitingBroadcast(broadcasts[i]); }
-                resolve(true);
-              })
-            );
+          if(!processed_broadcasts.find(e => e.clanId === broadcasts[i].clanId && e.membershipId === broadcasts[i].membershipId && e.season === broadcasts[i].season && e.broadcast === broadcasts[i].broadcast)) {
+            if(broadcasts[i].type === "clan") {
+              await new Promise(resolve =>
+                Database.CheckNewClanBroadcast(broadcasts[i].clanId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
+                  if(!isFound) { Broadcasts.ProcessBroadcast(client, broadcasts[i], Definitions); }
+                  else { Database.RemoveAwaitingClanBroadcast(broadcasts[i]); }
+                  resolve(true);
+                })
+              );
+            }
+            else {
+              await new Promise(resolve =>
+                Database.CheckNewBroadcast(broadcasts[i].membershipId, broadcasts[i].season, broadcasts[i].broadcast, function (isError, isFound) {
+                  if(!isFound) { Broadcasts.ProcessBroadcast(client, broadcasts[i], Definitions); }
+                  else { Database.RemoveAwaitingBroadcast(broadcasts[i]); }
+                  resolve(true);
+                })
+              );
+            }
+            //Processed Broadcast, Add to filter.
+            processed_broadcasts.push({ "clanId": broadcasts[i].clanId, "membershipId": broadcasts[i].membershipId, "season": broadcasts[i].season, "broadcast": broadcasts[i].broadcast });
           }
         }
       }

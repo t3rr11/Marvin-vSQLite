@@ -16,7 +16,7 @@ var StartupTime = new Date().getTime();
 var CommandsInput = 0;
 var ClanScans = 0;
 var ScanSpeed = Backend_config.scan_speed;
-var ProcessingClans = null;
+var ClansBeingProceesed = null;
 var LastScanTime = null;
 var ScanLength = null;
 var APIDisabled = false;
@@ -72,7 +72,7 @@ async function StartUp() {
   //Clan scanner function
   clanScanner = async function() {
     id++; //Increase id value to make sure this scans the next aval clan.
-    ProcessingClans = processingClans.length; //Keep track of how many clans have started to be scanned.
+    ClansBeingProceesed = processingClans.length; //Keep track of how many clans have started to be scanned.
 
     //Alorigthm to check how many clans are being processed, for optimal time we want this to be between 20-30 at all times possible. But never over 30.
     if(processingClans.length >= Math.round(ScanSpeed * 0.8)) { setTimeout(clanScanner, 1000 * 5); }
@@ -130,6 +130,7 @@ async function StartUp() {
     else {
       if(!APIDisabled) {
         if((new Date().getTime() - new Date(LastScanTime).getTime()) > 1800000) {
+          //I haven't seen this checkpoint being hit in a while, I might remove it later, or at the very least just remove the console logs.
           Log.SaveError("I stopped scanning for 30 minutes, so i have automatically reset.");
           Log.SaveLog("Info", "I stopped scanning for 30 minutes, so i have automatically reset.");
           console.log(`processingClans.length: ${ processingClans.length }`);
@@ -158,7 +159,7 @@ async function StartUp() {
 	setInterval(function() { UpdateLocalData() }, 1000 * 60 * 1);
 	setInterval(function() { CheckScanSpeedChange() }, 1000 * 60 * 1);
 	setInterval(function() { CheckProcessingClans() }, 1000 * 60 * 1);
-  setInterval(function() { Log.SaveBackendStatus(ClanScans, ScanLength, LastScanTime, StartupTime, ProcessingClans, ScanSpeed, APIDisabled) }, 10000);
+  setInterval(function() { Log.SaveBackendStatus(ClanScans, ScanLength, LastScanTime, StartupTime, ClansBeingProceesed, ScanSpeed, APIDisabled) }, 10000);
 
   //Start Up Console Log
   if(Config.enableDebug){ console.clear(); }
