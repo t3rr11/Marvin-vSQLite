@@ -8,3 +8,5 @@ Marvin is a great bot to have just to see who your most active members are, if y
 
 To get Marvin to join your server Go here: https://guardianstats.com/marvin. Follow the discord prompts and he will be there!
 You can try some of the commands from the help menu using: ~help Enjoy!
+
+**![GifExample](https://guardianstats.com/images/github/video.gif)**
