@@ -4,7 +4,7 @@ He can be useful for many reasons, if you are a clan owner and you feel like you
 
 If people see that they are a few kills behind Rank 1 in the clan for a specific ranking, they might play more to get Rank 1 and keep that Rank 1 position!
 
-Marvin is a great bot to have just to see who your most active members are, if you use the `~glory` command for example you might find people who you were not aware pvp'd much in your clan, so you could ask them to help you out? Same goes with raids and other activities!
+Marvin is a great bot to have just to see who your most active members are, if you use the `~glory` command for example you might find people who you were not aware pvp'd much in your clan, so you could ask them to help you out? Or if you are curious who has or does not have a specific weapon you can use: `~item divinity` or `~!item divinity` to see who has what!
 
 **![GifExample](https://guardianstats.com/images/github/video.gif)**
 
