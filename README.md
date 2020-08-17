@@ -10,6 +10,8 @@ Marvin is a great bot to have just to see who your most active members are, if y
 
 He also features live broadcasts. Share your in-game achivements to your server as well. Use: `~set broadcasts` to setup.
 
+**![BroadcastExample](https://guardianstats.com/images/github/broadcast.gif)**
+
 To get Marvin to join your server Go here: https://guardianstats.com/marvin. Follow the discord prompts and he will be there!
 
 You can try some of the commands from the help menu using: `~help` Enjoy!
