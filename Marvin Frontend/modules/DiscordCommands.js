@@ -3138,7 +3138,7 @@ function DisplayProfile(message, leaderboards, playerData) {
         .addField("Infamy", `${ Misc.AddCommas(infamy) }`, true)
         .addField("Triumph Score", `${ Misc.AddCommas(triumphScore) }`, true)
         .addField("Raids", `${ Misc.AddCommas(playerStats.leviCompletions + playerStats.leviPresCompletions + playerStats.eowCompletions + playerStats.eowPresCompletions + playerStats.sosCompletions + playerStats.sosPresCompletions + playerStats.lastWishCompletions + playerStats.scourgeCompletions + playerStats.sorrowsCompletions + playerStats.gardenCompletions) }`, true)
-        .addField("Titles", `${ titles.length }`, true)
+        .addField("Titles", `${ titles[0] === "" ? 0 : titles.length }`, true)
         .addField("Highest Power", `${ Misc.AddCommas(highestPower) }`, true)
         .addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`)
         .setFooter(Config.defaultFooter, Config.defaultLogoURL)
@@ -3148,7 +3148,7 @@ function DisplayProfile(message, leaderboards, playerData) {
       catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
     }
   }
-  else { message.reply("Sorry i could not find you in our database. Your clan might not be registered yet? Try using: `~set clan`"); }
+  else { message.reply("Sorry i could not find your account, has your clan registered with Marvin? `~set clan` or is your account private?"); }
 }
 
 //Trials
