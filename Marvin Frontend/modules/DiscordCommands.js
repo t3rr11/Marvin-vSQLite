@@ -3090,7 +3090,7 @@ function Profile(message) {
   });
 }
 function DisplayProfile(message, leaderboards, playerData) {
-  try {
+  if(leaderboards.find(e => e.membershipId === playerData.membershipId)) {
     var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
     var name = playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x });
     var timePlayed = playerStats.timePlayed;
@@ -3098,32 +3098,57 @@ function DisplayProfile(message, leaderboards, playerData) {
     var valor = playerStats.valor;
     var glory = playerStats.glory;
     var triumphScore = playerStats.triumphScore;
-    var infamyResets = playerStats.infamyResets;
-    var valorResets = playerStats.valorResets;
     var seasonRank = playerStats.seasonRank;
     var titles = playerStats.titles.split(",");
     var lastPlayed = playerStats.lastPlayed;
     var highestPower = playerStats.highestPower;
 
-    const embed = new Discord.RichEmbed()
-    .setColor(0x0099FF)
-    .setAuthor(`Viewing Profile for ${ name }`)
-    .addField("Name (SR)", `${ name } (${ seasonRank })`, true)
-    .addField("Time Played", `${ Misc.AddCommas(Math.round(timePlayed/60)) } Hrs`, true)
-    .addField("Last Played", `${ Misc.GetReadableDate(lastPlayed) }`, true)
-    .addField("Valor", `${ Misc.AddCommas(valor) }`, true)
-    .addField("Glory", `${ Misc.AddCommas(glory) }`, true)
-    .addField("Infamy", `${ Misc.AddCommas(infamy) }`, true)
-    .addField("Triumph Score", `${ Misc.AddCommas(triumphScore) }`, true)
-    .addField("Raids", `${ Misc.AddCommas(playerStats.leviCompletions + playerStats.leviPresCompletions + playerStats.eowCompletions + playerStats.eowPresCompletions + playerStats.sosCompletions + playerStats.sosPresCompletions + playerStats.lastWishCompletions + playerStats.scourgeCompletions + playerStats.sorrowsCompletions + playerStats.gardenCompletions) }`, true)
-    .addField("Titles", `${ titles.length }`, true)
-    .addField("Highest Power", `${ Misc.AddCommas(highestPower) }`, true)
-    .addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`)
-    .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-    .setTimestamp()
-    message.channel.send({embed});
+    if(message.content.includes(" -r") || message.content.includes(" -raids")) {
+      try {
+        const embed = new Discord.RichEmbed()
+        .setColor(0x0099FF)
+        .setAuthor(`Viewing Profile for ${ name }`)
+        .addField("Leviathan", Misc.AddCommas(playerStats.leviCompletions), true)
+        .addField("Leviathan", Misc.AddCommas(playerStats.leviPresCompletions), true)
+        .addField("Eater of Worlds", Misc.AddCommas(playerStats.eowCompletions), true)
+        .addField("Eater of Worlds", Misc.AddCommas(playerStats.eowPresCompletions), true)
+        .addField("Spire of Stars", Misc.AddCommas(playerStats.sosCompletions), true)
+        .addField("Spire of Stars", Misc.AddCommas(playerStats.sosPresCompletions), true)
+        .addField("Last Wish", Misc.AddCommas(playerStats.lastWishCompletions), true)
+        .addField("Scourge of the Past", Misc.AddCommas(playerStats.scourgeCompletions), true)
+        .addField("Crown of Sorrows", Misc.AddCommas(playerStats.sorrowsCompletions), true)
+        .addField("Garden of Salvation", Misc.AddCommas(playerStats.gardenCompletions), true)
+        .addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`)
+        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+        .setTimestamp()
+        message.channel.send({embed});
+      }
+      catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
+    }
+    else {
+      try {
+        const embed = new Discord.RichEmbed()
+        .setColor(0x0099FF)
+        .setAuthor(`Viewing Profile for ${ name }`)
+        .addField("Name (SR)", `${ name } (${ seasonRank })`, true)
+        .addField("Time Played", `${ Misc.AddCommas(Math.round(timePlayed/60)) } Hrs`, true)
+        .addField("Last Played", `${ Misc.GetReadableDate(lastPlayed) }`, true)
+        .addField("Valor", `${ Misc.AddCommas(valor) }`, true)
+        .addField("Glory", `${ Misc.AddCommas(glory) }`, true)
+        .addField("Infamy", `${ Misc.AddCommas(infamy) }`, true)
+        .addField("Triumph Score", `${ Misc.AddCommas(triumphScore) }`, true)
+        .addField("Raids", `${ Misc.AddCommas(playerStats.leviCompletions + playerStats.leviPresCompletions + playerStats.eowCompletions + playerStats.eowPresCompletions + playerStats.sosCompletions + playerStats.sosPresCompletions + playerStats.lastWishCompletions + playerStats.scourgeCompletions + playerStats.sorrowsCompletions + playerStats.gardenCompletions) }`, true)
+        .addField("Titles", `${ titles.length }`, true)
+        .addField("Highest Power", `${ Misc.AddCommas(highestPower) }`, true)
+        .addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`)
+        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+        .setTimestamp()
+        message.channel.send({embed});
+      }
+      catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
+    }
   }
-  catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
+  else { message.reply("Sorry i could not find you in our database. Your clan might not be registered yet? Try using: `~set clan`"); }
 }
 
 //Trials
