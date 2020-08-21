@@ -3079,7 +3079,7 @@ function Profile(message) {
       if(isFound) {
         var playerData = Data;
         //Give personalised response if user has registered
-        Database.GetGlobalLeaderboards(function(isError, isFound, leaderboards) {
+        Database.GetGlobalProfile(function(isError, isFound, leaderboards) {
           if(!isError) { if(isFound) { DisplayProfile(message, leaderboards, playerData); } }
           else { message.reply("Sorry! An error occurred, Please try again..."); }
         });

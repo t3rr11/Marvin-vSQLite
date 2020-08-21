@@ -9,7 +9,7 @@ const fetch = require("node-fetch");
 //Exports
 module.exports = {
   GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetPlayer, GetUsers, GetGlobalDryStreak, GetClanDryStreaks, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
-  CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, 
+  CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, GetGlobalProfile,
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
   ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, ClearAwaitingBroadcasts, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking,
@@ -164,6 +164,12 @@ function GetClanLeaderboards(clanIds, callback) {
 function GetGlobalLeaderboards(callback) {
   db.query(`SELECT * FROM playerInfo WHERE EXISTS (SELECT 1 FROM clans WHERE clans.clan_id = playerInfo.clanId AND clans.isTracking = "true" AND playerInfo.isPrivate = "false" AND playerInfo.firstLoad = "false")`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting global leaderboards, Error: ${ error }`); callback(true); }
+    else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
+  });
+}
+function GetGlobalProfile(callback) {
+  db.query(`SELECT membershipId,displayName,timePlayed,infamy,valor,glory,triumphScore,seasonRank,titles,lastPlayed,highestPower,leviCompletions,leviPresCompletions,eowCompletions,eowPresCompletions,sosCompletions,sosPresCompletions,lastWishCompletions,scourgeCompletions,sorrowsCompletions,gardenCompletions FROM playerInfo WHERE EXISTS (SELECT 1 FROM clans WHERE clans.clan_id = playerInfo.clanId AND clans.isTracking = "true" AND playerInfo.isPrivate = "false" AND playerInfo.firstLoad = "false")`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error getting global profile, Error: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
 }
