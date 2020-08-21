@@ -382,34 +382,34 @@ client.on("message", async message => {
         //Help menu
         else if(command.startsWith("~HELP ")) {
           if(!CheckBanned(message)) {
-            if(command === "~HELP RANKINGS") { DiscordCommands.Help(message, "rankings"); }
-            else if(command === "~HELP RAIDS") { DiscordCommands.Help(message, "raids"); }
-            else if(command === "~HELP ITEMS") { DiscordCommands.Help(message, "items"); }
-            else if(command === "~HELP TITLES") { DiscordCommands.Help(message, "titles"); }
-            else if(command === "~HELP SEASONAL") { DiscordCommands.Help(message, "seasonal"); }
-            else if(command === "~HELP PRESEASONAL" || command === "~HELP PRE-SEASONAL") { DiscordCommands.Help(message, "preseasonal"); }
-            else if(command === "~HELP CLANS" || command === "~HELP CLAN") { DiscordCommands.Help(message, "clan"); }
-            else if(command === "~HELP GLOBALS" || command === "~HELP GLOBAL") { DiscordCommands.Help(message, "globals"); }
-            else if(command === "~HELP DRYSTREAKS" || command === "HELP DRYSTREAK") { DiscordCommands.Help(message, "drystreaks"); }
-            else if(command === "~HELP TRIALS") { DiscordCommands.Help(message, "trials"); }
+            if(command === "~HELP RANKINGS") { DiscordCommands.Help(message, "rankings", Definitions); }
+            else if(command === "~HELP RAIDS") { DiscordCommands.Help(message, "raids", Definitions); }
+            else if(command === "~HELP ITEMS") { DiscordCommands.Help(message, "items", Definitions); }
+            else if(command === "~HELP TITLES") { DiscordCommands.Help(message, "titles", Definitions); }
+            else if(command === "~HELP SEASONAL") { DiscordCommands.Help(message, "seasonal", Definitions); }
+            else if(command === "~HELP PRESEASONAL" || command === "~HELP PRE-SEASONAL") { DiscordCommands.Help(message, "preseasonal", Definitions); }
+            else if(command === "~HELP CLANS" || command === "~HELP CLAN") { DiscordCommands.Help(message, "clan", Definitions); }
+            else if(command === "~HELP GLOBALS" || command === "~HELP GLOBAL") { DiscordCommands.Help(message, "globals", Definitions); }
+            else if(command === "~HELP DRYSTREAKS" || command === "HELP DRYSTREAK") { DiscordCommands.Help(message, "drystreaks", Definitions); }
+            else if(command === "~HELP TRIALS") { DiscordCommands.Help(message, "trials", Definitions); }
             else if(command === "~HELP BROADCASTS") { DiscordCommands.BroadcastsHelp(message); }
-            else if(command === "~HELP OTHERS" || command === "~HELP OTHER") { DiscordCommands.Help(message, "others"); }
-            else if(command === "~HELP DUNGEONS" || command === "~HELP DUNGEON") { DiscordCommands.Help(message, "dungeons"); }
-            else if(command === "~HELP CLANWARS" || command === "~HELP CLANWARS") { DiscordCommands.Help(message, "clanwars"); }
+            else if(command === "~HELP OTHERS" || command === "~HELP OTHER") { DiscordCommands.Help(message, "others", Definitions); }
+            else if(command === "~HELP DUNGEONS" || command === "~HELP DUNGEON") { DiscordCommands.Help(message, "dungeons", Definitions); }
+            else if(command === "~HELP CLANWARS" || command === "~HELP CLANWARS") { DiscordCommands.Help(message, "clanwars", Definitions); }
             else { message.reply("I am unsure of that help command, type `~help` to see them all."); }
           }
         }
-        else if(command === "~HELP" || command === "~COMMANDS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "none"); } }
-        else if(command === "~RANKINGS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "rankings"); } }
-        else if(command === "~RAIDS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "raids"); } }
-        else if(command === "~SEASONAL") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "seasonal"); } }
-        else if(command === "~PRESEASONAL") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "preseasonal"); } }
-        else if(command === "~CLANS" || command === "~CLAN") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "clan"); } }
-        else if(command === "~GLOBALS" || command === "~GLOBAL") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "globals"); } }
-        else if(command === "~TRIALS" || command === "~GLOBAL TRIALS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "trials"); } }
-        else if(command === "~OTHERS" || command === "~OTHER") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "others"); } }
-        else if(command === "~DUNGEONS" || command === "~DUNGEON") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "dungeons"); } }
-        else if(command === "~CLANWARS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "clanwars"); } }
+        else if(command === "~HELP" || command === "~COMMANDS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "none", Definitions); } }
+        else if(command === "~RANKINGS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "rankings", Definitions); } }
+        else if(command === "~RAIDS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "raids", Definitions); } }
+        else if(command === "~SEASONAL") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "seasonal", Definitions); } }
+        else if(command === "~PRESEASONAL") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "preseasonal", Definitions); } }
+        else if(command === "~CLANS" || command === "~CLAN") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "clan", Definitions); } }
+        else if(command === "~GLOBALS" || command === "~GLOBAL") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "globals", Definitions); } }
+        else if(command === "~TRIALS" || command === "~GLOBAL TRIALS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "trials", Definitions); } }
+        else if(command === "~OTHERS" || command === "~OTHER") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "others", Definitions); } }
+        else if(command === "~DUNGEONS" || command === "~DUNGEON") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "dungeons", Definitions); } }
+        else if(command === "~CLANWARS") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "clanwars", Definitions); } }
         else if(command === "~CLAN WARS") { if(!CheckBanned(message)) { message.reply("The command is used without a space: `~Clanwars`. It's for stability issues sorry."); } }
 
         //Rankings
@@ -441,8 +441,8 @@ client.on("message", async message => {
         else if(command === "~TRIUMPH SCORE" || command === "~TRIUMPHSCORE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("triumphScore", message, Definitions); } }
         else if(command === "~CLAN TIME" || command === "~TIME PLAYED" || command === "~TOTAL TIME" || command === "~TOTALTIME" || command === "~TIME") { if(!CheckBanned(message)) { DiscordCommands.Rankings("totalTime", message, Definitions); } }
         else if(command === "~SEASON RANKS" || command === "~SEASONRANKS" || command === "~SEASON RANK" || command === "~SEASONRANK") { if(!CheckBanned(message)) { DiscordCommands.Rankings("seasonRank", message, Definitions); } }
-        else if(command === "~ITEMS") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedItems(message); } }
-        else if(command === "~TITLES") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedTitles(message); } }
+        else if(command === "~ITEMS") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedItems(message, Definitions); } }
+        else if(command === "~TITLES") { if(!CheckBanned(message)) { DiscordCommands.GetTrackedTitles(message, Definitions); } }
         else if(command === "~TITLES TOTAL" || command === "~THENUMBEROFTITLESTHATIHAVEEARNED") { if(!CheckBanned(message)) { DiscordCommands.Rankings("totalTitles", message, Definitions); } }
         else if(command.startsWith("~TRIALS ")) {
           if(!CheckBanned(message)) {
@@ -524,7 +524,7 @@ client.on("message", async message => {
             else if(command === "~TRIALS POST WINS") { DiscordCommands.TrialsRankings(message, "weekly", "postFlawlessWins"); }
             else if(command === "~TRIALS CARRIES") { DiscordCommands.TrialsRankings(message, "weekly", "carries"); }
             else if(command === "~TRIALS PROFILE") { DiscordCommands.Trials(message, "overall") }
-            else { DiscordCommands.Help(message, "trials"); }
+            else { DiscordCommands.Help(message, "trials", Definitions); }
           }
         }
         else if(command.startsWith("~GG ")) {
@@ -534,10 +534,10 @@ client.on("message", async message => {
             else if(command === "~GG TRIUMPHS" || command === "~GG TRIUMPH") { DiscordCommands.Rankings("gg_triumphs", message); }
             else if(command === "~GG SUPER KILLS" || command === "~GG SUPERS" || command === "~GG RUMBLE") { DiscordCommands.Rankings("gg_rumble_super_kills", message); }
             else if(command === "~GG CLASSES" || command === "~GG CLASS") { DiscordCommands.Rankings("gg_classes", message); }
-            else { DiscordCommands.Help(message, "guardianGames"); }
+            else { DiscordCommands.Help(message, "guardianGames", Definitions); }
           }
         }
-        else if(command === "~GUARDIAN GAMES" || command === "~GG") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "guardianGames"); } }
+        else if(command === "~GUARDIAN GAMES" || command === "~GG") { if(!CheckBanned(message)) { DiscordCommands.Help(message, "guardianGames", Definitions); } }
         else if(command === "~CLASSES") { if(!CheckBanned(message)) { DiscordCommands.Rankings("gg_classes", message, Definitions); } }
         else if(command === "~SHATTERED THRONE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("st_dungeon", message, Definitions); } }
         else if(command === "~SHATTERED THRONE FLAWLESS" || command === "~FLAWLESS SHATTERED THRONE") { if(!CheckBanned(message)) { DiscordCommands.Rankings("st_flawless_dungeon", message, Definitions); } }
@@ -617,7 +617,7 @@ client.on("message", async message => {
             else if(command === "~CLANWARS TRIUMPH SCORE") { DiscordCommands.DisplayInhouseClanRankings("triumphScore", message); }
             else if(command === "~CLANWARS TIME" || command === "~CLANWARS TIME PLAYED" || command === "~CLANWARS TOTAL TIME") { DiscordCommands.DisplayInhouseClanRankings("totalTime", message); }
             else if(command === "~CLANWARS RAIDS" || command === "~CLANWARS TOTAL RAIDS") { DiscordCommands.DisplayInhouseClanRankings("totalRaids", message); }
-            else { DiscordCommands.Help(message, "clanwars"); }
+            else { DiscordCommands.Help(message, "clanwars", Definitions); }
           }
         }
 

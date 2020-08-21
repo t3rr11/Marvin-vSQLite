@@ -17,7 +17,7 @@ module.exports = {
 };
 
 //Important
-function Help(message, type) {
+function Help(message, type, definitions) {
   if(type === "rankings") {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
@@ -48,8 +48,8 @@ function Help(message, type) {
     .setTimestamp()
     message.channel.send({embed});
   }
-  else if(type === "items") { GetTrackedItems(message) }
-  else if(type === "titles") { GetTrackedTitles(message) }
+  else if(type === "items") { GetTrackedItems(message, definitions) }
+  else if(type === "titles") { GetTrackedTitles(message, definitions) }
   else if(type === "seasonal") {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
@@ -3289,21 +3289,21 @@ function DisplayTrials(message, leaderboards, playerData, type) {
 }
 
 //Others
-function GetTrackedItems(message) {
-  const pveItems = "1000 Voices, Anarchy, Tarrabah, Le Monarque, Jotunn, Thorn, Last Word, Izanagis Burden, Arbalest, Wendigo GL3, Lumina, Bad Juju, Xenophage, Divinity, Buzzard, Loaded Question, Whisper of the Worm, Outbreak Perfected, Legend of Acrius, Oxygen SR3, Edgewise, Wish-Ender, Leviathans Breath, Devils Ruin, Fourth Horseman, Heir Apparent, Khvostov 7G-02";
-  const pvpItems = "Luna Howl, Not Forgotten, Redrix Broadsword, Redrix Claymore, Mountain Top, Recluse, Revoker, Randys Throwing Knife, Komodo-4FR, Point of the Stag, Bastion, Felwinter's Lie";
-  const gambitItems = "Breakneck, 21% Delirium, Hush, Exit Strategy, Python";
-  const others = "Always On Time, A Thousand Wings, SCRAP CF-717-91, Silver Tercel, The Platinum Starling, Harbinger's Echo, Luxurious Toast, Armory Forged Shell, Prophetic Visionary";
+function GetTrackedItems(message, definitions) {
+  let weapons = definitions.filter(e => e.advanced_type === "weapon").map((item, index) => { return index === 0 ? (item.name) : (` ${ item.name }`) });
+  let shipSparrows = definitions.filter(e => e.advanced_type === "ship" || e.advanced_type === "sparrow").map((item, index) => { return index === 0 ? (item.name) : (` ${ item.name }`) });
+  let emblems = definitions.filter(e => e.advanced_type === "emblem").map((item, index) => { return index === 0 ? (item.name) : (` ${ item.name }`) });
+  let others = definitions.filter(e => e.advanced_type === "emote" || e.advanced_type === "shell").map((item, index) => { return index === 0 ? (item.name) : (` ${ item.name }`) });
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked items!")
-  .setDescription("To view who owns a specific item use the command like this: `~Item 1000 Voices`\n\n**PvE** \n" + pveItems + "\n\n**PvP**\n" + pvpItems + "\n\n**Gambit**\n" + gambitItems + "\n\n**Others**\n" + others)
+  .setDescription("To view who owns a specific item use the command like this: `~Item 1000 Voices`\n\n**Weapons** \n" + weapons + "\n\n**Ship/Sparrow**\n" + shipSparrows + "\n\n**Emblems**\n" + emblems + "\n\n**Others**\n" + others)
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
   message.channel.send({embed});
 }
-function GetTrackedTitles(message) {
-  const titles = "Wayfarer, Dredgen, Unbroken, Chronicler, Cursebreaker, Rivensbane, Blacksmith, Reckoner, MMXIX, Shadow, Undying, Enlightened, Harbinger, Savior, Almighty, Flawless S10, Flawless S11, Conqueror S10, Conqueror S11, MMXX";
+function GetTrackedTitles(message, definitions) {
+  let titles = definitions.filter(e => e.advanced_type === "title").map((title, index) => { return index === 0 ? (title.name) : (` ${ title.name }`) });
   const embed = new Discord.RichEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked titles!")
