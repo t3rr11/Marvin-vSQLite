@@ -338,7 +338,7 @@ client.on("message", async message => {
   if(message.author.bot) return;
   if(message.guild) {
     if(message.guild.id === "110373943822540800" || message.guild.id === "264445053596991498") return;
-    if(!message.member.guild.me.permissionsIn(message.channel.id).has('SEND_MESSAGES')) return;
+    if(!message.guild.me.permissionsIn(message.channel.id).has('SEND_MESSAGES')) return;
     if(command.startsWith("~") && ignoredCommands.filter(f => command.startsWith(f)).length === 0 && !command.endsWith("~")) {
       try {
         if(command.startsWith("~REGISTER ")) { if(!CheckBanned(message)) { if(command.substr("~REGISTER ".length) !== "EXAMPLE") { Register(message, message.author.id, command.substr("~REGISTER ".length)) } else { message.reply("To register please use: Use: `~Register example` example being your steam name.") } } }

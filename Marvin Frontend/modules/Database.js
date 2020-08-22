@@ -154,9 +154,11 @@ function GetSingleClanLeaderboard(clanId, callback) {
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
 }
-function GetClanLeaderboards(clanIds, callback) {
+function GetClanLeaderboards(clanIds, guildId, callback) {
   var query = ""; for(var i in clanIds) { if(i == 0) { query = `clanId="${ clanIds[i] }"` } else { query = `${ query } OR clanId="${ clanIds[i] }"` } }
-  db.query(`SELECT * FROM playerInfo WHERE ${ query } AND isPrivate = "false" AND firstLoad = "false"`, function(error, rows, fields) {
+  var queryString = `SELECT * FROM playerInfo WHERE ${ query } AND isPrivate = "false" AND firstLoad = "false"`;
+  if(guildId === "664237007261925404") { queryString = `SELECT * FROM playerInfo WHERE isPrivate = "false" AND firstLoad = "false"` }
+  db.query(queryString, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting clan leaderboards: ${ clanIds } Error: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });

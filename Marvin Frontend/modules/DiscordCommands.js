@@ -281,7 +281,7 @@ function Rankings(type, message, definitions) {
                 if(isFound) {
                   //Get all clan data from playerInfo using clans
                   var allClanIds = Data.clans.split(",");
-                  Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+                  Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
                     if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, playerData, playerInfo, definitions); } }
                     else { message.channel.send("Currently your clan is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
                   });
@@ -299,7 +299,7 @@ function Rankings(type, message, definitions) {
             if(isFound) {
               //Get all clan data from playerInfo using clan_id
               var allClanIds = Data.clans.split(",");
-              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+              Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayRankings(message, type, leaderboards, undefined, undefined, definitions); } }
                 else { message.channel.send("Currently your clan is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
               });
@@ -824,39 +824,159 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
 
     //Items and Titles
     else if(type === "item") {
-      var leaderboard = [];
-      var itemInput = message.content.substr("~ITEM ".length).toUpperCase();
-      
-      //Rename items
-      if(itemInput === "JOTUNN") { itemInput = "JÖTUNN" }
-      if(itemInput === "FOURTH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
-      if(itemInput === "THE 4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
-      if(itemInput === "4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
-      if(itemInput === "1K VOICES") { itemInput = "1000 VOICES" }
+      if(message.guild.id !== "664237007261925404") {
+        var leaderboard = [];
+        var itemInput = message.content.substr("~ITEM ".length).toUpperCase();
+        
+        //Rename items
+        if(itemInput === "JOTUNN") { itemInput = "JÖTUNN" }
+        if(itemInput === "FOURTH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+        if(itemInput === "THE 4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+        if(itemInput === "4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+        if(itemInput === "1K VOICES") { itemInput = "1000 VOICES" }
+  
+        //Find Items
+        var itemToFind = definitions.find(e => e.name.toUpperCase() === itemInput);
+  
+        //Item exists in tracking now generate leaderboards
+        if(itemToFind) {
+          Database.GetFromBroadcasts(itemToFind, function(isError, isFound, Data) {
+            //Store broadcasts
+            var broadcasts = [];
+            if(!isError) { broadcasts = Data; }
+  
+            for(var i in leaderboards) {
+              var items = leaderboards[i].items.split(",");
+              var broadcast = broadcasts.find(e => e.membershipId == leaderboards[i].membershipId);
+              for(j in items) {
+                if(items[j] === itemToFind.hash) {
+                  leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ broadcast ? (broadcast.count != "-1" ? `(${ broadcast.count } Raids, ` : "(") : "" }${ broadcast ? `${ new Date(broadcast.date).toLocaleDateString('en-GB') })` : "" }`)
+                }
+              }
+            }
+            if(leaderboard.length === 0) {
+              const embed = new Discord.RichEmbed()
+              .setColor(0x0099FF)
+              .setDescription("Nobody owns the " + itemToFind.name + " yet! Go be the first!")
+              .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+              .setTimestamp()
+              message.channel.send({embed});
+            }
+            else if(leaderboard.length === 1) {
+              const embed = new Discord.RichEmbed()
+              .setColor(0x0099FF)
+              .setAuthor("The only person to own " + itemToFind.name + " is: ")
+              .setDescription(leaderboard[0])
+              .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+              .setTimestamp()
+              message.channel.send({embed});
+            }
+            else if(leaderboard.length < 50) {
+              var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
+              var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
+              let embed = new Discord.RichEmbed();
+              embed.setColor(0x0099FF)
+              embed.setAuthor("People that own " + itemToFind.name);
+              embed.addField("Names", namesLeft, true);
+              embed.addField("Names", namesRight, true);
+              embed.setFooter(Config.defaultFooter, Config.defaultLogoURL);
+              embed.setTimestamp();
+              message.channel.send({embed});
+            }
+            else { message.channel.send("Sorry there are too many people with this item, The list is too large to display over discord."); }
+          });
+        }
+        else { message.channel.send("We do not track the item: " + itemInput + " yet, you can see a list of tracked items here `~items` or feel free to request tracking for this item by using `~request Please track x item.`"); }
+      }
+      else { message.channel.send("Sorry this command is disabled in this server due to the large amount of tracked users."); }
+    }
+    else if(type === "title") {
+      if(message.guild.id !== "664237007261925404") {
+        var leaderboard = [];
+        var titleInput = message.content.substr("~TITLE ".length).toUpperCase();
 
-      //Find Items
-      var itemToFind = definitions.find(e => e.name.toUpperCase() === itemInput);
+        //Find Items
+        var titleToFind = definitions.find(e => e.name.toUpperCase() === titleInput);
 
-      //Item exists in tracking now generate leaderboards
-      if(itemToFind) {
-        Database.GetFromBroadcasts(itemToFind, function(isError, isFound, Data) {
-          //Store broadcasts
-          var broadcasts = [];
-          if(!isError) { broadcasts = Data; }
+        //Title exists in tracking now generate leaderboards
+        if(titleToFind) {
+          Database.GetFromBroadcasts(titleToFind, function(isError, isFound, Data) {
+            //Store broadcasts
+            var broadcasts = [];
+            if(!isError) { broadcasts = Data; }
 
+            for(var i in leaderboards) {
+              var titles = leaderboards[i].titles.split(",");
+              var broadcast = broadcasts.find(e => e.membershipId == leaderboards[i].membershipId);
+              for(j in titles) {
+                if(titles[j] === titleToFind.hash) {
+                  leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ broadcast ? `(${ new Date(broadcast.date).toLocaleDateString('en-GB') })` : "" }`)
+                }
+              }
+            }
+            if(leaderboard.length === 0) {
+              const embed = new Discord.RichEmbed()
+              .setColor(0x0099FF)
+              .setDescription("Nobody owns the " + titleToFind.name + " yet, Quick be the first!")
+              .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+              .setTimestamp()
+              message.channel.send({embed});
+            }
+            else if(leaderboard.length === 1) {
+              const embed = new Discord.RichEmbed()
+              .setColor(0x0099FF)
+              .setAuthor("The only person to own " + titleToFind.name + " is: ")
+              .setDescription(leaderboard[0])
+              .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+              .setTimestamp()
+              message.channel.send({embed});
+            }
+            else if(leaderboard.length < 50) {
+              var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
+              var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
+              const embed = new Discord.RichEmbed()
+              .setColor(0x0099FF)
+              .setAuthor("People that own the " + titleToFind.name + " title!")
+              .addField("Names", namesLeft, true)
+              .addField("Names", namesRight, true)
+              .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+              .setTimestamp()
+              message.channel.send({embed});
+            }
+            else { message.channel.send("Sorry there are too many people with this title, The list is too large to display over discord."); }
+          });
+        }
+        else { message.channel.send("Nobody owns the " + titleInput + " yet, you can see a list of tracked titles here `~titles` or feel free to request tracking for this title by using `~request Please track the x title.`"); }
+      }
+      else { message.channel.send("Sorry this command is disabled in this server due to the large amount of tracked users."); }
+    }
+    else if(type === "notItem") {
+      if(message.guild.id !== "664237007261925404") {
+        var leaderboard = [];
+        var itemInput = message.content.substr("~!ITEM ".length).toUpperCase();
+        
+        //Rename items
+        if(itemInput === "JOTUNN") { itemInput = "JÖTUNN" }
+        if(itemInput === "FOURTH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+        if(itemInput === "THE 4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+        if(itemInput === "4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
+        if(itemInput === "1K VOICES") { itemInput = "1000 VOICES" }
+  
+        //Find Items
+        var itemToFind = definitions.find(e => e.name.toUpperCase() === itemInput);
+  
+        //Item exists in tracking now generate leaderboards
+        if(itemToFind) {
           for(var i in leaderboards) {
             var items = leaderboards[i].items.split(",");
-            var broadcast = broadcasts.find(e => e.membershipId == leaderboards[i].membershipId);
-            for(j in items) {
-              if(items[j] === itemToFind.hash) {
-                leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ broadcast ? (broadcast.count != "-1" ? `(${ broadcast.count } Raids, ` : "(") : "" }${ broadcast ? `${ new Date(broadcast.date).toLocaleDateString('en-GB') })` : "" }`)
-              }
+            if(!items.find(e => e === itemToFind.hash)) {
+              leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`)
             }
           }
           if(leaderboard.length === 0) {
             const embed = new Discord.RichEmbed()
             .setColor(0x0099FF)
-            .setDescription("Nobody owns the " + itemToFind.name + " yet! Go be the first!")
+            .setDescription("Everybody owns the " + itemToFind.name + "! Wowsers!")
             .setFooter(Config.defaultFooter, Config.defaultLogoURL)
             .setTimestamp()
             message.channel.send({embed});
@@ -864,55 +984,50 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
           else if(leaderboard.length === 1) {
             const embed = new Discord.RichEmbed()
             .setColor(0x0099FF)
-            .setAuthor("The only person to own " + itemToFind.name + " is: ")
+            .setAuthor("The only person who does not own the " + itemToFind.name + " is: ")
             .setDescription(leaderboard[0])
             .setFooter(Config.defaultFooter, Config.defaultLogoURL)
             .setTimestamp()
             message.channel.send({embed});
           }
-          else {
+          else if(leaderboard.length < 50) {
             var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
             var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
             let embed = new Discord.RichEmbed();
             embed.setColor(0x0099FF)
-            embed.setAuthor("People that own " + itemToFind.name);
+            embed.setAuthor("People that do not own " + itemToFind.name);
             embed.addField("Names", namesLeft, true);
             embed.addField("Names", namesRight, true);
             embed.setFooter(Config.defaultFooter, Config.defaultLogoURL);
             embed.setTimestamp();
             message.channel.send({embed});
           }
-        });
+          else { message.channel.send("Sorry there are too many people without this item, The list is too large to display over discord."); }
+        }
+        else { message.channel.send("We do not track the item: " + itemInput + " yet, you can see a list of tracked items here `~items` or feel free to request tracking for this item by using `~request Please track x item.`"); }
       }
-      else { message.channel.send("We do not track the item: " + itemInput + " yet, you can see a list of tracked items here `~items` or feel free to request tracking for this item by using `~request Please track x item.`"); }
+      else { message.channel.send("Sorry this command is disabled in this server due to the large amount of tracked users."); }
     }
-    else if(type === "title") {
-      var leaderboard = [];
-      var titleInput = message.content.substr("~TITLE ".length).toUpperCase();
-
-      //Find Items
-      var titleToFind = definitions.find(e => e.name.toUpperCase() === titleInput);
-
-      //Title exists in tracking now generate leaderboards
-      if(titleToFind) {
-        Database.GetFromBroadcasts(titleToFind, function(isError, isFound, Data) {
-          //Store broadcasts
-          var broadcasts = [];
-          if(!isError) { broadcasts = Data; }
-
+    else if(type === "notTitle") {
+      if(message.guild.id !== "664237007261925404") {
+        var leaderboard = [];
+        var titleInput = message.content.substr("~!TITLE ".length).toUpperCase();
+  
+        //Find Items
+        var titleToFind = definitions.find(e => e.name.toUpperCase() === titleInput);
+  
+        if(titleToFind) {
+          //Title exists in tracking now generate leaderboards
           for(var i in leaderboards) {
             var titles = leaderboards[i].titles.split(",");
-            var broadcast = broadcasts.find(e => e.membershipId == leaderboards[i].membershipId);
-            for(j in titles) {
-              if(titles[j] === titleToFind.hash) {
-                leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ broadcast ? `(${ new Date(broadcast.date).toLocaleDateString('en-GB') })` : "" }`)
-              }
+            if(!titles.find(e => e === titleToFind.hash)) {
+              leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`)
             }
           }
           if(leaderboard.length === 0) {
             const embed = new Discord.RichEmbed()
             .setColor(0x0099FF)
-            .setDescription("Nobody owns the " + titleToFind.name + " yet, Quick be the first!")
+            .setDescription("Everybody owns the " + titleToFind.name + "!, Wowsers!")
             .setFooter(Config.defaultFooter, Config.defaultLogoURL)
             .setTimestamp()
             message.channel.send({embed});
@@ -920,128 +1035,29 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
           else if(leaderboard.length === 1) {
             const embed = new Discord.RichEmbed()
             .setColor(0x0099FF)
-            .setAuthor("The only person to own " + titleToFind.name + " is: ")
+            .setAuthor("The only person who does not own the " + titleToFind.name + " is: ")
             .setDescription(leaderboard[0])
             .setFooter(Config.defaultFooter, Config.defaultLogoURL)
             .setTimestamp()
             message.channel.send({embed});
           }
-          else {
+          else if(leaderboard.length < 50) {
             var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
             var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
             const embed = new Discord.RichEmbed()
             .setColor(0x0099FF)
-            .setAuthor("People that own the " + titleToFind.name + " title!")
+            .setAuthor("People that do not own the " + titleToFind.name + " title!")
             .addField("Names", namesLeft, true)
             .addField("Names", namesRight, true)
             .setFooter(Config.defaultFooter, Config.defaultLogoURL)
             .setTimestamp()
             message.channel.send({embed});
           }
-        });
+          else { message.channel.send("Sorry there are too many people without this title, The list is too large to display over discord."); }
+        }
+        else { message.channel.send("Nobody owns the " + titleInput + " yet, you can see a list of tracked titles here `~titles` or feel free to request tracking for this title by using `~request Please track the x title.`"); }
       }
-      else { message.channel.send("Nobody owns the " + titleInput + " yet, you can see a list of tracked titles here `~titles` or feel free to request tracking for this title by using `~request Please track the x title.`"); }
-    }
-    else if(type === "notItem") {
-      var leaderboard = [];
-      var itemInput = message.content.substr("~!ITEM ".length).toUpperCase();
-      
-      //Rename items
-      if(itemInput === "JOTUNN") { itemInput = "JÖTUNN" }
-      if(itemInput === "FOURTH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
-      if(itemInput === "THE 4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
-      if(itemInput === "4TH HORSEMAN") { itemInput = "THE FOURTH HORSEMAN" }
-      if(itemInput === "1K VOICES") { itemInput = "1000 VOICES" }
-
-      //Find Items
-      var itemToFind = definitions.find(e => e.name.toUpperCase() === itemInput);
-
-      //Item exists in tracking now generate leaderboards
-      if(itemToFind) {
-        for(var i in leaderboards) {
-          var items = leaderboards[i].items.split(",");
-          if(!items.find(e => e === itemToFind.hash)) {
-            leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`)
-          }
-        }
-        if(leaderboard.length === 0) {
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setDescription("Everybody owns the " + itemToFind.name + "! Wowsers!")
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
-        else if(leaderboard.length === 1) {
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("The only person who does not own the " + itemToFind.name + " is: ")
-          .setDescription(leaderboard[0])
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
-        else {
-          var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
-          var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
-          let embed = new Discord.RichEmbed();
-          embed.setColor(0x0099FF)
-          embed.setAuthor("People that do not own " + itemToFind.name);
-          embed.addField("Names", namesLeft, true);
-          embed.addField("Names", namesRight, true);
-          embed.setFooter(Config.defaultFooter, Config.defaultLogoURL);
-          embed.setTimestamp();
-          message.channel.send({embed});
-        }
-      }
-      else { message.channel.send("We do not track the item: " + itemInput + " yet, you can see a list of tracked items here `~items` or feel free to request tracking for this item by using `~request Please track x item.`"); }
-    }
-    else if(type === "notTitle") {
-      var leaderboard = [];
-      var titleInput = message.content.substr("~!TITLE ".length).toUpperCase();
-
-      //Find Items
-      var titleToFind = definitions.find(e => e.name.toUpperCase() === titleInput);
-
-      if(titleToFind) {
-        //Title exists in tracking now generate leaderboards
-        for(var i in leaderboards) {
-          var titles = leaderboards[i].titles.split(",");
-          if(!titles.find(e => e === titleToFind.hash)) {
-            leaderboard.push(`${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) }`)
-          }
-        }
-        if(leaderboard.length === 0) {
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setDescription("Everybody owns the " + titleToFind.name + "!, Wowsers!")
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
-        else if(leaderboard.length === 1) {
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("The only person who does not own the " + titleToFind.name + " is: ")
-          .setDescription(leaderboard[0])
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
-        else {
-          var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
-          var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
-          const embed = new Discord.RichEmbed()
-          .setColor(0x0099FF)
-          .setAuthor("People that do not own the " + titleToFind.name + " title!")
-          .addField("Names", namesLeft, true)
-          .addField("Names", namesRight, true)
-          .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-          .setTimestamp()
-          message.channel.send({embed});
-        }
-      }
-      else { message.channel.send("Nobody owns the " + titleInput + " yet, you can see a list of tracked titles here `~titles` or feel free to request tracking for this title by using `~request Please track the x title.`"); }
+      else { message.channel.send("Sorry this command is disabled in this server due to the large amount of tracked users."); }
     }
 
     //Seasonal
@@ -2332,7 +2348,7 @@ function DisplayInhouseClanRankings(type, message) {
         Database.GetClans(async function(isError, clans) {
           clans = clans.filter(e => allClanIds.includes(e.clan_id));
           if(!isError) {
-            Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+            Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
               if(!isError) {
                 if(isFound) {
                   //Create leaderboards
@@ -3093,15 +3109,15 @@ function DisplayProfile(message, leaderboards, playerData) {
   if(leaderboards.find(e => e.membershipId === playerData.membershipId)) {
     var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
     var name = playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x });
-    var timePlayed = playerStats.timePlayed;
-    var infamy = playerStats.infamy;
-    var valor = playerStats.valor;
-    var glory = playerStats.glory;
-    var triumphScore = playerStats.triumphScore;
-    var seasonRank = playerStats.seasonRank;
+    var timePlayed = { "data": playerStats.timePlayed, "rank": leaderboards.sort(function(a, b) { return b.timePlayed - a.timePlayed; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var infamy = { "data": playerStats.infamy, "rank": leaderboards.sort(function(a, b) { return b.infamy - a.infamy; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var valor = { "data": playerStats.valor, "rank": leaderboards.sort(function(a, b) { return b.valor - a.valor; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var glory = { "data": playerStats.glory, "rank": leaderboards.sort(function(a, b) { return b.glory - a.glory; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var triumphScore = { "data": playerStats.triumphScore, "rank": leaderboards.sort(function(a, b) { return b.triumphScore - a.triumphScore; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var seasonRank = { "data": playerStats.seasonRank, "rank": leaderboards.sort(function(a, b) { return b.seasonRank - a.seasonRank; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
     var titles = playerStats.titles.split(",");
     var lastPlayed = playerStats.lastPlayed;
-    var highestPower = playerStats.highestPower;
+    var highestPower = { "data": playerStats.highestPower, "rank": leaderboards.sort(function(a, b) { return b.highestPower - a.highestPower; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
 
     if(message.content.includes(" -r") || message.content.includes(" -raids")) {
       try {
@@ -3130,16 +3146,17 @@ function DisplayProfile(message, leaderboards, playerData) {
         const embed = new Discord.RichEmbed()
         .setColor(0x0099FF)
         .setAuthor(`Viewing Profile for ${ name }`)
-        .addField("Name (SR)", `${ name } (${ seasonRank })`, true)
-        .addField("Time Played", `${ Misc.AddCommas(Math.round(timePlayed/60)) } Hrs`, true)
+        .setDescription("Ranks are based on all clans registered with Marvin, clans not tracked are not included in this ranking.")
+        .addField("Name (SR)", `${ name } (${ seasonRank.data })`, true)
+        .addField("Time Played", `${ Misc.AddCommas(Math.round(timePlayed.data/60)) } Hrs *(Rank: ${ Misc.addOrdinal(timePlayed.rank) })*`, true)
         .addField("Last Played", `${ new Date(parseInt(lastPlayed)).getDate() }-${ new Date(parseInt(lastPlayed)).getMonth()+1 }-${ new Date(parseInt(lastPlayed)).getFullYear() }`, true)
-        .addField("Valor", `${ Misc.AddCommas(valor) }`, true)
-        .addField("Glory", `${ Misc.AddCommas(glory) }`, true)
-        .addField("Infamy", `${ Misc.AddCommas(infamy) }`, true)
-        .addField("Triumph Score", `${ Misc.AddCommas(triumphScore) }`, true)
+        .addField("Valor", `${ Misc.AddCommas(valor.data) } *(Rank: ${ Misc.addOrdinal(valor.rank) })*`, true)
+        .addField("Glory", `${ Misc.AddCommas(glory.data) } *(Rank: ${ Misc.addOrdinal(glory.rank) })*`, true)
+        .addField("Infamy", `${ Misc.AddCommas(infamy.data) } *(Rank: ${ Misc.addOrdinal(infamy.rank) })*`, true)
+        .addField("Triumph Score", `${ Misc.AddCommas(triumphScore.data) } *(Rank: ${ Misc.addOrdinal(triumphScore.rank) })*`, true)
         .addField("Raids", `${ Misc.AddCommas(playerStats.leviCompletions + playerStats.leviPresCompletions + playerStats.eowCompletions + playerStats.eowPresCompletions + playerStats.sosCompletions + playerStats.sosPresCompletions + playerStats.lastWishCompletions + playerStats.scourgeCompletions + playerStats.sorrowsCompletions + playerStats.gardenCompletions) }`, true)
         .addField("Titles", `${ titles[0] === "" ? 0 : titles.length }`, true)
-        .addField("Highest Power", `${ Misc.AddCommas(highestPower) }`, true)
+        .addField("Highest Power", `${ Misc.AddCommas(highestPower.data) } *(Rank: ${ Misc.addOrdinal(highestPower.rank) })*`, true)
         .addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`)
         .setFooter(Config.defaultFooter, Config.defaultLogoURL)
         .setTimestamp()
@@ -3163,7 +3180,7 @@ function TrialsRankings(message, type, stat) {
             if(isFound) {
               //Get all clan data from playerInfo using clans
               var allClanIds = Data.clans.split(",");
-              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+              Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayTrialsRankings(message, leaderboards, playerData, type, stat); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
@@ -3178,7 +3195,7 @@ function TrialsRankings(message, type, stat) {
             if(isFound) {
               //Get all clan data from playerInfo using clan_id
               var allClanIds = Data.clans.split(",");
-              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+              Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayTrialsRankings(message, leaderboards, undefined, type, stat); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
@@ -3243,7 +3260,7 @@ function Trials(message, type) {
             if(isFound) {
               //Get all clan data from playerInfo using clans
               var allClanIds = Data.clans.split(",");
-              Database.GetClanLeaderboards(allClanIds, function(isError, isFound, leaderboards) {
+              Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
                 if(!isError) { if(isFound) { DisplayTrials(message, leaderboards, playerData, type); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
