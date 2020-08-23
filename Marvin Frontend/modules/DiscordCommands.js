@@ -3086,7 +3086,7 @@ function DisplayDryStreak(message, item, leaderboards, playerData, allClanIds) {
     message.channel.send({embed});
   });
 }
-function Profile(message) {
+function Profile(message, type) {
   var userId = null;
   if(message.mentions.users.first()) { userId = message.mentions.users.first().id }
   else { userId = message.author.id }
@@ -3095,17 +3095,33 @@ function Profile(message) {
       if(isFound) {
         var playerData = Data;
         //Give personalised response if user has registered
-        Database.GetGlobalProfile(function(isError, isFound, leaderboards) {
-          if(!isError) { if(isFound) { DisplayProfile(message, leaderboards, playerData); } }
-          else { message.reply("Sorry! An error occurred, Please try again..."); }
-        });
+        if(type === "global") {
+          Database.GetGlobalProfile(function(isError, isFound, leaderboards) {
+            if(!isError) { if(isFound) { DisplayProfile(message, leaderboards, playerData, type); } }
+            else { message.reply("Sorry! An error occurred, Please try again..."); }
+          });
+        }
+        else {
+          Database.GetGuild(message.guild.id, function(isError, isFound, Data) {
+            if(!isError) {
+              if(isFound) {
+                //Get all clan data from playerInfo using clans
+                var allClanIds = Data.clans.split(",");
+                Database.GetProfile(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
+                  if(!isError) { if(isFound) { DisplayProfile(message, leaderboards, playerData, type); } }
+                  else { message.channel.send("Currently your clan is undergoing it's first scan, this can take upto 3-5 minutes. Please wait for a message which will let you know when it's finished and ready to go!"); }
+                });
+              } else { message.reply("No clan set, to set one use: `~Set clan`"); }
+            } else { message.reply("Sorry! An error occurred, Please try again..."); }
+          });
+        }
       }
       else { if(message.mentions.users.first()) { message.reply("The user mentioned has not registered. So we don't know their destiny account."); } else { message.reply("Please register first to use this command."); } }
     }
     else { message.reply("Sorry! An error occurred, Please try again..."); }
   });
 }
-function DisplayProfile(message, leaderboards, playerData) {
+function DisplayProfile(message, leaderboards, playerData, type) {
   if(leaderboards.find(e => e.membershipId === playerData.membershipId)) {
     var playerStats = leaderboards.find(e => e.membershipId === playerData.membershipId);
     var name = playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x });
@@ -3119,53 +3135,96 @@ function DisplayProfile(message, leaderboards, playerData) {
     var lastPlayed = playerStats.lastPlayed;
     var highestPower = { "data": playerStats.highestPower, "rank": leaderboards.sort(function(a, b) { return b.highestPower - a.highestPower; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
 
+    var leviCompletions = { "data": playerStats.leviCompletions, "rank": leaderboards.sort(function(a, b) { return b.leviCompletions - a.leviCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var leviPresCompletions = { "data": playerStats.leviPresCompletions, "rank": leaderboards.sort(function(a, b) { return b.leviPresCompletions - a.leviPresCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var eowCompletions = { "data": playerStats.eowCompletions, "rank": leaderboards.sort(function(a, b) { return b.eowCompletions - a.eowCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var eowPresCompletions = { "data": playerStats.eowPresCompletions, "rank": leaderboards.sort(function(a, b) { return b.eowPresCompletions - a.eowPresCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var sosCompletions = { "data": playerStats.sosCompletions, "rank": leaderboards.sort(function(a, b) { return b.sosCompletions - a.sosCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var sosPresCompletions = { "data": playerStats.sosPresCompletions, "rank": leaderboards.sort(function(a, b) { return b.sosPresCompletions - a.sosPresCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var lastWishCompletions = { "data": playerStats.lastWishCompletions, "rank": leaderboards.sort(function(a, b) { return b.lastWishCompletions - a.lastWishCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var scourgeCompletions = { "data": playerStats.scourgeCompletions, "rank": leaderboards.sort(function(a, b) { return b.scourgeCompletions - a.scourgeCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var sorrowsCompletions = { "data": playerStats.sorrowsCompletions, "rank": leaderboards.sort(function(a, b) { return b.sorrowsCompletions - a.sorrowsCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+    var gardenCompletions = { "data": playerStats.gardenCompletions, "rank": leaderboards.sort(function(a, b) { return b.gardenCompletions - a.gardenCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
+
+    var embed = new Discord.RichEmbed();
     if(message.content.includes(" -r") || message.content.includes(" -raids")) {
       try {
-        const embed = new Discord.RichEmbed()
-        .setColor(0x0099FF)
-        .setAuthor(`Viewing Profile for ${ name }`)
-        .addField("Leviathan", Misc.AddCommas(playerStats.leviCompletions), true)
-        .addField("Leviathan (PRESTIGE)", Misc.AddCommas(playerStats.leviPresCompletions), true)
-        .addField("Eater of Worlds", Misc.AddCommas(playerStats.eowCompletions), true)
-        .addField("Eater of Worlds (PRESTIGE)", Misc.AddCommas(playerStats.eowPresCompletions), true)
-        .addField("Spire of Stars", Misc.AddCommas(playerStats.sosCompletions), true)
-        .addField("Spire of Stars (PRESTIGE)", Misc.AddCommas(playerStats.sosPresCompletions), true)
-        .addField("Last Wish", Misc.AddCommas(playerStats.lastWishCompletions), true)
-        .addField("Scourge of the Past", Misc.AddCommas(playerStats.scourgeCompletions), true)
-        .addField("Crown of Sorrows", Misc.AddCommas(playerStats.sorrowsCompletions), true)
-        .addField("Garden of Salvation", Misc.AddCommas(playerStats.gardenCompletions), true)
-        .addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`)
-        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-        .setTimestamp()
+        embed.setColor(0x0099FF);
+        embed.setAuthor(`Viewing Profile for ${ name }`);
+        if(type === "global") { embed.setDescription(`Ranks are based on every clan registered with Marvin, this should not be considered a global ranking, but more of a Marvins ranking. (? / ${ leaderboards.length }) players!`); }
+        else { embed.setDescription(`Ranks are based on all tracked clans for this server. (? / ${ leaderboards.length }) players!`); }
+        embed.addField("Leviathan", `${ Misc.AddCommas(leviCompletions.data) } *(Rank: ${ Misc.addOrdinal(leviCompletions.rank) })*`, true);
+        embed.addField("Leviathan (PRESTIGE)", `${ Misc.AddCommas(leviPresCompletions.data) } *(Rank: ${ Misc.addOrdinal(leviPresCompletions.rank) })*`, true);
+        embed.addField("Eater of Worlds", `${ Misc.AddCommas(eowCompletions.data) } *(Rank: ${ Misc.addOrdinal(eowCompletions.rank) })*`, true);
+        embed.addField("Eater of Worlds (PRESTIGE)", `${ Misc.AddCommas(eowPresCompletions.data) } *(Rank: ${ Misc.addOrdinal(eowPresCompletions.rank) })*`, true);
+        embed.addField("Spire of Stars", `${ Misc.AddCommas(sosCompletions.data) } *(Rank: ${ Misc.addOrdinal(sosCompletions.rank) })*`, true);
+        embed.addField("Spire of Stars (PRESTIGE)", `${ Misc.AddCommas(sosPresCompletions.data) } *(Rank: ${ Misc.addOrdinal(sosPresCompletions.rank) })*`, true);
+        embed.addField("Last Wish", `${ Misc.AddCommas(lastWishCompletions.data) } *(Rank: ${ Misc.addOrdinal(lastWishCompletions.rank) })*`, true);
+        embed.addField("Scourge of the Past", `${ Misc.AddCommas(scourgeCompletions.data) } *(Rank: ${ Misc.addOrdinal(scourgeCompletions.rank) })*`, true);
+        embed.addField("Crown of Sorrows", `${ Misc.AddCommas(sorrowsCompletions.data) } *(Rank: ${ Misc.addOrdinal(sorrowsCompletions.rank) })*`, true);
+        embed.addField("Garden of Salvation", `${ Misc.AddCommas(gardenCompletions.data) } *(Rank: ${ Misc.addOrdinal(gardenCompletions.rank) })*`, true);
+        embed.addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`);
+        embed.setFooter(Config.defaultFooter, Config.defaultLogoURL);
+        embed.setTimestamp();
         message.channel.send({embed});
       }
       catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
     }
+    else if(message.content.includes(" -b") || message.content.includes(" -broadcasts")) {
+      Database.GetPlayerBroadcasts(playerData.membershipId, function(isError, isFound, broadcasts) {
+        if(!isError) {
+          if(isFound) {
+            var broadcastNames = [];
+            var broadcastDates = [];
+            for(var i in broadcasts) {
+              broadcastNames.unshift(`${ broadcasts[i].type.charAt(0).toUpperCase() + broadcasts[i].type.slice(1) } - ${ broadcasts[i].broadcast }`);
+              broadcastDates.unshift(`${ new Date(parseInt(broadcasts[i].date)).getDate() }-${ new Date(parseInt(broadcasts[i].date)).getMonth()+1 }-${ new Date(parseInt(broadcasts[i].date)).getFullYear() }`);
+            }
+            try {
+              embed.setColor(0x0099FF);
+              embed.setAuthor(`Viewing Broadcasts for ${ name }`);
+              embed.setDescription("This only shows broadcasts whilst Marvin was tracking your profile. (Capped at 15 newest broadcasts)");
+              embed.addField("Name", broadcastNames.slice(0, 14), true);
+              embed.addField("Date", broadcastDates.slice(0, 14), true);
+              embed.setFooter(Config.defaultFooter, Config.defaultLogoURL);
+              embed.setTimestamp();
+              message.channel.send({embed});
+            }
+            catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
+          }
+          else { message.channel.send("Could not find any broadcasts for your registered account. Have you obtained any since Marvin has started tracking your clan?"); }
+        }
+        else { message.channel.send("Could not find any broadcasts for your registered account. Have you obtained any since Marvin has started tracking your clan?"); }
+      });
+    }
     else {
       try {
-        const embed = new Discord.RichEmbed()
-        .setColor(0x0099FF)
-        .setAuthor(`Viewing Profile for ${ name }`)
-        .setDescription("Ranks are based on all clans registered with Marvin, clans not tracked are not included in this ranking.")
-        .addField("Name (SR)", `${ name } (${ seasonRank.data })`, true)
-        .addField("Time Played", `${ Misc.AddCommas(Math.round(timePlayed.data/60)) } Hrs *(Rank: ${ Misc.addOrdinal(timePlayed.rank) })*`, true)
-        .addField("Last Played", `${ new Date(parseInt(lastPlayed)).getDate() }-${ new Date(parseInt(lastPlayed)).getMonth()+1 }-${ new Date(parseInt(lastPlayed)).getFullYear() }`, true)
-        .addField("Valor", `${ Misc.AddCommas(valor.data) } *(Rank: ${ Misc.addOrdinal(valor.rank) })*`, true)
-        .addField("Glory", `${ Misc.AddCommas(glory.data) } *(Rank: ${ Misc.addOrdinal(glory.rank) })*`, true)
-        .addField("Infamy", `${ Misc.AddCommas(infamy.data) } *(Rank: ${ Misc.addOrdinal(infamy.rank) })*`, true)
-        .addField("Triumph Score", `${ Misc.AddCommas(triumphScore.data) } *(Rank: ${ Misc.addOrdinal(triumphScore.rank) })*`, true)
-        .addField("Raids", `${ Misc.AddCommas(playerStats.leviCompletions + playerStats.leviPresCompletions + playerStats.eowCompletions + playerStats.eowPresCompletions + playerStats.sosCompletions + playerStats.sosPresCompletions + playerStats.lastWishCompletions + playerStats.scourgeCompletions + playerStats.sorrowsCompletions + playerStats.gardenCompletions) }`, true)
-        .addField("Titles", `${ titles[0] === "" ? 0 : titles.length }`, true)
-        .addField("Highest Power", `${ Misc.AddCommas(highestPower.data) } *(Rank: ${ Misc.addOrdinal(highestPower.rank) })*`, true)
-        .addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`)
-        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
-        .setTimestamp()
+        embed.setColor(0x0099FF);
+        embed.setAuthor(`Viewing Profile for ${ name }`);
+        if(type === "global") { embed.setDescription(`Ranks are based on every clan registered with Marvin, this should not be considered a global ranking, but more of a Marvins ranking. (? / ${ leaderboards.length }) players!`); }
+        else { embed.setDescription(`Ranks are based on all tracked clans for this server. (? / ${ leaderboards.length }) players!`); }
+        embed.addField("Name (SR)", `${ name } (${ seasonRank.data })`, true);
+        embed.addField("Time Played", `${ Misc.AddCommas(Math.round(timePlayed.data/60)) } Hrs *(Rank: ${ Misc.addOrdinal(timePlayed.rank) })*`, true);
+        embed.addField("Last Played", `${ new Date(parseInt(lastPlayed)).getDate() }-${ new Date(parseInt(lastPlayed)).getMonth()+1 }-${ new Date(parseInt(lastPlayed)).getFullYear() }`, true);
+        embed.addField("Valor", `${ Misc.AddCommas(valor.data) } *(Rank: ${ Misc.addOrdinal(valor.rank) })*`, true);
+        embed.addField("Glory", `${ Misc.AddCommas(glory.data) } *(Rank: ${ Misc.addOrdinal(glory.rank) })*`, true);
+        embed.addField("Infamy", `${ Misc.AddCommas(infamy.data) } *(Rank: ${ Misc.addOrdinal(infamy.rank) })*`, true);
+        embed.addField("Triumph Score", `${ Misc.AddCommas(triumphScore.data) } *(Rank: ${ Misc.addOrdinal(triumphScore.rank) })*`, true);
+        embed.addField("Raids", `${ Misc.AddCommas(playerStats.leviCompletions + playerStats.leviPresCompletions + playerStats.eowCompletions + playerStats.eowPresCompletions + playerStats.sosCompletions + playerStats.sosPresCompletions + playerStats.lastWishCompletions + playerStats.scourgeCompletions + playerStats.sorrowsCompletions + playerStats.gardenCompletions) }`, true);
+        embed.addField("Titles", `${ titles[0] === "" ? 0 : titles.length }`, true);
+        embed.addField("Highest Power", `${ Misc.AddCommas(highestPower.data) } *(Rank: ${ Misc.addOrdinal(highestPower.rank) })*`, true);
+        embed.addField("See more at", `https://guardianstats.com/profile/${ playerData.membershipId }`);
+        embed.setFooter(Config.defaultFooter, Config.defaultLogoURL);
+        embed.setTimestamp();
         message.channel.send({embed});
       }
       catch(err) { message.reply("Sorry! An error occurred, Please try again..."); console.log(err); }
     }
   }
-  else { message.reply("Sorry i could not find your account, has your clan registered with Marvin? `~set clan` or is your account private?"); }
+  else {
+    if(type === "global") { message.reply("Sorry i could not find your account, has your clan registered with Marvin? `~set clan` or is your account private?"); }
+    else { message.reply("Sorry it seems your clan is not tracked by this server and thus this command cannot connect the dots. Try using: `~global profile`"); }
+  }
 }
 
 //Trials

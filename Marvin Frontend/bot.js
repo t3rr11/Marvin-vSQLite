@@ -345,13 +345,15 @@ client.on("message", async message => {
         else if(command.startsWith("~REQUEST ")) { if(!CheckBanned(message)) { if(CheckTimeout(message)) { DiscordCommands.Request(client, message) } } }
         else if(command.startsWith("~DEL ")) { if(!CheckBanned(message)) { var amount = command.substr("~DEL ".length); Misc.DeleteMessages(message, amount); } }
         else if(command.startsWith("~SET SCANSPEED ")) { if(!CheckBanned(message)) { var input = command.substr("~SET SCANSPEED ".length); SetScanSpeed(message, input); } }
-        else if(command.startsWith("~PROFILE ")) { if(!CheckBanned(message)) { DiscordCommands.Profile(message); } }
+        else if(command.startsWith("~PROFILE ")) { if(!CheckBanned(message)) { DiscordCommands.Profile(message, "local"); } }
+        else if(command.startsWith("~GLOBAL PROFILE ")) { if(!CheckBanned(message)) { DiscordCommands.Profile(message, "global"); } }
         else if(command.startsWith("~MBAN ")) { if(message.author.id === "194972321168097280") { AddBannedUser(message) } else { message.channel.send("No permission to use this command."); } }
         else if(command.startsWith("~MUNBAN ")) { if(message.author.id === "194972321168097280") { RemoveBannedUser(message) } else { message.channel.send("No permission to use this command."); } }
         else if(command.startsWith("~MCHANGE ")) { if(message.author.id === "194972321168097280") { ChangeBannedUser(message) } else { message.channel.send("No permission to use this command."); } }
         else if(command === "~REGISTER") { if(!CheckBanned(message)) { message.reply("To register please use: Use: `~Register example` example being your steam name."); } }
         else if(command === "~DONATE" || command === "~SPONSOR" || command === "~SUPPORTING") { if(!CheckBanned(message)) { message.channel.send("Want to help support future updates or bots? Visit my Patreon! https://www.patreon.com/Terrii"); } }
-        else if(command === "~PROFILE") { if(!CheckBanned(message)) { DiscordCommands.Profile(message); } }
+        else if(command === "~PROFILE") { if(!CheckBanned(message)) { DiscordCommands.Profile(message, "local"); } }
+        else if(command === "~GLOBAL PROFILE") { if(!CheckBanned(message)) { DiscordCommands.Profile(message, "global"); } }
         else if(command === "~FORCE RESCAN") { if(message.author.id === "194972321168097280") { DiscordCommands.ForceFullScan(message); } else { message.channel.send("No permission to use this command."); } }
         else if(command === "~FORCE GUILD CHECK") { if(message.author.id === "194972321168097280") { DiscordCommands.ForceGuildCheck(client, message); } else { message.channel.send("No permission to use this command."); } }
         else if(command === "~FORCE TOPGG") { if(message.author.id === "194972321168097280") { ForceTopGGUpdate(message); } else { message.channel.send("No permission to use this command."); } }

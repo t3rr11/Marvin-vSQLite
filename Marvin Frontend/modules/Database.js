@@ -8,8 +8,8 @@ const fetch = require("node-fetch");
 
 //Exports
 module.exports = {
-  GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetPlayer, GetUsers, GetGlobalDryStreak, GetClanDryStreaks, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
-  CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, GetGlobalProfile,
+  GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetPlayer, GetUsers, GetGlobalDryStreak, GetClanDryStreaks, GetPlayerBroadcasts, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
+  CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, GetGlobalProfile, GetProfile,
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
   ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, ClearAwaitingBroadcasts, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking,
@@ -120,6 +120,15 @@ function GetClanDryStreaks(clanIds, hash, callback) {
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
 }
+function GetPlayerBroadcasts(membershipId, callback) {
+  var sql = "SELECT * FROM broadcasts WHERE membershipId=?";
+  var inserts = [membershipId];
+  sql = db.format(sql, inserts);
+  db.query(sql, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error getting broadcasts for ${ membershipId } Error: ${ error }`); callback(true); }
+    else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
+  });
+}
 function GetFromBroadcasts(itemDef, callback) {
   var sql = "SELECT * FROM broadcasts WHERE hash LIKE ? OR broadcast LIKE ?";
   var inserts = ['%' + itemDef.hash + '%', '%' + itemDef.name + '%'];
@@ -160,6 +169,15 @@ function GetClanLeaderboards(clanIds, guildId, callback) {
   if(guildId === "664237007261925404") { queryString = `SELECT * FROM playerInfo WHERE isPrivate = "false" AND firstLoad = "false"` }
   db.query(queryString, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting clan leaderboards: ${ clanIds } Error: ${ error }`); callback(true); }
+    else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
+  });
+}
+function GetProfile(clanIds, guildId, callback) {
+  var query = ""; for(var i in clanIds) { if(i == 0) { query = `clanId="${ clanIds[i] }"` } else { query = `${ query } OR clanId="${ clanIds[i] }"` } }
+  var queryString = `SELECT membershipId,displayName,timePlayed,infamy,valor,glory,triumphScore,seasonRank,titles,lastPlayed,highestPower,leviCompletions,leviPresCompletions,eowCompletions,eowPresCompletions,sosCompletions,sosPresCompletions,lastWishCompletions,scourgeCompletions,sorrowsCompletions,gardenCompletions FROM playerInfo WHERE ${ query } AND isPrivate = "false" AND firstLoad = "false"`;
+  if(guildId === "664237007261925404") { queryString = `SELECT membershipId,displayName,timePlayed,infamy,valor,glory,triumphScore,seasonRank,titles,lastPlayed,highestPower,leviCompletions,leviPresCompletions,eowCompletions,eowPresCompletions,sosCompletions,sosPresCompletions,lastWishCompletions,scourgeCompletions,sorrowsCompletions,gardenCompletions FROM playerInfo WHERE isPrivate = "false" AND firstLoad = "false"` }
+  db.query(queryString, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error getting profile: ${ clanIds } Error: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
 }
