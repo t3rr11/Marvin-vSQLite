@@ -84,7 +84,7 @@ async function UpdateClans() {
   Log.SaveDiscordLog(StartupTime, Users, CommandsInput, Config.currentSeason, client);
 
   await new Promise(resolve => Database.GetDefinitions((isError, Data) => { if(!isError) { Definitions = Data; } resolve(true); }) );
-  await new Promise(resolve => Database.GetClans((isError, Clans) => { ClansLength = Clans.length; CheckForNewlyScannedClans(Clans); resolve(true); }));
+  await new Promise(resolve => Database.GetClans((isError, Clans) => { if(!isError) { ClansLength = Clans.length; CheckForNewlyScannedClans(Clans); } resolve(true); }));
 }
 function CheckForNewlyScannedClans(Clans) {
   for(var i in Clans) {
