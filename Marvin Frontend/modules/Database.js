@@ -8,7 +8,7 @@ const fetch = require("node-fetch");
 
 //Exports
 module.exports = {
-  GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetPlayer, GetUsers, GetGlobalDryStreak, GetClanDryStreaks, GetPlayerBroadcasts, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
+  GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetPlayer, GetUsers, GetGlobalDryStreak, GetPlayerBroadcasts, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
   CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, GetGlobalProfile, GetProfile,
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
@@ -107,16 +107,6 @@ function GetGlobalDryStreak(itemDef, callback) {
   sql = db.format(sql, inserts);
   db.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error getting drystreak leaderboards for ${ itemDef.name } Error: ${ error }`); callback(true); }
-    else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
-  });
-}
-function GetClanDryStreaks(clanIds, hash, callback) {
-  var query = ""; for(var i in clanIds) { if(i == 0) { query = `clanId="${ clanIds[i] }"` } else { query = `${ query } OR clanId="${ clanIds[i] }"` } }
-  var sql = `SELECT * FROM playerInfo WHERE (items NOT LIKE ?) AND (${ query })`;
-  var inserts = ['%' + hash + '%'];
-  sql = db.format(sql, inserts);
-  db.query(sql, function(error, rows, fields) {
-    if(!!error) { Log.SaveError(`Error getting drystreak leaderboards for ${ hash } Error: ${ error }`); callback(true); }
     else { if(rows.length > 0) { callback(false, true, rows); } else { callback(true); } }
   });
 }

@@ -3009,32 +3009,32 @@ function DryStreak(message, item) {
             //Get all clan data from playerInfo using clans
             var allClanIds = Data.clans.split(",");
             if(item.toUpperCase() == "1000 VOICES") {
-              Database.GetClanDryStreaks(allClanIds, 199171385, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayDryStreak(message, "1000 Voices", leaderboards, playerData, allClanIds); } }
+              Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayDryStreak(message, "1000 Voices", 199171385, leaderboards, playerData, allClanIds); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
             else if(item.toUpperCase() == "ANARCHY") {
-              Database.GetClanDryStreaks(allClanIds, 2220014607, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayDryStreak(message, "Anarchy", leaderboards, playerData, allClanIds); } }
+              Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayDryStreak(message, "Anarchy", 2220014607, leaderboards, playerData, allClanIds); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
             else if(item.toUpperCase() == "ALWAYS ON TIME") {
-              Database.GetClanDryStreaks(allClanIds, 1903459810, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayDryStreak(message, "Always on Time", leaderboards, playerData, allClanIds); } }
+              Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayDryStreak(message, "Always on Time", 1903459810, leaderboards, playerData, allClanIds); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
             else if(item.toUpperCase() == "TARRABAH") {
-              Database.GetClanDryStreaks(allClanIds, 2329697053, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayDryStreak(message, "Tarrabah", leaderboards, playerData, allClanIds); } }
+              Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayDryStreak(message, "Tarrabah", 2329697053, leaderboards, playerData, allClanIds); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
             else if(item.toUpperCase() == "LUXURIOUS TOAST") {
-              Database.GetClanDryStreaks(allClanIds, 1866399776, function(isError, isFound, leaderboards) {
-                if(!isError) { if(isFound) { DisplayDryStreak(message, "Luxurious Toast", leaderboards, playerData, allClanIds); } }
+              Database.GetClanLeaderboards(allClanIds, message.guild.id, function(isError, isFound, leaderboards) {
+                if(!isError) { if(isFound) { DisplayDryStreak(message, "Luxurious Toast", 1866399776, leaderboards, playerData, allClanIds); } }
                 else { message.reply("Sorry! An error occurred, Please try again..."); }
               });
             }
@@ -3048,17 +3048,69 @@ function DryStreak(message, item) {
     else { message.reply("Sorry! An error occurred, Please try again..."); }
   });
 }
-function DisplayDryStreak(message, item, leaderboards, playerData, allClanIds) {
+function DisplayDryStreak(message, item, itemHash, leaderboards, playerData, allClanIds) {
   Database.GetFromClanBroadcasts(allClanIds, item, function(isError, isFound, data) {
+    var broadcasts = [];
     var globalLeaderboard = [];
-    for(var i in leaderboards) {
-      if(item.toUpperCase() === "1000 VOICES") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].lastWishCompletions) }); }
-      else if(item.toUpperCase() === "ANARCHY") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
-      else if(item.toUpperCase() === "ALWAYS ON TIME") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].scourgeCompletions) }); }
-      else if(item.toUpperCase() === "TARRABAH") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].sorrowsCompletions) }); }
-      else if(item.toUpperCase() === "LUXURIOUS TOAST") { globalLeaderboard.push({ "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ✗`, "membershipId": leaderboards[i].membershipId, "completions": Misc.AddCommas(leaderboards[i].sosCompletions + leaderboards[i].sosPresCompletions) }); }
+
+    //Find clan broadcasts for that item, then mark as completed. Store these in a tempLeaderboard.
+    for(var i in data) {
+      broadcasts.push({
+        "clanId": data[i].clanId,
+        "displayName": data[i].displayName,
+        "membershipId": data[i].membershipId,
+        "completions": Misc.AddCommas(data[i].count)
+      });
     }
-    for(var i in data) { globalLeaderboard.push({ "displayName": `${ data[i].displayName } 🗸`, "completions": Misc.AddCommas(data[i].count) }); }
+
+    for(var i in leaderboards) {
+      //Check if this user has obtained the item.
+      var hasObtained = false;
+      var completions = 0;
+      var inClan = false;
+
+      for(var b in broadcasts) { if(leaderboards[i].membershipId === broadcasts[b].membershipId) { hasObtained = true; completions = broadcasts[b].completions; inClan = true; } }
+
+      if(!hasObtained && !inClan && leaderboards[i].items.includes(itemHash)) { }
+      else {
+        if(item.toUpperCase() === "1000 VOICES") {
+          globalLeaderboard.push({
+            "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ hasObtained ? "✓" : "✗" }`,
+            "membershipId": leaderboards[i].membershipId,
+            "completions": hasObtained ? completions : Misc.AddCommas(leaderboards[i].lastWishCompletions)
+          });
+        }
+        else if(item.toUpperCase() === "ANARCHY") {
+          globalLeaderboard.push({
+            "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ hasObtained ? "✓" : "✗" }`,
+            "membershipId": leaderboards[i].membershipId,
+            "completions": hasObtained ? completions : Misc.AddCommas(leaderboards[i].scourgeCompletions)
+          });
+        }
+        else if(item.toUpperCase() === "ALWAYS ON TIME") {
+          globalLeaderboard.push({
+            "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ hasObtained ? "✓" : "✗" }`,
+            "membershipId": leaderboards[i].membershipId,
+            "completions": hasObtained ? completions : Misc.AddCommas(leaderboards[i].scourgeCompletions)
+          });
+        }
+        else if(item.toUpperCase() === "TARRABAH") {
+          globalLeaderboard.push({
+            "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ hasObtained ? "✓" : "✗" }`,
+            "membershipId": leaderboards[i].membershipId,
+            "completions": hasObtained ? completions : Misc.AddCommas(leaderboards[i].sorrowsCompletions)
+          });
+        }
+        else if(item.toUpperCase() === "LUXURIOUS TOAST") {
+          globalLeaderboard.push({
+            "displayName": `${ leaderboards[i].displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x }) } ${ hasObtained ? "✓" : "✗" }`,
+            "membershipId": leaderboards[i].membershipId,
+            "completions": hasObtained ? completions : Misc.AddCommas(leaderboards[i].sosCompletions + leaderboards[i].sosPresCompletions)
+          });
+        }
+      }
+    }
+    
     globalLeaderboard.sort(function(a, b) { return b.completions - a.completions; });
     globalTopLeaderboard = globalLeaderboard.slice(0, 10);
 
@@ -3079,6 +3131,7 @@ function DisplayDryStreak(message, item, leaderboards, playerData, allClanIds) {
     const embed = new Discord.RichEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top 10 Unluckiest People - ${ item }`)
+    .setDescription(`✓ = Obtained, ✗ = Not Obtained`)
     .addField("Name", leaderboard.names, true)
     .addField("Completions", leaderboard.completions, true)
     .setFooter(Config.defaultFooter, Config.defaultLogoURL)
