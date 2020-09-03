@@ -47,7 +47,7 @@ async function ConfigureBroadcasts(message) {
                   data.enable_broadcasts_items === "true" ? broadcastsEnabled.push("Items") : ignoredBroadcasts.push("Items");
                   data.enable_broadcasts_titles === "true" ? broadcastsEnabled.push("Titles") : ignoredBroadcasts.push("Titles");
                   data.enable_broadcasts_clans === "true" ? broadcastsEnabled.push("Clans") : ignoredBroadcasts.push("Clans");
-                  const embed = new Discord.RichEmbed()
+                  const embed = new Discord.MessageEmbed()
                   .setColor(0x0099FF)
                   .setAuthor("Configure Broadcasts")
                   .setDescription(`
@@ -63,7 +63,7 @@ async function ConfigureBroadcasts(message) {
                   message.channel.send({embed});
                 }
                 else {
-                  const embed = new Discord.RichEmbed()
+                  const embed = new Discord.MessageEmbed()
                   .setColor(0x0099FF)
                   .setAuthor("Configure Broadcasts")
                   .setDescription(`
@@ -231,7 +231,7 @@ async function ProcessBroadcast(client, broadcast, definitions) {
 }
 async function SendBroadcast(client, guild, message, broadcast, definitions, clanData) {
   //Make simple broadcast embed.
-  let embed = new Discord.RichEmbed()
+  let embed = new Discord.MessageEmbed()
   .setColor(0xFFE000)
   .setTitle(`Clan Broadcast - ${ clanData.clan_name }`)
   .setDescription(message)
@@ -248,7 +248,7 @@ async function SendBroadcast(client, guild, message, broadcast, definitions, cla
       
       //Change the embed based on the type of item
       if(itemDef.advanced_type === "emblem") {
-        embed = new Discord.RichEmbed()
+        embed = new Discord.MessageEmbed()
         .setColor(0xFFE000)
         .setTitle(`Clan Broadcast - ${ clanData.clan_name }`)
         .setDescription(message)
@@ -257,7 +257,7 @@ async function SendBroadcast(client, guild, message, broadcast, definitions, cla
         .setTimestamp();
       }
       else {
-        embed = new Discord.RichEmbed()
+        embed = new Discord.MessageEmbed()
         .setColor(0xFFE000)
         .setTitle(`Clan Broadcast - ${ clanData.clan_name }`)
         .setDescription(message)
@@ -272,7 +272,7 @@ async function SendBroadcast(client, guild, message, broadcast, definitions, cla
       if(guild.enable_whitelist === "true") {
         var whitelistItems = guild.whitelist.split(',');
         if(whitelistItems.find(e => e.toUpperCase() === broadcast.broadcast.toUpperCase())) {
-          try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
+          try { client.guilds.cache.get(guild.guild_id).channels.cache.get(guild.broadcasts_channel).send({embed}); }
           catch(err) { console.log(`Failed to send item broadcast to ${ guild.guild_id } because of ${ err }`); }
         }
       }
@@ -280,7 +280,7 @@ async function SendBroadcast(client, guild, message, broadcast, definitions, cla
         //If whitelist is disabled then check the blacklisted items to make sure it's not blacklisted.
         var blacklistItems = guild.blacklist.split(",");
         if(!blacklistItems.find(e => e.toUpperCase() === broadcast.broadcast.toUpperCase())) {
-          try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
+          try { client.guilds.cache.get(guild.guild_id).channels.cache.get(guild.broadcasts_channel).send({embed}); }
           catch(err) { console.log(`Failed to send item broadcast to ${ guild.guild_id } because of ${ err }`); }
         }
       }
@@ -292,7 +292,7 @@ async function SendBroadcast(client, guild, message, broadcast, definitions, cla
     
     //Check if broadcasts are enabled on that item.
     if(JSON.parse(titleDef.broadcast_enabled)) {
-      embed = new Discord.RichEmbed()
+      embed = new Discord.MessageEmbed()
       .setColor(0xFFE000)
       .setTitle("Clan Broadcast")
       .setDescription(message)
@@ -302,28 +302,28 @@ async function SendBroadcast(client, guild, message, broadcast, definitions, cla
 
       if(titleDef.description.length > 0){ embed.addField("Obtained by:", titleDef.description) }
   
-      try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
+      try { client.guilds.cache.get(guild.guild_id).channels.cache.get(guild.broadcasts_channel).send({embed}); }
       catch(err) { console.log(`Failed to send title broadcast to ${ guild.guild_id } because of ${ err }`); }
     }
   }
   else if(broadcast.type === "clan" && guild.enable_broadcasts_clans === "true") {
-    try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
+    try { client.guilds.cache.get(guild.guild_id).channels.cache.get(guild.broadcasts_channel).send({embed}); }
     catch(err) { console.log(`Failed to send clan broadcast to ${ guild.guild_id } because of ${ err }`); }
   }
   else if(broadcast.type === "dungeon" && guild.enable_broadcasts_dungeons === "true") {
-    try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
+    try { client.guilds.cache.get(guild.guild_id).channels.cache.get(guild.broadcasts_channel).send({embed}); }
     catch(err) { console.log(`Failed to send dungeon broadcast to ${ guild.guild_id } because of ${ err }`); }
   }
   else if(broadcast.type === "catalyst" && guild.enable_broadcasts_catalysts === "true") {
-    try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
+    try { client.guilds.cache.get(guild.guild_id).channels.cache.get(guild.broadcasts_channel).send({embed}); }
     catch(err) { console.log(`Failed to send catalyst broadcast to ${ guild.guild_id } because of ${ err }`); }
   }
   else if(broadcast.type === "triumph" && guild.enable_broadcasts_triumphs === "true") {
-    try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
+    try { client.guilds.cache.get(guild.guild_id).channels.cache.get(guild.broadcasts_channel).send({embed}); }
     catch(err) { console.log(`Failed to send triumph broadcast to ${ guild.guild_id } because of ${ err }`); }
   }
   else if(broadcast.type === "other" && guild.enable_broadcasts_others === "true") {
-    try { client.guilds.get(guild.guild_id).channels.get(guild.broadcasts_channel).send({embed}); }
+    try { client.guilds.cache.get(guild.guild_id).channels.cache.get(guild.broadcasts_channel).send({embed}); }
     catch(err) { console.log(`Failed to send other broadcast to ${ guild.guild_id } because of ${ err }`); }
   }
 }
@@ -335,8 +335,8 @@ async function SendFinishedLoadingAnnouncement(client, Clan) {
         for(var j in clans) {
           if(clans[j] === Clan.clan_id) {
             const thisDate = new Date();
-            const embed = new Discord.RichEmbed().setColor(0xFFE000).setAuthor("Clan Broadcast").setDescription(`${ Clan.clan_name } has finished loading for the first time. You are free to use commands now! For help use: ~help.`).setFooter(Config.defaultFooter, Config.defaultLogoURL).setTimestamp();
-            try { Misc.getDefaultChannel(client.guilds.get(Guilds[i].guild_id)).send({embed}); Log.SaveLog("Clans", `Informed ${ Guilds[i].guild_id } that the clan ${ Clan.clan_id } has finished loading.`); }
+            const embed = new Discord.MessageEmbed().setColor(0xFFE000).setAuthor("Clan Broadcast").setDescription(`${ Clan.clan_name } has finished loading for the first time. You are free to use commands now! For help use: ~help.`).setFooter(Config.defaultFooter, Config.defaultLogoURL).setTimestamp();
+            try { Misc.getDefaultChannel(client.guilds.cache.get(Guilds[i].guild_id)).send({embed}); Log.SaveLog("Clans", `Informed ${ Guilds[i].guild_id } that the clan ${ Clan.clan_id } has finished loading.`); }
             catch(err) { Log.SaveError(`Failed to inform ${ Guilds[i].guild_id } that the clan ${ Clan.clan_id } has finished loading. Error: ${ err }`); }
           }
         }

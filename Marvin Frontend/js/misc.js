@@ -96,19 +96,7 @@ function DeleteMessages(message, amount) {
 }
 function GetClanID(Clans, guild_id) { for(var i in Clans) { if(Clans[i].guild_id === guild_id) { return Clans[i].clan_id; } } return false; }
 function GetMembershipID(Players, discord_id) { for(var i in Players) { if(Players[i].discord_id === discord_id) { return Players[i].membershipId; } } return false; }
-function getDefaultChannel(guild) {
-  if(guild.channels.has(guild.id))
-    return guild.channels.get(guild.id)
-  const generalChannel = guild.channels.find(channel => channel.name === "general");
-  if (generalChannel)
-    return generalChannel;
-  return guild.channels
-   .filter(c => c.type === "text" &&
-     c.permissionsFor(guild.client.user).has("SEND_MESSAGES"))
-   .sort((a, b) => a.position - b.position ||
-     Long.fromString(a.id).sub(Long.fromString(b.id)).toNumber())
-   .first();
-}
+function getDefaultChannel(guild) { return guild.channels.cache.find(channel => channel.type === 'text' && channel.permissionsFor(guild.me).has('SEND_MESSAGES')); }
 function cleanString(input) {
   if(input) {
     var output = "";

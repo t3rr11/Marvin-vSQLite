@@ -19,7 +19,7 @@ module.exports = {
 //Important
 function Help(message, type, definitions) {
   if(type === "rankings") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Rankings Help Menu")
     .setDescription("Here is a list of ranking commands! Example: `~Iron Banner`")
@@ -29,7 +29,7 @@ function Help(message, type, definitions) {
     message.channel.send({embed});
   }
   else if(type === "dungeons") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Dungeons Help Menu")
     .setDescription("Here is a list of dungeon commands! Example: `~Pit of Heresy`")
@@ -39,7 +39,7 @@ function Help(message, type, definitions) {
     message.channel.send({embed});
   }
   else if(type === "raids") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Raids Help Menu")
     .setDescription("Here is a list of raid commands! Example: `~LW`")
@@ -51,7 +51,7 @@ function Help(message, type, definitions) {
   else if(type === "items") { GetTrackedItems(message, definitions) }
   else if(type === "titles") { GetTrackedTitles(message, definitions) }
   else if(type === "seasonal") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Seasonal Help Menu")
     .setDescription("Here is a list of seasonal commands! Example: `~Season Rank`")
@@ -61,7 +61,7 @@ function Help(message, type, definitions) {
     message.channel.send({embed});
   }
   else if(type === "preseasonal") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Pre-seasonal Help Menu")
     .setDescription("Here is a list of pre-seasonal commands! Example: `~Fractaline`")
@@ -71,7 +71,7 @@ function Help(message, type, definitions) {
     message.channel.send({embed});
   }
   else if(type === "clan") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Clans Help Menu")
     .setDescription("Here is a list of clan commands! Example: `~Set Clan`")
@@ -81,7 +81,7 @@ function Help(message, type, definitions) {
     message.channel.send({embed});
   }
   else if(type === "globals") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Globals Help Menu")
     .setDescription("Here is a list of global commands! Example: `~Global Time Played`")
@@ -92,7 +92,7 @@ function Help(message, type, definitions) {
   }
   else if(type === "drystreaks") { DrystreaksHelp(message) }
   else if(type === "trials") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Trials Help Menu")
     .setDescription("Here is a list of trials commands! Profile commands can be altered by @ing the person you wish to view: `~Trials Profile @Someone`")
@@ -108,7 +108,7 @@ function Help(message, type, definitions) {
     message.channel.send({embed});
   }
   else if(type === "others") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Others Help Menu")
     .setDescription("Here is a list of other commands! Example: `~Donate`")
@@ -118,7 +118,7 @@ function Help(message, type, definitions) {
     message.channel.send({embed});
   }
   else if(type === "guardianGames") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Guardian Games Help Menu")
     .setDescription("Here is a list of Guardian Games commands! Example: `~GG Laurels`")
@@ -128,7 +128,7 @@ function Help(message, type, definitions) {
     message.channel.send({embed});
   }
   else if(type === "clanwars") {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Clanwars Help Menu")
     .setDescription("Here is a list of Clanwars commands! Example: `~Clanwars Time`")
@@ -141,7 +141,7 @@ function Help(message, type, definitions) {
     message.channel.send({embed});
   }
   else {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Hey there! I am Marvin.")
     .setDescription("I have so many commands now i've had to split them up here is a list of my help commands! Example: `~Help Rankings`")
@@ -153,7 +153,7 @@ function Help(message, type, definitions) {
   }
 }
 function BroadcastsHelp(message) {
-  const embed = new Discord.RichEmbed()
+  const embed = new Discord.MessageEmbed()
   .setColor(0x0099FF)
   .setAuthor("Broadcasts Help Menu")
   .setDescription("By default clan broadcasts are disabled, To enable this you can set a broadcasts channel.")
@@ -173,7 +173,7 @@ function BroadcastsHelp(message) {
   message.channel.send({embed});
 }
 function DrystreaksHelp(message) {
-  const embed = new Discord.RichEmbed()
+  const embed = new Discord.MessageEmbed()
   .setColor(0x0099FF)
   .setAuthor("Drystreaks Help Menu")
   .setDescription("Currently these are the only drystreak leaderboards.\nTo use: `~Drystreak Anarchy` or `~Global Drystreak Anarchy`")
@@ -184,13 +184,13 @@ function DrystreaksHelp(message) {
 }
 function Request(client, message) {
   const request = message.content.substr("~request ".length);
-  const embed = new Discord.RichEmbed()
+  const embed = new Discord.MessageEmbed()
   .setColor(0x0099FF)
   .setAuthor(`New Request by ${ message.author.username }#${ message.author.discriminator }, ID: ${ message.author.id }`)
   .setDescription(request)
   .setFooter(Config.defaultFooter, Config.defaultLogoURL)
   .setTimestamp()
-  client.guilds.get('664237007261925404').channels.get('664238376219836416').send({embed});
+  client.guilds.cache.get('664237007261925404').channels.cache.get('664238376219836416').send({embed});
   message.reply("Your request has been sent, Thank your for your valuable feedback! Feel free to join the discord if you'd like to keep up to date about the status of this request. https://guardianstats.com/JoinMarvin");
 }
 function GetTrackedClans(message) {
@@ -220,7 +220,7 @@ function GetTrackedClans(message) {
             })
           );
         }
-        const embed = new Discord.RichEmbed()
+        const embed = new Discord.MessageEmbed()
         .setColor(0x0099FF)
         .setAuthor("Clans Tracked")
         .setDescription("Here is a list of tracked clans for this server!")
@@ -246,7 +246,7 @@ function ForceFullScan(message) {
 }
 async function GuildCheck(client) {
   await new Promise(resolve => Database.GetAllGuilds((isError, Data) => {
-    for(let g of client.guilds.array()) {
+    for(let g of client.guilds.cache.array()) {
       if(Data.find(guild => guild.guild_id === g.id)) {
         Database.EnableTracking(g.id, function(isError, isFound) { });
       }
@@ -344,7 +344,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Seasonal Infamy Rankings")
       .addField("Name", leaderboard.names, true)
@@ -383,7 +383,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Seasonal Valor Rankings")
       .addField("Name", leaderboard.names, true)
@@ -419,7 +419,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Seasonal Glory Rankings")
       .addField("Name", leaderboard.names, true)
@@ -457,7 +457,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Overall Iron Banner")
       .addField("Name", leaderboard.names, true)
@@ -495,7 +495,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Normal: Leviathan")
       .setDescription("These results are different from Raid Report as these are from a different endpoint that tracks things differently. Only applies for the this raid.")
@@ -531,7 +531,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Prestige: Leviathan")
       .setDescription("These results are different from Raid Report as these are from a different endpoint that tracks things differently. Only applies for the this raid.")
@@ -567,7 +567,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Normal: Eater of Worlds")
       .addField("Name", leaderboard.names, true)
@@ -602,7 +602,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Prestige: Eater of Worlds")
       .addField("Name", leaderboard.names, true)
@@ -637,7 +637,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Normal: Spire of Stars")
       .addField("Name", leaderboard.names, true)
@@ -672,7 +672,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Prestige: Spire of Stars")
       .addField("Name", leaderboard.names, true)
@@ -707,7 +707,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Last Wish")
       .addField("Name", leaderboard.names, true)
@@ -742,7 +742,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Scourge of the Past")
       .addField("Name", leaderboard.names, true)
@@ -777,7 +777,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Crown of Sorrows")
       .addField("Name", leaderboard.names, true)
@@ -812,7 +812,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Garden of Salvation")
       .addField("Name", leaderboard.names, true)
@@ -855,7 +855,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
               }
             }
             if(leaderboard.length === 0) {
-              const embed = new Discord.RichEmbed()
+              const embed = new Discord.MessageEmbed()
               .setColor(0x0099FF)
               .setDescription("Nobody owns the " + itemToFind.name + " yet! Go be the first!")
               .setFooter(Config.defaultFooter, Config.defaultLogoURL)
@@ -863,7 +863,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
               message.channel.send({embed});
             }
             else if(leaderboard.length === 1) {
-              const embed = new Discord.RichEmbed()
+              const embed = new Discord.MessageEmbed()
               .setColor(0x0099FF)
               .setAuthor("The only person to own " + itemToFind.name + " is: ")
               .setDescription(leaderboard[0])
@@ -874,7 +874,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
             else if(leaderboard.length < 50) {
               var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
               var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
-              let embed = new Discord.RichEmbed();
+              let embed = new Discord.MessageEmbed();
               embed.setColor(0x0099FF)
               embed.setAuthor("People that own " + itemToFind.name);
               embed.addField("Names", namesLeft, true);
@@ -915,7 +915,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
               }
             }
             if(leaderboard.length === 0) {
-              const embed = new Discord.RichEmbed()
+              const embed = new Discord.MessageEmbed()
               .setColor(0x0099FF)
               .setDescription("Nobody owns the " + titleToFind.name + " yet, Quick be the first!")
               .setFooter(Config.defaultFooter, Config.defaultLogoURL)
@@ -923,7 +923,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
               message.channel.send({embed});
             }
             else if(leaderboard.length === 1) {
-              const embed = new Discord.RichEmbed()
+              const embed = new Discord.MessageEmbed()
               .setColor(0x0099FF)
               .setAuthor("The only person to own " + titleToFind.name + " is: ")
               .setDescription(leaderboard[0])
@@ -934,7 +934,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
             else if(leaderboard.length < 50) {
               var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
               var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
-              const embed = new Discord.RichEmbed()
+              const embed = new Discord.MessageEmbed()
               .setColor(0x0099FF)
               .setAuthor("People that own the " + titleToFind.name + " title!")
               .addField("Names", namesLeft, true)
@@ -974,7 +974,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
             }
           }
           if(leaderboard.length === 0) {
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
             .setColor(0x0099FF)
             .setDescription("Everybody owns the " + itemToFind.name + "! Wowsers!")
             .setFooter(Config.defaultFooter, Config.defaultLogoURL)
@@ -982,7 +982,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
             message.channel.send({embed});
           }
           else if(leaderboard.length === 1) {
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
             .setColor(0x0099FF)
             .setAuthor("The only person who does not own the " + itemToFind.name + " is: ")
             .setDescription(leaderboard[0])
@@ -993,7 +993,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
           else if(leaderboard.length < 50) {
             var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
             var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
-            let embed = new Discord.RichEmbed();
+            let embed = new Discord.MessageEmbed();
             embed.setColor(0x0099FF)
             embed.setAuthor("People that do not own " + itemToFind.name);
             embed.addField("Names", namesLeft, true);
@@ -1025,7 +1025,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
             }
           }
           if(leaderboard.length === 0) {
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
             .setColor(0x0099FF)
             .setDescription("Everybody owns the " + titleToFind.name + "!, Wowsers!")
             .setFooter(Config.defaultFooter, Config.defaultLogoURL)
@@ -1033,7 +1033,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
             message.channel.send({embed});
           }
           else if(leaderboard.length === 1) {
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
             .setColor(0x0099FF)
             .setAuthor("The only person who does not own the " + titleToFind.name + " is: ")
             .setDescription(leaderboard[0])
@@ -1044,7 +1044,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
           else if(leaderboard.length < 50) {
             var namesRight = leaderboard.slice(0, (leaderboard.length / 2));
             var namesLeft = leaderboard.slice((leaderboard.length / 2), leaderboard.length);
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
             .setColor(0x0099FF)
             .setAuthor("People that do not own the " + titleToFind.name + " title!")
             .addField("Names", namesLeft, true)
@@ -1087,7 +1087,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Season Ranks")
       .addField("Name", leaderboard.names, true)
@@ -1122,7 +1122,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Sundial Completions")
       .addField("Name", leaderboard.names, true)
@@ -1157,7 +1157,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Highest Power")
       .setDescription("In order for this to be as accurate as possible, accounts are scanned every 3-5 minutes. If you have your highest light gear equipped for that long of a period, it should update on the leaderboards.")
@@ -1190,7 +1190,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Laurels Collected")
       .addField("Name", leaderboard.names, true)
@@ -1220,7 +1220,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Medals Donated")
       .addField("Name", leaderboard.names, true)
@@ -1250,7 +1250,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Rumble Super Kills throughout Guardian Games")
       .addField("Name", leaderboard.names, true)
@@ -1282,7 +1282,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Guardian Games Triumphs Completed")
       .addField("Name", leaderboard.names, true)
@@ -1305,7 +1305,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
         laurels[leaderboards[i].currentClass] = parseInt(laurels[leaderboards[i].currentClass]) + parseInt(JSON.parse(leaderboards[i].guardianGames).laurels);
       }
       
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Guardian Games - Classes")
       .setDescription(`
@@ -1365,7 +1365,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Shattered Throne Completions")
       .setDescription("Due to the way this metric is tracked it is character based. This leaderboard reflects just 1 character. I've put in a ticket to get this fixed, until then the other dungeon leaderboards work fine.")
@@ -1405,7 +1405,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Shattered Throne Flawless Completions")
       .addField("Name", leaderboard.names, true)
@@ -1444,7 +1444,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Pit Of Heresy Completions")
       .addField("Name", leaderboard.names, true)
@@ -1483,7 +1483,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Pit Of Heresy Flawless Completions")
       .addField("Name", leaderboard.names, true)
@@ -1522,7 +1522,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Prophecy Completions")
       .addField("Name", leaderboard.names, true)
@@ -1561,7 +1561,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Prophecy Flawless Completions")
       .addField("Name", leaderboard.names, true)
@@ -1598,7 +1598,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Triumph Scores")
       .addField("Name", leaderboard.names, true)
@@ -1633,7 +1633,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Most Time Played")
       .addField("Name", leaderboard.names, true)
@@ -1668,7 +1668,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Title Collectors")
       .addField("Name", leaderboard.names, true)
@@ -1703,7 +1703,7 @@ function DisplayRankings(message, type, leaderboards, playerData, playerInfo, de
       }
       catch(err) { }
 
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("Top 10 Total Raid Completions")
       .addField("Name", leaderboard.names, true)
@@ -1760,7 +1760,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Global Overall Iron Banner")
     .addField("Name", leaderboard.names, true)
@@ -1790,7 +1790,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Global Season Rank")
     .addField("Name", leaderboard.names, true)
@@ -1819,7 +1819,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Most Fractaline Donated")
     .addField("Name", leaderboard.names, true)
@@ -1848,7 +1848,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Most Resonant Players")
     .addField("Name", leaderboard.names, true)
@@ -1877,7 +1877,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Global Triumph Score")
     .addField("Name", leaderboard.names, true)
@@ -1906,7 +1906,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Most Time Played")
     .addField("Name", leaderboard.names, true)
@@ -1935,7 +1935,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Highest Power Level")
     .addField("Name", leaderboard.names, true)
@@ -1965,7 +1965,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Seasonal Trials Wins")
     .addField("Name", leaderboard.names, true)
@@ -1995,7 +1995,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Seasonal Trials Flawless Tickets")
     .addField("Name", leaderboard.names, true)
@@ -2025,7 +2025,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Seasonal Trials Carries")
     .addField("Name", leaderboard.names, true)
@@ -2055,7 +2055,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Weekly Trials Wins")
     .addField("Name", leaderboard.names, true)
@@ -2085,7 +2085,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Weekly Trials Flawless Tickets")
     .addField("Name", leaderboard.names, true)
@@ -2115,7 +2115,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Weekly Trials Carries")
     .addField("Name", leaderboard.names, true)
@@ -2145,7 +2145,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Overall Trials Wins")
     .addField("Name", leaderboard.names, true)
@@ -2175,7 +2175,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Overall Trials Flawless Tickets")
     .addField("Name", leaderboard.names, true)
@@ -2205,7 +2205,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Overall Trials Carries")
     .addField("Name", leaderboard.names, true)
@@ -2228,7 +2228,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
       laurels[leaderboards[i].currentClass] = parseInt(laurels[leaderboards[i].currentClass]) + parseInt(JSON.parse(leaderboards[i].guardianGames).laurels);
     }
     
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Guardian Games - Classes")
     .setDescription(`
@@ -2277,7 +2277,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Global Laurels Collected")
     .addField("Name", leaderboard.names, true)
@@ -2307,7 +2307,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
     }
     catch(err) { }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Top 10 Global Medals Donated")
     .addField("Name", leaderboard.names, true)
@@ -2326,7 +2326,7 @@ function DisplayGlobalRankings(message, type, leaderboards, playerData) {
       if(planets.IO < lieCommQuest.IO) { planets.IO = lieCommQuest.IO }
     }
     
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Felwinter's Lie Global Progress")
     .setDescription(`
@@ -2462,7 +2462,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.infamy));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Infamy`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2481,7 +2481,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.valor));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Valor`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2500,7 +2500,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.glory));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Glory`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2521,7 +2521,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.leviCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Normal: Leviathan`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2540,7 +2540,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.leviPresCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Prestige: Leviathan`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2559,7 +2559,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.eowCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Normal: Eater of Worlds`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2578,7 +2578,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.eowPresCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Prestige: Eater of Worlds`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2597,7 +2597,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.sosCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Normal: Spire of Stars`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2616,7 +2616,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.sosPresCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Prestige: Spire of Stars`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2635,7 +2635,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.lastWishCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Last Wish`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2654,7 +2654,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.scourgeCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Scourge of the Past`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2673,7 +2673,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.sorrowsCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Crown of Sorrows`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2692,7 +2692,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.gardenCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Garden of Salvation`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2713,7 +2713,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.seasonRank));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Combined Season Ranks`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2732,7 +2732,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.sundial));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Sundial Completions`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2753,7 +2753,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.pitCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Pit of Heresy Completions`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2772,7 +2772,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.prophecyCompletions));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Prophecy Completions`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2793,7 +2793,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.triumphScore));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Triumph Score`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2812,7 +2812,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(`${ Misc.AddCommas(Math.round(top[i].totals.totalTime/60)) } Hrs`);
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Time Played`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2831,7 +2831,7 @@ async function ClanRankings(message, type, leaderboards) {
       leaderboard.data.push(Misc.AddCommas(top[i].totals.totalRaids));
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top ${ leaderboardSize } Clan Wars Rankings for Total Raid Completions`)
     .setDescription("This leaderboard is comprised of all tracked clans for this server.")
@@ -2861,7 +2861,7 @@ function GlobalDryStreak(message, definitions, item) {
               leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
             }
 
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
             .setColor(0x0099FF)
             .setAuthor("Top 10 Unluckiest People - 1000 Voices")
             .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
@@ -2891,7 +2891,7 @@ function GlobalDryStreak(message, definitions, item) {
               leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
             }
 
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
             .setColor(0x0099FF)
             .setAuthor("Top 10 Unluckiest People - Anarchy")
             .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
@@ -2921,7 +2921,7 @@ function GlobalDryStreak(message, definitions, item) {
               leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
             }
 
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
             .setColor(0x0099FF)
             .setAuthor("Top 10 Unluckiest People - Always on Time")
             .setDescription("This does not count switches, so the people here might have just never got the chest. It also does not looted clears, just clears total. It's more of an estimate.")
@@ -2951,7 +2951,7 @@ function GlobalDryStreak(message, definitions, item) {
               leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
             }
 
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
             .setColor(0x0099FF)
             .setAuthor("Top 10 Unluckiest People - Tarrabah")
             .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
@@ -2981,7 +2981,7 @@ function GlobalDryStreak(message, definitions, item) {
               leaderboard.completions.push(Misc.AddCommas(globalLeaderboard[i].completions));
             }
 
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
             .setColor(0x0099FF)
             .setAuthor("Top 10 Unluckiest People - Luxurious Toast")
             .setDescription("This does not count looted clears, just clears total. It's more of an estimate.")
@@ -3128,7 +3128,7 @@ function DisplayDryStreak(message, item, itemHash, leaderboards, playerData, all
       }
     }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top 10 Unluckiest People - ${ item }`)
     .setDescription(`✓ = Obtained, ✗ = Not Obtained`)
@@ -3199,7 +3199,7 @@ function DisplayProfile(message, leaderboards, playerData, type) {
     var sorrowsCompletions = { "data": playerStats.sorrowsCompletions, "rank": leaderboards.sort(function(a, b) { return b.sorrowsCompletions - a.sorrowsCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
     var gardenCompletions = { "data": playerStats.gardenCompletions, "rank": leaderboards.sort(function(a, b) { return b.gardenCompletions - a.gardenCompletions; }).findIndex(e => e.membershipId === playerData.membershipId) +1 };
 
-    var embed = new Discord.RichEmbed();
+    var embed = new Discord.MessageEmbed();
     if(message.content.includes(" -r") || message.content.includes(" -raids")) {
       try {
         embed.setColor(0x0099FF);
@@ -3347,7 +3347,7 @@ function DisplayTrialsRankings(message, leaderboards, playerData, type, stat) {
     else if(stat === "postFlawlessWins"){ stat = "Post Flawless Wins" }
     else if(stat === "carries"){ stat = "Carries (With Emblem)" }
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor(`Top 10 ${ Misc.capitalize(type) } Trials ${ stat }`)
     .addField("Name", leaderboard.names, true)
@@ -3399,7 +3399,7 @@ function DisplayTrials(message, leaderboards, playerData, type) {
       var name = playerStats.displayName.replace(/\*|\^|\~|\_|\`/g, function(x) { return "\\" + x });
       var trials = JSON.parse(playerStats.trials)[type];
   
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor(`Viewing ${ Misc.capitalize(type) } Trials Statistics for ${ name }`)
       .addField("Name", `${ name }`, true)
@@ -3423,7 +3423,7 @@ function GetTrackedItems(message, definitions) {
   let shipSparrows = definitions.filter(e => e.advanced_type === "ship" || e.advanced_type === "sparrow").map((item, index) => { return index === 0 ? (item.name) : (` ${ item.name }`) });
   let emblems = definitions.filter(e => e.advanced_type === "emblem").map((item, index) => { return index === 0 ? (item.name) : (` ${ item.name }`) });
   let others = definitions.filter(e => e.advanced_type === "emote" || e.advanced_type === "shell").map((item, index) => { return index === 0 ? (item.name) : (` ${ item.name }`) });
-  const embed = new Discord.RichEmbed()
+  const embed = new Discord.MessageEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked items!")
   .setDescription("To view who owns a specific item use the command like this: `~Item 1000 Voices`\n\n**Weapons** \n" + weapons + "\n\n**Ship/Sparrow**\n" + shipSparrows + "\n\n**Emblems**\n" + emblems + "\n\n**Others**\n" + others)
@@ -3433,7 +3433,7 @@ function GetTrackedItems(message, definitions) {
 }
 function GetTrackedTitles(message, definitions) {
   let titles = definitions.filter(e => e.advanced_type === "title").map((title, index) => { return index === 0 ? (title.name) : (` ${ title.name }`) });
-  const embed = new Discord.RichEmbed()
+  const embed = new Discord.MessageEmbed()
   .setColor(0x0099FF)
   .setAuthor("Here is a list of tracked titles!")
   .setDescription("To view who owns a specific title use the command like this: `~Title Flawless S10`\n\n**Titles** \n" + titles + "\n\n" + "**Extra** \n If you want to see who has the most titles within the tracked clans of this discord use: `~titles total`")
@@ -3531,7 +3531,7 @@ function ClanInfo(message) {
           if(!clanData[i].isError) {
             if(clanData[i].isFound) {
               const timeOptions = { weekday: "long", year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" };
-              const embed = new Discord.RichEmbed()
+              const embed = new Discord.MessageEmbed()
               .setColor(0x0099FF)
               .setAuthor(`${ clanData[i].data.clan_name } (${ clanData[i].data.clan_id })`)
               .setDescription(

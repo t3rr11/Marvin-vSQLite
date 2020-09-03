@@ -3,8 +3,6 @@ const Discord = require('discord.js');
 const { Permissions } = require('discord.js');
 const fs = require('fs');
 const client = new Discord.Client();
-const DBL = require("dblapi.js");
-const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzMTM1MTM2Njc5OTA2NTA4OCIsImJvdCI6dHJ1ZSwiaWF0IjoxNTg0NDIxMzAxfQ.qZ5CrrQdaC9cIfeuqx7svNTwiSTH_R0JD5H-1CVzrCo', client);
 
 //Modules
 let Config = require('../Combined/configs/config.json');
@@ -42,6 +40,7 @@ function UpdateActivityList() {
     ActivityList.push(`Try ~Trials`);
     ActivityList.push(`Try ~Power`);
     ActivityList.push(`Try ~Season`);
+    ActivityList.push(`Sorry for the recent instability, I am working to resolve these issues.`);
     var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
     client.user.setActivity(activity);
   }
@@ -72,7 +71,11 @@ async function CheckMaintenance() {
 }
 async function UpdateClans() {
   //Grab discord user count first
-  Users = 0; for(let g of client.guilds.array()) { Users = Users + (g.members.size - 1) }
+  Users = 0;
+  for(let g in client.guilds.cache.array()) {
+    var guild = client.guilds.cache.array()[g];
+    try { if(!isNaN(guild.memberCount)) { Users = Users + guild.memberCount; } } catch (err) { console.log(`Failed to read member count from: ${ guild.id }`); } 
+  }
 
   //Then continue
   CheckMaintenance();
@@ -165,19 +168,18 @@ function CheckNewSeason() {
       Config.currentSeason = Config.currentSeason + 1;
       NewSeasonDate = null;
       fs.writeFile('../Combined/configs/config.json', JSON.stringify(Config), (err) => { if (err) console.error(err) });
-      try { client.guilds.get('664237007261925404').channels.get('664237007261925409').send(`A new season is upon us. The current season has been changed from ${ Config.currentSeason-1 } to ${ Config.currentSeason }`); }
+      try { client.guilds.cache.get('664237007261925404').channels.cache.get('664237007261925409').send(`A new season is upon us. The current season has been changed from ${ Config.currentSeason-1 } to ${ Config.currentSeason }`); }
       catch (err) { console.log("Failed to send new season message."); }
       try { Database.AddLog(null, "season change", null, 6, null); } catch (err) {  }
     }
   }
   else { NewSeasonDate = Config.newSeasonDate; }
 }
-function ForceTopGGUpdate(message) { dbl.postStats(client.guilds.size); message.channel.send("Updated stats on Top.GG"); }
 function UpdateBannedUsers() { try { BannedUsers = JSON.parse(fs.readFileSync('./data/banned_users.json').toString()); } catch(err) { console.log("Couldn't parse banned users file."); } }
 function CheckBanned(message) {
   var isFound = BannedUsers.find(usr => usr.id == message.author.id);
   if(isFound !== undefined) {
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("You have been banned and can no longer use this bots features.")
       .setDescription(`**User:** ${ message.author.username }\n**Reason:** ${ isFound.reason }`)
@@ -197,7 +199,7 @@ function AddBannedUser(message) {
       "reason": reason.length > 4 ? reason : "You have been banned."
     });
     fs.writeFile('./data/banned_users.json', JSON.stringify(BannedUsers), (err) => { if (err) console.error(err) });
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("User has been banned!")
       .setDescription(`**User:** ${ id }\n**Reason:** ${ reason.length > 4 ? reason : "You have been banned." }`)
@@ -213,7 +215,7 @@ function RemoveBannedUser(message) {
   if(BannedUsers.find(usr => usr.id == id)) {
     BannedUsers.splice(BannedUsers.indexOf(BannedUsers.find(usr => usr.id === id)), 1);
     fs.writeFile('./data/banned_users.json', JSON.stringify(BannedUsers), (err) => { if (err) console.error(err) });
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
       .setColor(0x0099FF)
       .setAuthor("User has been unbanned!")
       .setDescription(`**User:** ${ id }`)
@@ -233,7 +235,7 @@ function ChangeBannedUser(message) {
     if(newReason.length > 4) {
       user.reason = newReason;
       fs.writeFile('./data/banned_users.json', JSON.stringify(BannedUsers), (err) => { if (err) console.error(err) });
-      const embed = new Discord.RichEmbed()
+      const embed = new Discord.MessageEmbed()
         .setColor(0x0099FF)
         .setAuthor("Reason for users ban updated.")
         .setDescription(`**User:** ${ user.id }\n**Previous Reason:** ${ previousReason }\n**Reason:** ${ user.reason }`)
@@ -246,7 +248,7 @@ function ChangeBannedUser(message) {
   else { message.reply("Cannot change reason as this user is not banned."); }
 }
 function ViewBans(message) {
-  const embed = new Discord.RichEmbed()
+  const embed = new Discord.MessageEmbed()
     .setColor(0x0099FF)
     .setAuthor("Here lies a list of banned users. Who no longer have access to Marvins features.")
     .setDescription(
@@ -270,18 +272,19 @@ function AddHash(message, hash) {
 
 //Discord Client Code
 client.on("ready", async () => {
+  console.log("isReady");
   if(ClansLength === null) {
     //Define variables
     await UpdateClans();
 
     //SetTimeouts
     setInterval(function() { UpdateClans() }, 10000);
-    setInterval(() => { dbl.postStats(client.guilds.size); }, 1800000);
     NewSeasonCountdown = setInterval(() => { CheckNewSeason(); }, 1000)
   
     //Start Up Console Log
     if(Config.enableDebug){ console.clear(); }
-    Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${client.channels.size} channels of ${client.guilds.size} guilds. Tracking ${ ClansLength } clans!`);
+    console.log(Users);
+    Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${ client.guilds.cache.size } guilds. Tracking ${ ClansLength } clans!`);
     Database.AddLog(null, "startup", null, 9, null);
   }
   else {
@@ -291,16 +294,23 @@ client.on("ready", async () => {
   DiscordCommands.GuildCheck(client);
 });
 
+client.on('shardDisconnect', (event, id) => { Log.SaveError(`Shard has disconnected and will no longer reconnect: ${ id }`); });
+client.on('shardError', (error, shardID) => { Log.SaveError(`Shard encounted an error: ${ id }, ${ error }`); });
+client.on('shardReady', (id, unavailableGuilds) => { Log.SaveLog("Info", `Shard is ready: ${ id }`); });
+client.on('shardReconnecting', (id) => { Log.SaveLog("Warning", `Shard is attempting to reconnect: ${ id }`); });
+client.on('shardResume', (id, replayedEvents) => { Log.SaveLog("Info", `Shard has been resumed: ${ id }`); });
+
 client.on("guildCreate", guild => {
   //Joined a server
   try {
-    Log.SaveLog("Server", `Joined a new guild: ${ guild.name }`);
+    if(guild.name) { Log.SaveLog("Server", "Joined a new guild: " + guild.name); }
+    else { Log.SaveLog("Server", "Joined a new guild: " + guild.id); }
     Database.AddLog({ "guild": { "id": guild.id, "name": guild.name } }, "joined guild", null, 1, null);
     Database.EnableTracking(guild.id, function(isError, isFound) {
       if(!isError) {
         if(isFound) { Log.SaveLog("Clans", "Clan Tracking Re-Enabled: " + guild.name); }
         else {
-          const embed = new Discord.RichEmbed()
+          const embed = new Discord.MessageEmbed()
           .setColor(0x0099FF)
           .setAuthor("Hey there!")
           .setDescription("I am Marvin. To set me up first register with me by using the `~Register example` command. Replace example with your in-game username. \n\nOnce registration is complete use the `~Set clan` command and **then wait 5 minutes** whilst I scan your clan. That's it you'll be ready to go! \n\nTry out clan broadcasts this can be set up by typing `~Set Broadcasts #general` (does not have to be general). \n\nSee `~help` to see what I can do!")
@@ -315,7 +325,8 @@ client.on("guildCreate", guild => {
 });
 client.on("guildDelete", guild => {
   //Removed from a server
-  Log.SaveLog("Server", "Left a guild: " + guild.name);
+  if(guild.name) { Log.SaveLog("Server", "Left a guild: " + guild.name); }
+  else { Log.SaveLog("Server", "Left a guild: " + guild.id); }
   Database.AddLog({ "guild": { "id": guild.id, "name": guild.name } }, "left guild", null, 2, null);
   Database.DisableTracking(guild.id);
 });
@@ -356,7 +367,6 @@ client.on("message", async message => {
         else if(command === "~GLOBAL PROFILE") { if(!CheckBanned(message)) { DiscordCommands.Profile(message, "global"); } }
         else if(command === "~FORCE RESCAN") { if(message.author.id === "194972321168097280") { DiscordCommands.ForceFullScan(message); } else { message.channel.send("No permission to use this command."); } }
         else if(command === "~FORCE GUILD CHECK") { if(message.author.id === "194972321168097280") { DiscordCommands.ForceGuildCheck(client, message); } else { message.channel.send("No permission to use this command."); } }
-        else if(command === "~FORCE TOPGG") { if(message.author.id === "194972321168097280") { ForceTopGGUpdate(message); } else { message.channel.send("No permission to use this command."); } }
         else if(command === "~MBANS") { if(message.author.id === "194972321168097280") { ViewBans(message); } else { message.channel.send("No permission to use this command."); } }
         else if(command === "~SCANSPEED") { if(!CheckBanned(message)) { GetScanSpeed(message); } }
         else if(command === "~CHECKAPI") { if(APIDisabled) { message.reply("API is offline."); } else { message.reply("API is online."); } }
@@ -367,7 +377,7 @@ client.on("message", async message => {
         else if(command === "~CURRENT SEASON" || command === "~SEASON") { message.channel.send(`Destiny 2 is currently in season ${ Config.currentSeason }. Season ${ Config.currentSeason+1 } starts in: ${ Misc.formatTime((new Date(NewSeasonDate) - new Date().getTime()) / 1000) }`) }
         else if(command === "~TEST") {
           if(message.author.id === "194972321168097280") {
-            //message.reply("We saw and we did nothing.");
+            message.channel.send(`<#${ Misc.getDefaultChannel(message.guild).id }>`);
           }
           else {
             message.reply("Test what? I do not understand.");

@@ -41,7 +41,7 @@ function SaveDiscordLog(StartupTime, Users, CommandsInput, currentSeason, client
   var totalTime = thisTime - StartupTime;
   var status = {
     "users": Users,
-    "servers": client.guilds.size,
+    "servers": client.guilds.cache.size,
     "commandsInput": CommandsInput,
     "uptime": totalTime,
     "currentSeason": currentSeason
