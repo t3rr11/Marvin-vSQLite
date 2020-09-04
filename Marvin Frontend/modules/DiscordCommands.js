@@ -12,7 +12,7 @@ const Database = require("./Database");
 module.exports = {
   Help, BroadcastsHelp, DrystreaksHelp, Request,
   GlobalRankings, Rankings, TrialsRankings, GlobalDryStreak, GetTrackedItems, DryStreak, GetTrackedClans,
-  Profile, GetTrackedTitles, ForceFullScan, GuildCheck, ForceGuildCheck, ToggleWhitelist, RenewLeadership, TransferLeadership,
+  Profile, GetTrackedTitles, ForceFullScan, ClanCheck, GuildCheck, ForceGuildCheck, ToggleWhitelist, RenewLeadership, TransferLeadership,
   DisplayClanRankings, DisplayInhouseClanRankings, Trials, ClanInfo
 };
 
@@ -245,24 +245,31 @@ function ForceFullScan(message) {
   else { message.reply("You are not allowed to use this command. Sorry."); }
 }
 async function GuildCheck(client) {
-  await new Promise(resolve => Database.GetAllGuilds((isError, Data) => {
-    for(let g of client.guilds.cache.array()) {
-      if(Data.find(guild => guild.guild_id === g.id)) {
-        Database.EnableTracking(g.id, function(isError, isFound) { });
-      }
+  await new Promise(resolve => Database.GetAllGuilds((isError, Guilds) => {
+    for(let guild of Guilds) {
+      if(client.guilds.cache.find(g => g.id === guild.guild_id)) { if(guild.isTracking === "false") { Database.EnableTracking(guild.guild_id, function(isError, isFound) { }); } }
+      else { if(guild.isTracking === "true") { Database.DisableTracking(guild.guild_id, function(isError, isFound) { }); } }
     }
   }));
 }
-async function ForceGuildCheck(client, message) {
-  if(message.author.id == "194972321168097280") {
-    await new Promise(resolve => Database.GetAllGuilds((isError, Data) => {
-      for(let g of client.guilds.array()) {
-        if(Data.find(guild => guild.guild_id === g.id)) {
-          Database.EnableTracking(g.id, function(isError, isFound) { });
+async function ClanCheck(client) {
+  await new Promise(resolve => Database.GetAllGuilds( async (isError, Guilds) => {
+    await new Promise(resolve => Database.GetAllClans( async (isError, Clans) => {
+      for(let clan of Clans) {
+        let foundGuilds = Guilds.filter(guild => guild.clans.split(",").includes(clan.clan_id) && guild.isTracking === "true");
+        if(foundGuilds.length > 0) { if(clan.isTracking === "false") { Database.EnableClanTracking(clan.clan_id); } }
+        else {
+          if(clan.isTracking === "true") {
+            console.log(`This clan has no guild: ${ clan.clan_id }`);
+            Database.DisableClanTracking(clan.clan_id);
+          }
         }
       }
     }));
-  }
+  }));
+}
+async function ForceGuildCheck(client, message) {
+  if(message.author.id == "194972321168097280") { GuildCheck(client); message.reply("Forced a guild check"); }
   else { message.reply("You are not allowed to use this command. Sorry."); }
 }
 

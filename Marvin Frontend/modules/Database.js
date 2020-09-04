@@ -8,12 +8,12 @@ const fetch = require("node-fetch");
 
 //Exports
 module.exports = {
-  GetClan, GetClans, GetGuild, GetGuilds, GetAllGuilds, GetPlayers, GetPlayer, GetUsers, GetGlobalDryStreak, GetPlayerBroadcasts, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
+  GetClan, GetClans, GetGuild, GetGuilds, GetAllClans, GetAllGuilds, GetPlayers, GetPlayer, GetUsers, GetGlobalDryStreak, GetPlayerBroadcasts, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
   CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, GetGlobalProfile, GetProfile,
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
   ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, ClearAwaitingBroadcasts, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking,
-  AddLog, GetLogDesc, GetDefinitions, AddHashToDefinition
+  AddLog, GetLogDesc, GetDefinitions, AddHashToDefinition, DisableClanTracking, EnableClanTracking
 };
 
 //MySQL Connection
@@ -78,6 +78,14 @@ function GetAllGuilds(callback) {
     else { for(var i in rows) { buildGuilds.push(rows[i]); } callback(false, buildGuilds); }
   });
   return buildGuilds;
+}
+function GetAllClans(callback) {
+  var buildClans = [];
+  db.query(`SELECT * FROM clans`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error getting all clans from server: ${ error }`); callback(true); }
+    else { for(var i in rows) { buildClans.push(rows[i]); } callback(false, buildClans); }
+  });
+  return buildClans;
 }
 function GetPlayers(callback) {
   var players = [];
@@ -523,17 +531,7 @@ function DisableTracking(guild_id) {
             for(var i in clans) {
               db.query(`SELECT * FROM guilds WHERE clans LIKE "%${ clans[i] }%"`, function(error, rows, fields) {
                 if(!!error) { Log.SaveError(`Failed to find clan: ${ clans[i] }, Error: ${ error }`); }
-                else {
-                  if(rows.length === 1) {
-                    db.query(`UPDATE clans SET isTracking="false" WHERE clan_id="${ clans[i] }"`, function(error, rows, fields) {
-                      if(!!error) { Log.SaveError(`Failed to disable tracking for clan: ${ clans[i] }, Error: ${ error }`); }
-                      else {
-                        AddLog(null, "stopped tracking clan", null, 12, null);
-                        Log.SaveLog("Clans", `Disabled tracking for ${ clans[i] } as there are no longer any more guilds tracking it.`);
-                      }
-                    });
-                  }
-                }
+                else { if(rows.length === 1) { DisableClanTracking(clans[i].clan_id); } }
               });
             }
           }
@@ -577,6 +575,24 @@ function EnableTracking(guild_id, callback) {
       else {
         callback(false, false);
       }
+    }
+  });
+}
+function DisableClanTracking(clan_id) {
+  db.query(`UPDATE clans SET isTracking="false" WHERE clan_id="${ clan_id }"`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Failed to disable tracking for clan: ${ clan_id }, Error: ${ error }`); }
+    else {
+      AddLog(null, "stopped tracking clan", null, 12, null);
+      Log.SaveLog("Clans", `Disabled tracking for ${ clan_id } as there are no longer any more guilds tracking it.`);
+    }
+  });
+}
+function EnableClanTracking(clan_id) {
+  db.query(`UPDATE clans SET isTracking="true" WHERE clan_id="${ clan_id }"`, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Failed to enable tracking for clan: ${ clan_id }, Error: ${ error }`); }
+    else {
+      AddLog(null, "resumed tracking clan", null, 13, null);
+      Log.SaveLog("Clans", `Enabled tracking for ${ clan_id } as it was found to be in a tracked guild.`);
     }
   });
 }

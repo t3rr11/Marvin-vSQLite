@@ -272,7 +272,6 @@ function AddHash(message, hash) {
 
 //Discord Client Code
 client.on("ready", async () => {
-  console.log("isReady");
   if(ClansLength === null) {
     //Define variables
     await UpdateClans();
@@ -283,7 +282,6 @@ client.on("ready", async () => {
   
     //Start Up Console Log
     if(Config.enableDebug){ console.clear(); }
-    console.log(Users);
     Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${ client.guilds.cache.size } guilds. Tracking ${ ClansLength } clans!`);
     Database.AddLog(null, "startup", null, 9, null);
   }
@@ -292,6 +290,7 @@ client.on("ready", async () => {
     Database.AddLog(null, "error", null, 3, null);
   }
   DiscordCommands.GuildCheck(client);
+  DiscordCommands.ClanCheck(client);
 });
 
 client.on('shardDisconnect', (event, id) => { Log.SaveError(`Shard has disconnected and will no longer reconnect: ${ id }`); });
