@@ -13,6 +13,7 @@
 
 #data
 /Marvin Backend/data/backend_status.json
+/Marvin Backend/data/errors.json
 /Marvin Frontend/data/frontend_status.json
 
 #databasefiles
@@ -38,3 +39,4 @@ Marvins Workspace.code-workspace
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+Marvin Backend/package.json
