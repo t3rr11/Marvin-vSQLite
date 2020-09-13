@@ -108,9 +108,9 @@ function CheckForNewlyScannedClans(Clans) {
 }
 function CheckForBroadcasts() {
   Database.GetNewBroadcasts(async function (isError, isFound, broadcasts) {
-    //This is a catch for broadcasts, if there is more than 10 then something went wrong, catch it and delete them.
+    //This is a catch for broadcasts, if there is more than 30 then something went wrong, catch it and delete them.
     if(broadcasts) {
-      if(broadcasts.length < 10) {
+      if(broadcasts.length < 30) {
         //This array will hold the broadcasts processed from the awaiting_broadcasts list. This is to avoid sending duplicate broadcasts in the same scan.
         var processed_broadcasts = [];
         for(var i in broadcasts) {
