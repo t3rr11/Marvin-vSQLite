@@ -83,6 +83,7 @@ async function UpdateClans() {
 
   //Log status
   Log.SaveDiscordLog(StartupTime, Users, CommandsInput, Config.currentSeason, client);
+  Database.AddStatus(StartupTime, Users, CommandsInput, Config.currentSeason, client);
 
   await new Promise(resolve => Database.GetDefinitions((isError, Data) => { if(!isError) { Definitions = Data; } resolve(true); }) );
   await new Promise(resolve => Database.GetClans((isError, Clans) => { if(!isError) { ClansLength = Clans.length; CheckForNewlyScannedClans(Clans); } resolve(true); }));
@@ -643,7 +644,7 @@ client.on("message", async message => {
         //Other
         else {
           related = false;
-          message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete(2000) }).catch();
+          message.reply('I\'m not sure what that commands is sorry. Use ~help to see commands.').then(msg => { msg.delete({ timeout: 2000}) }).catch();
         }
 
         //Try save log to file

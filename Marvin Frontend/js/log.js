@@ -18,10 +18,11 @@ function SaveLog(type, log) {
   console.log(Misc.GetReadableDateTime() + " - " + log);
   if(Config.enableLogging) {
     var dateTime = Misc.GetReadableDateTime();
-    var dataToSave = [{'DateTime': dateTime, 'Type': type, 'Log': log}];
-    TotalLogData.push(dataToSave[0]);
-    fs.writeFile('./data/logs/frontend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => {  });
-    fs.writeFile('./data/logs/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
+    var dataToSave = {'DateTime': dateTime, 'Type': type, 'Log': log};
+    TotalLogData.push(dataToSave);
+    fs.writeFile('./data/logs/frontend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { });
+    fs.unlink('./data/logs/frontend_log.json', (err) => { });
+    fs.writeFile('./data/logs/frontend_log.json', JSON.stringify(TotalLogData), (err) => { });
     fs.writeFile('../../../var/www/guardianstats.com/data/marvin/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
   }
 }
@@ -30,9 +31,10 @@ function SaveError(log) {
   console.log(log);
   if(Config.enableLogging) {
     var dateTime = Misc.GetReadableDateTime();
-    var dataToSave = [{'DateTime': dateTime, 'Type': 'Error', 'Log': log}];
-    TotalLogData.push(dataToSave[0]);
+    var dataToSave = {'DateTime': dateTime, 'Type': 'Error', 'Log': log};
+    TotalLogData.push(dataToSave);
     fs.writeFile('./data/logs/frontend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => {  });
+    fs.unlink('./data/logs/frontend_log.json', (err) => { });
     fs.writeFile('./data/logs/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
     fs.writeFile('../../../var/www/guardianstats.com/data/marvin/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
   }

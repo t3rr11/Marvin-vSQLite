@@ -14,7 +14,7 @@ module.exports = {
   AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
   ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, ClearAwaitingBroadcasts, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking,
-  AddLog, GetLogDesc, GetDefinitions, AddHashToDefinition, DisableClanTracking, EnableClanTracking
+  AddLog, GetLogDesc, GetDefinitions, AddHashToDefinition, DisableClanTracking, EnableClanTracking, AddStatus
 };
 
 var DB;
@@ -628,6 +628,14 @@ function AddLog(message, type, command, description, related) {
     sql = DB.format(sql, inserts);
   }
   DB.query(sql, function(error, rows, fields) { if(!!error) { Log.SaveError(`Error trying to add log to database, Error: ${ error }`); } });
+}
+function AddStatus(StartupTime, Users, CommandsInput, currentSeason, client) {
+  var sql = `INSERT INTO frontend_status (users, servers, commandsInput, currentSeason, uptime) VALUES (?, ?, ?, ?, ?)`;
+  var thisTime = new Date().getTime();
+  var totalTime = thisTime - StartupTime;
+  var inserts = [Users, client.guilds.cache.size, CommandsInput, currentSeason, totalTime];
+  sql = DB.format(sql, inserts);
+  DB.query(sql, function(error, rows, fields) { if(!!error) { Log.SaveError(`Error trying to add frontend_status to database, Error: ${ error }`); } });
 }
 function GetLogDesc(id) { try { return LogDesc.find(e => e.id === id); } catch (err) { return `Unknown ID: ${ id }` } }
 function ClearAwaitingBroadcasts() {
