@@ -4,6 +4,7 @@ const Log = require("../js/log.js");
 const fetch = require("node-fetch");
 
 async function GetReport(req, res, name) {
+  const timeStart = new Date().getTime();
   Log.SaveLog("Request", `GET Request; From: ${ req.headers["x-forwarded-for"] } to: ${ name }`);
 
   //Get statuses.
@@ -14,6 +15,8 @@ async function GetReport(req, res, name) {
     //Return processed data or error.
     if(data[0] === undefined) { res.status(200).send({ error: "Failed" }); }
     else {
+      const ttf = `${ (Math.round(new Date().getTime() - timeStart) / 1000).toFixed(2) }s`;
+      console.log(ttf);
       res.status(200).send({
         error: null,
         data: {
@@ -40,6 +43,7 @@ async function GetStatus() {
   return { frontend, backend }
 }
 async function GetOverallReport() {
+  const timeStart = new Date().getTime();
   //Grab all logs since the beginning of time.
   return new Promise(resolve => { db.query(`SELECT * FROM log`, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error: ${ error }`); return "Failed"; }
@@ -70,17 +74,23 @@ async function GetOverallBroadcasts() {
   }) });
 }
 async function BuildReport(rows) {
+  const timeStart = new Date().getTime();
+
   //Logs obtained, processing now.
   let commands = [];
   let commands_count = 0;
   let related_commands_count = 0;
   for(let i in rows) {
     if(rows[i].command !== "") { 
-      if(!commands.find(e => e.name === rows[i].command)) { commands.push({ "name": rows[i].command, amount: rows.filter(f => f.command === rows[i].command).length }); }
+      if(!commands.find(e => e.name === rows[i].command)) { commands.push({ "name": rows[i].command, "amount": 1 }); }
+      else { commands[commands.findIndex(e => e.name === rows[i].command)].amount++ }
       commands_count++;
     }
     if(rows[i].related === '1') { related_commands_count++; }
   }
+
+  const ttf = `${ (Math.round(new Date().getTime() - timeStart) / 1000).toFixed(2) }s`;
+  console.log("Built Report: " + ttf);
 
   //Create processed dataset
   return {
@@ -106,11 +116,7 @@ async function BuildBroadcastsReport(rows) {
       if(!broadcasts[rows[i].season].items.find(e => e.name === rows[i].broadcast)) { broadcasts[rows[i].season].items.push({ "name": rows[i].broadcast, "amount": 1 }); }
       else {
         //If item does exist then increase the amount.
-        for(let j in broadcasts[rows[i].season].items) {
-          if(broadcasts[rows[i].season].items[j].name === rows[i].broadcast) {
-            broadcasts[rows[i].season].items[j].amount = broadcasts[rows[i].season].items[j].amount + 1;
-          }
-        }
+        broadcasts[rows[i].season].items[broadcasts[rows[i].season].items.findIndex(e => e.name === rows[i].broadcast)].amount++;
       }
     }
     else if(rows[i].type === "title") {
@@ -118,11 +124,7 @@ async function BuildBroadcastsReport(rows) {
       if(!broadcasts[rows[i].season].titles.find(e => e.name === rows[i].broadcast)) { broadcasts[rows[i].season].titles.push({ "name": rows[i].broadcast, "amount": 1 }); }
       else {
         //If title does exist then increase the amount.
-        for(let j in broadcasts[rows[i].season].titles) {
-          if(broadcasts[rows[i].season].titles[j].name === rows[i].broadcast) {
-            broadcasts[rows[i].season].titles[j].amount = broadcasts[rows[i].season].titles[j].amount + 1;
-          }
-        }
+        broadcasts[rows[i].season].titles[broadcasts[rows[i].season].titles.findIndex(e => e.name === rows[i].broadcast)].amount++;
       }
     }
     broadcasts_count++;
