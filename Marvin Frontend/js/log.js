@@ -23,7 +23,7 @@ function SaveLog(type, log) {
     fs.writeFile('./data/logs/frontend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => { });
     fs.unlink('./data/logs/frontend_log.json', (err) => { });
     fs.writeFile('./data/logs/frontend_log.json', JSON.stringify(TotalLogData), (err) => { });
-    fs.writeFile('../../../var/www/guardianstats.com/data/marvin/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
+    fs.writeFile('../../../../var/www/html/data/marvin/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
   }
 }
 
@@ -36,7 +36,7 @@ function SaveError(log) {
     fs.writeFile('./data/logs/frontend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => {  });
     fs.unlink('./data/logs/frontend_log.json', (err) => { });
     fs.writeFile('./data/logs/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
-    fs.writeFile('../../../var/www/guardianstats.com/data/marvin/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
+    fs.writeFile('../../../../var/www/html/data/marvin/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
   }
 }
 
@@ -51,5 +51,5 @@ function SaveDiscordLog(StartupTime, Users, CommandsInput, currentSeason, client
     "currentSeason": currentSeason
   }
   fs.writeFile('./data/frontend_status.json', JSON.stringify(status), (err) => {  });
-  fs.writeFile('../../../var/www/guardianstats.com/data/marvin/frontend_status.json', JSON.stringify(status), (err) => {  });
+  fs.writeFile('../../../../var/www/html/data/marvin/frontend_status.json', JSON.stringify(status), (err) => {  });
 }
