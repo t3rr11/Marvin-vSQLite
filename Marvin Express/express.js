@@ -84,7 +84,7 @@ async function apiRequest(sql, callback) {
 async function logStatus() {
   //Get all data together
   var backend_status = JSON.parse(fs.readFileSync('../Marvin Backend/data/backend_status.json').toString());
-  var frontend_status = JSON.parse(fs.readFileSync('../Marvin Frontend/data/frontend_status.json').toString());
+  var frontend_status = await new Promise(resolve => apiRequest(`SELECT * FROM frontend_status ORDER BY id DESC LIMIT 1`, (isError, isFound, Data) => { resolve(Data[0]); }) );
   var Users = frontend_status.users;
   var Servers = frontend_status.servers;
   var T_Users = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM users`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
@@ -98,7 +98,6 @@ async function logStatus() {
   var T_Guilds = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM guilds WHERE isTracking="true"`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
   var Broadcasts = await new Promise(resolve => apiRequest(`SELECT COUNT(*) FROM broadcasts`, (isError, isFound, Data) => { resolve(Data[0]["COUNT(*)"]); }) );
   
-
   //Get and sort Guardian games data
   Players = Players.filter(e => JSON.parse(e.guardianGames) !== null);
   var Guardian_Games = {
