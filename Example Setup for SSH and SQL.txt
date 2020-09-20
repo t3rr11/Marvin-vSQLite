@@ -1,0 +1,61 @@
+In Combined/configs write a file called: SSHConfig.js
+#############################################################
+
+const ppk = require('fs').readFileSync("../Combined/configs/private_key.ppk");
+const Config = {
+  "dbServer": {
+    "host": "localhost",
+    "port": 3306,
+    "user": "#user",
+    "password": "#password",
+    "database": "#database_name"
+  },
+  "tunnelConfig": {
+    "host": "#server_ip",
+    "port": 22,
+    "username": "#user",
+    "privateKey": ppk,
+    "passphrase": "#password"
+  },
+  "forwardConfig": {
+    "srcHost": "127.0.0.1",
+    "srcPort": 3306,
+    "dstHost": "localhost",
+    "dstPort": "3306"
+  }
+}
+module.exports = { Config };
+
+#############################################################
+
+Next up is an example of the /Combined/configs/MarvinConfig.json file.
+#############################################################
+
+{
+  "client_id": "",
+  "token": "",
+  "apiKey": "",
+  "prefix": "~",
+  "defaultFooter": "Guardianstats",
+  "defaultLogoURL": "https://guardianstats.com/images/logo.png",
+  "enableDebug": false,
+  "enableTracking": true,
+  "enableBroadcasts": true,
+  "enableLogging": true,
+  "currentSeason": 11,
+  "newSeasonDate": "2020-11-10T17:00:00.000Z"
+}
+
+#############################################################
+
+Lastly is the /Combined/configs/backend_config.json file.
+#############################################################
+
+{
+  "apiKey": "",
+  "scan_speed": 25
+}
+
+#############################################################
+
+
