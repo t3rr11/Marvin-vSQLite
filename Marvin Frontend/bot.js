@@ -81,10 +81,6 @@ async function UpdateClans() {
   UpdateActivityList();
   UpdateBannedUsers();
 
-  //Log status
-  Log.SaveDiscordLog(StartupTime, Users, CommandsInput, Config.currentSeason, client);
-  Database.AddStatus(StartupTime, Users, CommandsInput, Config.currentSeason, client);
-
   await new Promise(resolve => Database.GetDefinitions((isError, Data) => { if(!isError) { Definitions = Data; } resolve(true); }) );
   await new Promise(resolve => Database.GetClans((isError, Clans) => { if(!isError) { ClansLength = Clans.length; CheckForNewlyScannedClans(Clans); } resolve(true); }));
 }
@@ -268,6 +264,11 @@ function AddHash(message, hash) {
     if(isError) { message.channel.send("Failed to force a full rescan. If this happens uhh use the panic command: `~addhash 0`. I'll fix in the morning."); }
   });
 }
+function LogStatus() {
+  //Log status
+  Log.SaveDiscordLog(StartupTime, Users, CommandsInput, Config.currentSeason, client);
+  Database.AddStatus(StartupTime, Users, CommandsInput, Config.currentSeason, client);
+}
 
 //Discord Client Code
 client.on("ready", async () => {
@@ -280,7 +281,8 @@ client.on("ready", async () => {
   
         //SetTimeouts
         setInterval(function() { UpdateClans() }, 10000);
-        NewSeasonCountdown = setInterval(() => { CheckNewSeason(); }, 1000)
+        setInterval(function() { LogStatus() }, 60000);
+        NewSeasonCountdown = setInterval(() => { CheckNewSeason(); }, 1000);
   
         //Start Up Console Log
         if(Config.enableDebug){ console.clear(); }
