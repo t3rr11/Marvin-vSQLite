@@ -74,8 +74,6 @@ async function GetOverallBroadcasts() {
   }) });
 }
 async function BuildReport(rows) {
-  const timeStart = new Date().getTime();
-
   //Logs obtained, processing now.
   let commands = [];
   let commands_count = 0;
@@ -88,9 +86,6 @@ async function BuildReport(rows) {
     }
     if(rows[i].related === '1') { related_commands_count++; }
   }
-
-  const ttf = `${ (Math.round(new Date().getTime() - timeStart) / 1000).toFixed(2) }s`;
-  console.log("Built Report: " + ttf);
 
   //Create processed dataset
   return {
