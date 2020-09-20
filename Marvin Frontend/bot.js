@@ -1,11 +1,10 @@
 //Required Libraraies
 const Discord = require('discord.js');
-const { Permissions } = require('discord.js');
 const fs = require('fs');
 const client = new Discord.Client();
 
 //Modules
-let Config = require('../Combined/configs/config.json');
+let Config = require('../Combined/configs/MarvinConfig.json');
 let Misc = require(__dirname + '/js/misc.js');
 let Log = require(__dirname + '/js/log.js');
 let Database = require(__dirname + '/modules/Database.js');
@@ -40,7 +39,6 @@ function UpdateActivityList() {
     ActivityList.push(`Try ~Trials`);
     ActivityList.push(`Try ~Power`);
     ActivityList.push(`Try ~Season`);
-    ActivityList.push(`Sorry for the recent instability, I am working to resolve these issues.`);
     var activity = ActivityList[Math.floor(Math.random() * ActivityList.length)];
     client.user.setActivity(activity);
   }
@@ -272,25 +270,35 @@ function AddHash(message, hash) {
 
 //Discord Client Code
 client.on("ready", async () => {
-  if(ClansLength === null) {
-    //Define variables
-    await UpdateClans();
-
-    //SetTimeouts
-    setInterval(function() { UpdateClans() }, 10000);
-    NewSeasonCountdown = setInterval(() => { CheckNewSeason(); }, 1000)
+  //Connect to DB
+  const connectToDB = async () => {
+    if(await Database.ConnectToDB()) {
+      //Update Clans
+      if(ClansLength === null) {
+        await UpdateClans();
   
-    //Start Up Console Log
-    if(Config.enableDebug){ console.clear(); }
-    Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${ client.guilds.cache.size } guilds. Tracking ${ ClansLength } clans!`);
-    Database.AddLog(null, "startup", null, 9, null);
+        //SetTimeouts
+        setInterval(function() { UpdateClans() }, 10000);
+        NewSeasonCountdown = setInterval(() => { CheckNewSeason(); }, 1000)
+  
+        //Start Up Console Log
+        if(Config.enableDebug){ console.clear(); }
+        Log.SaveLog("Info", `Bot has started, with ${ Users } users, in ${ client.guilds.cache.size } guilds. Tracking ${ ClansLength } clans!`);
+        Database.AddLog(null, "startup", null, 9, null);
+      }
+      else {
+        Log.SaveError(`Bot lost connection to discord, It has been reconnected now, but in order to avoid spam broadcasts the startup funciton has been cancelled, As the bot has already started.`);
+        Database.AddLog(null, "error", null, 3, null);
+      }
+      DiscordCommands.GuildCheck(client);
+      DiscordCommands.ClanCheck(client);
+    }
+    else {
+      console.log("Failed to connect, trying again in 5 seconds.");
+      setTimeout(() => connectToDB(), 5000);
+    }
   }
-  else {
-    Log.SaveError(`Bot lost connection to discord, It has been reconnected now, but in order to avoid spam broadcasts the startup funciton has been cancelled, As the bot has already started.`);
-    Database.AddLog(null, "error", null, 3, null);
-  }
-  DiscordCommands.GuildCheck(client);
-  DiscordCommands.ClanCheck(client);
+  connectToDB();
 });
 
 client.on('shardDisconnect', (event, id) => { Log.SaveError(`Shard has disconnected and will no longer reconnect: ${ id }`); });

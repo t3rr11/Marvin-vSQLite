@@ -1,5 +1,5 @@
 //Required Libraraies
-const Config = require('../../Combined/configs/config.json');
+const Config = require('../../Combined/configs/MarvinConfig.json');
 const Discord = require('discord.js');
 const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");

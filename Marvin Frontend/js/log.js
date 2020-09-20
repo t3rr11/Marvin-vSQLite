@@ -1,7 +1,7 @@
 //Required Libraraies
 const fs = require('fs');
 var Misc = require("./misc.js");
-const Config = require('../../Combined/configs/config.json');
+const Config = require('../../Combined/configs/MarvinConfig.json');
 
 //Variables
 var LogTime = Misc.GetDateString();
@@ -21,6 +21,7 @@ function SaveLog(type, log) {
     var dataToSave = [{'DateTime': dateTime, 'Type': type, 'Log': log}];
     TotalLogData.push(dataToSave[0]);
     fs.writeFile('./data/logs/frontend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => {  });
+    fs.writeFile('./data/logs/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
     fs.writeFile('../../../var/www/guardianstats.com/data/marvin/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
   }
 }
@@ -32,6 +33,7 @@ function SaveError(log) {
     var dataToSave = [{'DateTime': dateTime, 'Type': 'Error', 'Log': log}];
     TotalLogData.push(dataToSave[0]);
     fs.writeFile('./data/logs/frontend_' + LogTime + '.json', JSON.stringify(TotalLogData), (err) => {  });
+    fs.writeFile('./data/logs/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
     fs.writeFile('../../../var/www/guardianstats.com/data/marvin/frontend_log.json', JSON.stringify(TotalLogData), (err) => {  });
   }
 }
