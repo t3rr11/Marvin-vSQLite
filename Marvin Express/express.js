@@ -1,12 +1,13 @@
 //Express
 const { db } = require("./modules/Database");
 const APIRequestHandler = require("./modules/APIRequestHandler");
+const WiFiModuleHandler = require("./modules/WiFiModuleHandler");
 const Log = require("./js/log.js");
 const fs = require('fs');
 const cors = require("cors")
 const express = require('express');
 const bodyParser = require('body-parser');
-const compression = require('compression')
+const compression = require('compression');
 var app = express();
 
 app.use(cors());
@@ -55,6 +56,8 @@ app.get("/GetBackStatus", async function(req, res) { await APIRequestHandler.exp
 app.get("/GetReport", async function(req, res) { await APIRequestHandler.GetReport(req, res, `GetReport`) });
 app.get("/GetClanRankings", async function(req, res) { await APIRequestHandler.GetClanRankings(req, res, `GetClanRankings`); });
 
+//This stuff is for the WiFi module. Leave alone.
+app.get("/GetTitles", async function(req, res) { await WiFiModuleHandler.GetPlayerTitles(req, res, `GetPlayerTitles`); });
 
 //Below this point is the status logging, quite important.
 
