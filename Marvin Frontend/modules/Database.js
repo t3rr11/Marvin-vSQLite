@@ -1,4 +1,7 @@
-const { Config } = require("../../Combined/configs/SSHConfig");
+const SConfig = require("../../Combined/configs/SSHConfig").Config;
+const LConfig = require("../../Combined/configs/LocalSSHConfig").Config;
+const MConfig = require("../../Combined/configs/MarvinConfig.json");
+const Config = MConfig.isLocal ? LConfig : SConfig;
 const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
 const LogDesc = require('./LogDescriptions.json');

@@ -1,7 +1,10 @@
 //Required Libraraies
 const fs = require('fs');
 var Misc = require("./misc.js");
-const Config = require('../../Combined/configs/MarvinConfig.json');
+const SConfig = require("../../Combined/configs/DiscordConfig.json");
+const LConfig = require("../../Combined/configs/LocalDiscordConfig.json");
+const MConfig = require("../../Combined/configs/MarvinConfig.json");
+let Config = MConfig.isLocal ? LConfig : SConfig;
 
 //Variables
 var LogTime = Misc.GetDateString();

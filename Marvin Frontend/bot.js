@@ -4,7 +4,10 @@ const fs = require('fs');
 const client = new Discord.Client();
 
 //Modules
-let Config = require('../Combined/configs/MarvinConfig.json');
+const SConfig = require("../Combined/configs/DiscordConfig.json");
+const LConfig = require("../Combined/configs/LocalDiscordConfig.json");
+const MConfig = require("../Combined/configs/MarvinConfig.json");
+let Config = MConfig.isLocal ? LConfig : SConfig;
 let Misc = require(__dirname + '/js/misc.js');
 let Log = require(__dirname + '/js/log.js');
 let Database = require(__dirname + '/modules/Database.js');
@@ -138,7 +141,7 @@ function CheckForBroadcasts() {
   });
 }
 function CheckTimeout(message) {
-  if(TimedOutUsers.includes(message.author.id)) { message.reply("You've been timed out. This lasts 5 minutes from your last " + Config.prefix + "request command. This is to protect from spam, sorry!"); return false; }
+  if(TimedOutUsers.includes(message.author.id)) { message.reply("You've been timed out. This lasts 5 minutes from your last " + MConfig.prefix + "request command. This is to protect from spam, sorry!"); return false; }
   else { SetTimeout(message); return true; }
 }
 function SetTimeout(message) {
@@ -151,24 +154,24 @@ function GetScanSpeed(message) {
   message.channel.send(`ScanSpeed is scanning at a rate of ${ backend_status.scanSpeed } clans per second. With a slow down rate of ${ Math.round(backend_status.scanSpeed * 0.8) } and a reset of ${ Math.round(backend_status.scanSpeed * 0.6) }`);
 }
 function SetScanSpeed(message, input) {
-  var backend_config = JSON.parse(fs.readFileSync('../Combined/configs/backend_config.json').toString());
-  backend_config.scan_speed = parseInt(input);
-  fs.writeFile('../Combined/configs/backend_config.json', JSON.stringify(backend_config), (err) => { if (err) console.error(err) });
+  var Backend_Config = JSON.parse(fs.readFileSync('../Combined/configs/Backend_Config.json').toString());
+  Backend_Config.scan_speed = parseInt(input);
+  fs.writeFile('../Combined/configs/Backend_Config.json', JSON.stringify(Backend_Config), (err) => { if (err) console.error(err) });
   message.channel.send(`ScanSpeed is now scanning at a rate of ${ input } clans per second. With a slow down rate of ${ Math.round(input * 0.8) } and a reset of ${ Math.round(input * 0.6) }`);
 }
 function CheckNewSeason() {
   if(NewSeasonDate !== null) {
     if(new Date(NewSeasonDate) - new Date() < 0) {
-      Config.newSeasonDate = new Date(new Date(NewSeasonDate).getTime() + 7776000000).toISOString();
-      Config.currentSeason = Config.currentSeason + 1;
+      MConfig.newSeasonDate = new Date(new Date(NewSeasonDate).getTime() + 7776000000).toISOString();
+      MConfig.currentSeason = MConfig.currentSeason + 1;
       NewSeasonDate = null;
-      fs.writeFile('../Combined/configs/config.json', JSON.stringify(Config), (err) => { if (err) console.error(err) });
-      try { client.guilds.cache.get('664237007261925404').channels.cache.get('664237007261925409').send(`A new season is upon us. The current season has been changed from ${ Config.currentSeason-1 } to ${ Config.currentSeason }`); }
+      fs.writeFile('../Combined/configs/config.json', JSON.stringify(MConfig), (err) => { if (err) console.error(err) });
+      try { client.guilds.cache.get('664237007261925404').channels.cache.get('664237007261925409').send(`A new season is upon us. The current season has been changed from ${ MConfig.currentSeason-1 } to ${ MConfig.currentSeason }`); }
       catch (err) { console.log("Failed to send new season message."); }
       try { Database.AddLog(null, "season change", null, 6, null); } catch (err) {  }
     }
   }
-  else { NewSeasonDate = Config.newSeasonDate; }
+  else { NewSeasonDate = MConfig.newSeasonDate; }
 }
 function UpdateBannedUsers() { try { BannedUsers = JSON.parse(fs.readFileSync('./data/banned_users.json').toString()); } catch(err) { console.log("Couldn't parse banned users file."); } }
 function CheckBanned(message) {
@@ -266,8 +269,8 @@ function AddHash(message, hash) {
 }
 function LogStatus() {
   //Log status
-  Log.SaveDiscordLog(StartupTime, Users, CommandsInput, Config.currentSeason, client);
-  Database.AddStatus(StartupTime, Users, CommandsInput, Config.currentSeason, client);
+  Log.SaveDiscordLog(StartupTime, Users, CommandsInput, MConfig.currentSeason, client);
+  Database.AddStatus(StartupTime, Users, CommandsInput, MConfig.currentSeason, client);
 }
 
 //Discord Client Code
@@ -382,12 +385,14 @@ client.on("message", async message => {
         else if(command === "~CHECKAPI") { if(APIDisabled) { message.reply("API is offline."); } else { message.reply("API is online."); } }
         else if(command === "~NEW SEASON" || command === "~SEASON 11" || command === "~NEXT SEASON") {
           if(new Date(NewSeasonDate) - new Date() > 0) { message.channel.send(`Next season starts in: ${ Misc.formatTime((new Date(NewSeasonDate) - new Date().getTime()) / 1000) }`); }
-          else { message.channel.send(`Season ${ Config.currentSeason } has already started!`) }
+          else { message.channel.send(`Season ${ MConfig.currentSeason } has already started!`) }
         }
-        else if(command === "~CURRENT SEASON" || command === "~SEASON") { message.channel.send(`Destiny 2 is currently in season ${ Config.currentSeason }. Season ${ Config.currentSeason+1 } starts in: ${ Misc.formatTime((new Date(NewSeasonDate) - new Date().getTime()) / 1000) }`) }
+        else if(command === "~CURRENT SEASON" || command === "~SEASON") { message.channel.send(`Destiny 2 is currently in season ${ MConfig.currentSeason }. Season ${ MConfig.currentSeason+1 } starts in: ${ Misc.formatTime((new Date(NewSeasonDate) - new Date().getTime()) / 1000) }`) }
         else if(command === "~TEST") {
           if(message.author.id === "194972321168097280") {
-            message.channel.send(`<#${ Misc.getDefaultChannel(message.guild).id }>`);
+            // message.channel.send(`<#${ Misc.getDefaultChannel(message.guild).id }>`); //Get Default Channel
+            //Get Geolocational Information
+            message.channel.send(`Guild Location: ${ message.guild.region }`);
           }
           else {
             message.reply("Test what? I do not understand.");

@@ -3,7 +3,10 @@ const fs = require('fs');
 const Bot = require("../bot.js");
 const Misc = require("../js/misc.js");
 const Log = require("../js/log.js");
-const Config = require('../../Combined/configs/MarvinConfig.json');
+const SConfig = require("../../Combined/configs/DiscordConfig.json");
+const LConfig = require("../../Combined/configs/LocalDiscordConfig.json");
+const MConfig = require("../../Combined/configs/MarvinConfig.json");
+let Config = MConfig.isLocal ? LConfig : SConfig;
 const fetch = require("node-fetch");
 const Database = require('./Database.js');
 
