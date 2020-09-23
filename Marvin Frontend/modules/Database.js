@@ -14,7 +14,7 @@ const ssh = new Client();
 module.exports = {
   ConnectToDB, GetClan, GetClans, GetGuild, GetGuilds, GetAllClans, GetAllGuilds, GetPlayers, GetPlayer, GetUsers, GetGlobalDryStreak, GetPlayerBroadcasts, GetFromBroadcasts, GetFromClanBroadcasts, GetNewBroadcasts, GetSingleClanLeaderboard, GetClanLeaderboards, GetGlobalLeaderboards, GetClanDetailsViaAuthor,
   CheckRegistered, CheckNewBroadcast, CheckNewClanBroadcast, GetGlobalProfile, GetProfile,
-  AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast,
+  AddTrackedPlayer, AddGuildBroadcastChannel, AddClanToGuild, AddNewClan, AddNewGuild, AddBroadcast, AddGuildRegion,
   RemoveClanBroadcastsChannel, RemoveClan, RemoveAwaitingBroadcast, RemoveAwaitingClanBroadcast, ToggleBroadcasts,
   ForceFullScan, EnableWhitelist, DisableWhitelist, ToggleBlacklistFilter, ToggleWhitelistFilter, ClearAwaitingBroadcasts, DeleteGuild, ReAuthClan, TransferClan, DisableTracking, EnableTracking,
   AddLog, GetLogDesc, GetDefinitions, AddHashToDefinition, DisableClanTracking, EnableClanTracking, AddStatus
@@ -331,11 +331,20 @@ function AddNewClan(clan_id) {
   });
 }
 function AddNewGuild(message, clanData, callback) {
-  var sql = `INSERT INTO guilds (guild_id,guild_name,owner_id,owner_avatar,clans,joinedOn) VALUES (?,?,?,?,?,"${ new Date().getTime() }")`;
-  var inserts = [message.guild.id, Misc.cleanString(message.guild.name), message.author.id, message.author.avatar, clanData.id];
+  var sql = `INSERT INTO guilds (guild_id,guild_name,owner_id,owner_avatar,clans,joinedOn,region) VALUES (?,?,?,?,?,"${ new Date().getTime() }",?)`;
+  var inserts = [message.guild.id, Misc.cleanString(message.guild.name), message.author.id, message.author.avatar, clanData.id, message.guild.region];
   sql = DB.format(sql, inserts);
   DB.query(sql, function(error, rows, fields) {
     if(!!error) { Log.SaveError(`Error adding clan: ${ clanData.id }, Error: ${ error }`); callback(true); }
+    else { callback(false); }
+  });
+}
+function AddGuildRegion(guild, callback) {
+  var sql = "UPDATE guilds SET region = ? WHERE guild_id = ?";
+  var inserts = [guild.region, guild.id];
+  sql = DB.format(sql, inserts);
+  DB.query(sql, function(error, rows, fields) {
+    if(!!error) { Log.SaveError(`Error adding region to guild: ${ guild.id }, Error: ${ error }`); callback(true); }
     else { callback(false); }
   });
 }

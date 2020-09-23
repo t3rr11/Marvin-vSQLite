@@ -51,19 +51,21 @@ function UpdateActivityList() {
 async function CheckMaintenance() {
   //Check if api is down for maintenance
   try {
-    var backend_status = JSON.parse(fs.readFileSync('../Marvin Backend/data/backend_status.json').toString());
-    if(APIDisabled === null) { APIDisabled = backend_status.APIDisabled; }
-    else {
-      if(backend_status.APIDisabled) {
-        if(APIDisabled === false) {
-          Log.SaveError("The Bungie API is temporarily disabled for maintenance."); APIDisabled = true;
-          Database.AddLog(null, "api offline", null, 5, null);
-        }
-      }
+    if(fs.existsSync('../Marvin Backend/data/backend_status.json')) {
+      var backend_status = JSON.parse(fs.readFileSync('../Marvin Backend/data/backend_status.json').toString());
+      if(APIDisabled === null) { APIDisabled = backend_status.APIDisabled; }
       else {
-        if(APIDisabled === true) {
-          Log.SaveError("The Bungie API is back online!"); APIDisabled = false;
-          Database.AddLog(null, "api online", null, 4, null);
+        if(backend_status.APIDisabled) {
+          if(APIDisabled === false) {
+            Log.SaveError("The Bungie API is temporarily disabled for maintenance."); APIDisabled = true;
+            Database.AddLog(null, "api offline", null, 5, null);
+          }
+        }
+        else {
+          if(APIDisabled === true) {
+            Log.SaveError("The Bungie API is back online!"); APIDisabled = false;
+            Database.AddLog(null, "api online", null, 4, null);
+          }
         }
       }
     }
@@ -272,6 +274,48 @@ function LogStatus() {
   Log.SaveDiscordLog(StartupTime, Users, CommandsInput, MConfig.currentSeason, client);
   Database.AddStatus(StartupTime, Users, CommandsInput, MConfig.currentSeason, client);
 }
+function AddGeolocationalInformation() {
+  //Get Geolocational Information
+  var count = 0;
+  console.log("Getting geolocational data...");
+  for(let g in client.guilds.cache.array()) {
+    var guild = client.guilds.cache.array()[g];
+    Database.AddGuildRegion(guild, (isError) => { count++; if(isError) { console.log(`Errored: ${ guild.id }, Region: ${ guild.region }`); } });
+    if(count === client.guilds.cache.array().length-1) { console.log("Finished adding geolocational data."); }
+  }
+}
+function GetGeolocationalData(message) {
+  Database.GetGuilds((isError, Guilds) => {
+    let Regions = [];
+    if(!isError) {
+      for(let i in Guilds) {
+        if(Guilds[i].region !== "") {
+          //Group some up.
+          if(Guilds[i].region.startsWith("us")) { Guilds[i].region = "US" }
+          if(Guilds[i].region.startsWith("eu") || Guilds[i].region.startsWith("london")) { Guilds[i].region = "europe" }
+          
+          //Add them up
+          if(!Regions.find(e => e.name === Guilds[i].region)) { Regions.push({ "name": Guilds[i].region, "amount": 1 }); }
+          else { Regions[Regions.findIndex(e => e.name === Guilds[i].region)].amount++ }
+        }
+      }
+      Regions.sort(function(a, b) { return b.amount - a.amount; });
+      const embed = new Discord.MessageEmbed()
+        .setColor(0x0099FF)
+        .setAuthor("Servers based on Region.")
+        .setDescription(`**Total Servers: **${ Guilds.length }\n`)
+        .addField("Region", Regions.map((region) => { return Misc.capitalize(region.name) }), true)
+        .addField("Amount", Regions.map((region) => { return region.amount }), true)
+        .addField("Percent", Regions.map((region) => { return `${ ((region.amount / Guilds.length) * 100).toFixed(2) }%` }), true)
+        .setFooter(Config.defaultFooter, Config.defaultLogoURL)
+        .setTimestamp();
+      message.channel.send({embed});
+    }
+    else {
+      message.channel.send("Failed...");
+    }
+  });
+}
 
 //Discord Client Code
 client.on("ready", async () => {
@@ -383,6 +427,7 @@ client.on("message", async message => {
         else if(command === "~MBANS") { if(message.author.id === "194972321168097280") { ViewBans(message); } else { message.channel.send("No permission to use this command."); } }
         else if(command === "~SCANSPEED") { if(!CheckBanned(message)) { GetScanSpeed(message); } }
         else if(command === "~CHECKAPI") { if(APIDisabled) { message.reply("API is offline."); } else { message.reply("API is online."); } }
+        else if(command === "~GEO" || command === "~REGIONS") { GetGeolocationalData(message); }
         else if(command === "~NEW SEASON" || command === "~SEASON 11" || command === "~NEXT SEASON") {
           if(new Date(NewSeasonDate) - new Date() > 0) { message.channel.send(`Next season starts in: ${ Misc.formatTime((new Date(NewSeasonDate) - new Date().getTime()) / 1000) }`); }
           else { message.channel.send(`Season ${ MConfig.currentSeason } has already started!`) }
@@ -391,8 +436,6 @@ client.on("message", async message => {
         else if(command === "~TEST") {
           if(message.author.id === "194972321168097280") {
             // message.channel.send(`<#${ Misc.getDefaultChannel(message.guild).id }>`); //Get Default Channel
-            //Get Geolocational Information
-            message.channel.send(`Guild Location: ${ message.guild.region }`);
           }
           else {
             message.reply("Test what? I do not understand.");
